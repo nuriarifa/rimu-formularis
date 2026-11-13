@@ -1,0 +1,51 @@
+:root{
+  --blau:#3D698E; --blau-fosc:#2C5274; --blau-clar:#EAF1F7;
+  --coral:#E79893; --coral-clar:#FBEDEC;
+  --text:#22313F; --gris:#6B7A88; --linia:#D9E2EA; --fons:#F6F8FA;
+  --verd:#2E7D5B; --verd-clar:#E6F4EE;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--text);background:var(--fons);line-height:1.45;font-size:16px}
+.cap{background:#fff;border-bottom:3px solid var(--blau);text-align:center;padding:18px 16px 14px}
+.cap img.logo{height:92px;width:auto}
+.cap .lema{color:var(--blau);font-size:12px;letter-spacing:.08em;margin-top:4px}
+.contingut{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+.targeta{background:#fff;border:1px solid var(--linia);border-radius:14px;padding:20px;margin-bottom:16px}
+.viatge-titol{color:var(--blau);font-size:24px;font-weight:700;margin:0 0 4px}
+.viatge-dates{color:var(--gris);font-size:15px}
+.ratlla{height:3px;width:56px;background:var(--coral);border-radius:3px;margin:12px 0}
+h2{color:var(--blau);font-size:18px;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+h2 .num{background:var(--blau);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;
+  align-items:center;justify-content:center;font-size:14px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);margin:18px 0 8px}
+.graella{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.graella .ample{grid-column:1/-1}
+@media (max-width:560px){.graella{grid-template-columns:1fr}}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+label .opc{font-weight:400;color:var(--gris)}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--linia);border-radius:10px;
+  background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blau);box-shadow:0 0 0 3px var(--blau-clar)}
+input.prefill{background:var(--blau-clar)}
+.ajuda{font-size:12.5px;color:var(--gris);margin-top:4px}
+.avis{background:var(--coral-clar);border-left:4px solid var(--coral);padding:10px 12px;border-radius:8px;
+  font-size:14px;margin-top:8px}
+.ok{background:var(--verd-clar);border-left:4px solid var(--verd);padding:12px 14px;border-radius:8px}
+.boto{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-weight:600;
+  border:0;border-radius:10px;padding:13px 20px;background:var(--blau);color:#fff;cursor:pointer;text-decoration:none}
+.boto:hover{background:var(--blau-fosc)}
+.boto:disabled{opacity:.6;cursor:default}
+.boto.ample{width:100%}
+.boto.sec{background:#fff;color:var(--blau);border:1px solid var(--blau)}
+.boto.sec:hover{background:var(--blau-clar)}
+.boto.wa{background:#25D366;color:#fff}
+.boto.petit{padding:8px 12px;font-size:14px}
+.boto.perill{background:#fff;color:#B3261E;border:1px solid #E6B8B4}
+.consentiment{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.consentiment input{width:auto;margin-top:3px}
+.centre{text-align:center}
+.peu{text-align:center;color:var(--gris);font-size:12.5px;margin-top:24px}
+.amagat{display:none!important}
+.error{color:#B3261E;font-size:14px;margin-top:8px}
