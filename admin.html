@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rimu Viatges · Panell de formularis</title>
+<title>Panell de formularis</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="estil.css">
 <script src="config.js"></script>
-<script src="logo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .contingut{max-width:860px}
@@ -35,41 +34,42 @@
   .estat{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
   .estat.pendent{background:var(--coral-clar);color:#A4504A}
   .estat.rebut{background:var(--verd-clar);color:var(--verd)}
+  .etiq-ag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--blau-clar);color:var(--blau);margin-left:6px;vertical-align:middle}
   table.dades{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
   table.dades td{padding:6px 8px;border-bottom:1px solid var(--linia);vertical-align:top}
   table.dades td:first-child{color:var(--gris);width:42%}
   .sub-viatger{font-weight:700;color:var(--blau);margin-top:12px}
-  .barra{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+  .barra{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#fff;
     padding:10px 18px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
   .toast.vist{opacity:1}
-  .filtre{display:flex;gap:6px}
+  .filtre{display:flex;gap:6px;flex-wrap:wrap}
   .filtre button{font:inherit;font-size:13px;padding:6px 12px;border-radius:20px;border:1px solid var(--linia);background:#fff;cursor:pointer}
   .filtre button.actiu{background:var(--blau-clar);border-color:var(--blau);color:var(--blau);font-weight:600}
 </style>
 </head>
 <body>
 <header class="cap">
-  <img class="logo" alt="Rimu Viatges">
-  <div class="lema">PANELL DE FORMULARIS</div>
+  <img class="logo" alt="" style="visibility:hidden">
+  <div class="lema" data-t="lemaPanell">PANELL DE FORMULARIS</div>
 </header>
 
 <main class="contingut">
 
-  <!-- ENTRADA -->
+  <!-- ENTRADA (bilingüe: encara no sabem de quina agència és) -->
   <section id="vistaLogin" class="amagat">
     <div class="targeta" style="max-width:420px;margin:0 auto">
-      <h2>Entrar al panell</h2>
-      <label for="lEmail">Correu</label>
+      <h2>Entrar · Acceder</h2>
+      <label for="lEmail">Correu · Correo</label>
       <input id="lEmail" type="email" autocomplete="username">
       <div style="height:12px"></div>
-      <label for="lPass">Contrasenya</label>
+      <label for="lPass">Contrasenya · Contraseña</label>
       <input id="lPass" type="password" autocomplete="current-password">
       <div id="lErr" class="error amagat"></div>
       <div id="lOk" class="ok amagat" style="margin-top:10px;font-size:14px"></div>
       <div style="margin-top:16px"><button class="boto ample" id="btnEntrar">Entrar</button></div>
       <p class="centre" style="font-size:14px;margin:14px 0 0">
-        Primer cop? <a href="#" id="lnkCrear" style="color:var(--blau)">Crear la contrasenya</a>
+        <a href="#" id="lnkCrear" style="color:var(--blau)">Primer cop? Crear la contrasenya · ¿Primera vez? Crear la contraseña</a>
       </p>
     </div>
   </section>
@@ -77,61 +77,63 @@
   <!-- APP -->
   <section id="vistaApp" class="amagat">
     <div class="pestanyes">
-      <button id="tabNou" class="actiu">➕ Nou formulari</button>
-      <button id="tabLlista">📋 Formularis</button>
+      <button id="tabNou" class="actiu" data-t="tabNou">➕ Nou formulari</button>
+      <button id="tabLlista" data-t="tabLlista">📋 Formularis</button>
     </div>
 
     <!-- NOU -->
     <div id="panNou">
       <div id="creacio">
         <div class="targeta">
-          <h2>El viatge</h2>
+          <h2 data-t="elViatge">El viatge</h2>
           <div class="graella">
-            <div class="ample"><label for="nTitol">Títol del viatge</label>
-              <input id="nTitol" placeholder="Ex.: Jordània – Petra i Wadi Rum"></div>
-            <div><label for="nInici">Data d'inici</label><input id="nInici" type="date"></div>
-            <div><label for="nFi">Data de tornada</label><input id="nFi" type="date"></div>
+            <div class="ample"><label for="nTitol" data-t="titolViatge">Títol del viatge</label>
+              <input id="nTitol"></div>
+            <div><label for="nInici" data-t="dataInici">Data d'inici</label><input id="nInici" type="date"></div>
+            <div><label for="nFi" data-t="dataFi">Data de tornada</label><input id="nFi" type="date"></div>
           </div>
-          <h3>Idioma del formulari</h3>
-          <div class="opcions">
-            <label><input type="radio" name="idioma" value="ca" checked> Català</label>
-            <label><input type="radio" name="idioma" value="es"> Castellà</label>
+          <div id="blocIdioma">
+            <h3 data-t="idiomaForm">Idioma del formulari</h3>
+            <div class="opcions">
+              <label><input type="radio" name="idioma" value="ca" checked> <span data-t="catala">Català</span></label>
+              <label><input type="radio" name="idioma" value="es"> <span data-t="castella">Castellà</span></label>
+            </div>
           </div>
-          <h3>Documentació</h3>
+          <h3 data-t="documentacio">Documentació</h3>
           <label class="consentiment" style="font-weight:500">
             <input type="checkbox" id="nPass" checked>
-            <span>Aquest viatge necessita <strong>passaport</strong> (es demanarà el número, la caducitat i la foto)</span>
+            <span data-t="calPassaport" data-html="1"></span>
           </label>
-          <h3>Nombre de viatgers</h3>
+          <h3 data-t="numViatgers">Nombre de viatgers</h3>
           <div style="display:flex;gap:10px;align-items:center">
-            <button class="boto sec petit" type="button" id="menys" aria-label="Menys">−</button>
+            <button class="boto sec petit" type="button" id="menys" aria-label="−">−</button>
             <input id="nNum" type="number" min="1" max="10" value="1" style="width:80px;text-align:center">
-            <button class="boto sec petit" type="button" id="mes" aria-label="Més">+</button>
+            <button class="boto sec petit" type="button" id="mes" aria-label="+">+</button>
           </div>
           <div id="blocMode" class="amagat">
-            <h3>Com vols enviar-ho?</h3>
+            <h3 data-t="comEnviar">Com vols enviar-ho?</h3>
             <div class="opcions">
-              <label><input type="radio" name="mode" value="un" checked> Un sol enllaç per a tots</label>
-              <label><input type="radio" name="mode" value="cadascu"> Un enllaç per a cada viatger</label>
+              <label><input type="radio" name="mode" value="un" checked> <span data-t="unPerTots">Un sol enllaç per a tots</span></label>
+              <label><input type="radio" name="mode" value="cadascu"> <span data-t="unPerCadascu">Un enllaç per a cada viatger</span></label>
             </div>
           </div>
         </div>
 
         <div class="targeta">
-          <h2>Dades que ja tens</h2>
-          <p class="meta" style="margin-top:-6px">Omple només el que ja sàpigues. La resta la completarà el client.</p>
+          <h2 data-t="dadesQueTens">Dades que ja tens</h2>
+          <p class="meta" style="margin-top:-6px" data-t="ompleNomes">Omple només el que ja sàpigues. La resta la completarà el client.</p>
           <div id="prefills"></div>
         </div>
 
         <div id="nErr" class="error amagat" style="margin-bottom:10px"></div>
-        <button class="boto ample" id="btnCrear">Crear i generar l'enllaç</button>
+        <button class="boto ample" id="btnCrear" data-t="crear">Crear i generar l'enllaç</button>
       </div>
 
       <div id="resultat" class="amagat">
         <div class="targeta">
-          <div class="ok"><strong>Formulari creat!</strong> Copia l'enllaç o envia'l directament per WhatsApp.</div>
+          <div class="ok" data-t="creat" data-html="1"></div>
           <div id="enllacos"></div>
-          <div style="margin-top:16px"><button class="boto sec ample" id="btnAltre">Crear un altre formulari</button></div>
+          <div style="margin-top:16px"><button class="boto sec ample" id="btnAltre" data-t="altre">Crear un altre formulari</button></div>
         </div>
       </div>
     </div>
@@ -139,81 +141,175 @@
     <!-- LLISTA -->
     <div id="panLlista" class="amagat">
       <div class="barra">
-        <div class="filtre">
-          <button data-f="tots" class="actiu">Tots</button>
-          <button data-f="pendent">Pendents</button>
-          <button data-f="rebut">Rebuts</button>
+        <div class="filtre" id="filtreEstat">
+          <button data-f="tots" class="actiu" data-t="tots">Tots</button>
+          <button data-f="pendent" data-t="pendents">Pendents</button>
+          <button data-f="rebut" data-t="rebuts">Rebuts</button>
         </div>
-        <button class="boto sec petit" id="btnRefresca">↻ Actualitzar</button>
+        <button class="boto sec petit" id="btnRefresca" data-t="actualitzar">↻ Actualitzar</button>
       </div>
+      <div class="filtre amagat" id="filtreAg" style="margin-bottom:12px"></div>
       <div id="llista"></div>
     </div>
 
-    <p class="centre" style="margin-top:28px"><a href="#" id="lnkSortir" style="color:var(--gris);font-size:14px">Tancar sessió</a></p>
+    <p class="centre" style="margin-top:28px"><a href="#" id="lnkSortir" style="color:var(--gris);font-size:14px" data-t="sortir">Tancar sessió</a></p>
   </section>
 </main>
 <div class="toast" id="toast"></div>
 
 <script>
+const D = {
+  ca: {
+    lemaPanell: "PANELL DE FORMULARIS", tabNou: "➕ Nou formulari", tabLlista: "📋 Formularis",
+    elViatge: "El viatge", titolViatge: "Títol del viatge", phTitol: "Ex.: Jordània – Petra i Wadi Rum",
+    dataInici: "Data d'inici", dataFi: "Data de tornada", idiomaForm: "Idioma del formulari", catala: "Català", castella: "Castellà",
+    documentacio: "Documentació", calPassaport: "Aquest viatge necessita <strong>passaport</strong> (es demanarà el número, la caducitat i la foto)",
+    numViatgers: "Nombre de viatgers", comEnviar: "Com vols enviar-ho?", unPerTots: "Un sol enllaç per a tots", unPerCadascu: "Un enllaç per a cada viatger",
+    dadesQueTens: "Dades que ja tens", ompleNomes: "Omple només el que ja sàpigues. La resta la completarà el client.",
+    crear: "Crear i generar l'enllaç", creant: "Creant…", creat: "<strong>Formulari creat!</strong> Copia l'enllaç o envia'l directament per WhatsApp.",
+    altre: "Crear un altre formulari", tots: "Tots", pendents: "Pendents", rebuts: "Rebuts", actualitzar: "↻ Actualitzar", sortir: "Tancar sessió",
+    totesAg: "Totes les agències",
+    viatger: "Viatger", fotosQueTens: "Fotos que ja tens (no es demanaran)", jaFotoDni: "Ja tinc la foto del DNI", jaFotoPass: "Ja tinc la foto del passaport",
+    posaTitol: "Posa el títol del viatge.", noCreat: "No s'ha pogut crear: ",
+    enllac: "Enllaç", enllacPerN: "Enllaç per als {n} viatgers", whatsapp: "WhatsApp", copiarEnllac: "Copiar enllaç", copiarMsg: "Copiar missatge", veure: "Veure",
+    carregant: "Carregant…", cap: "No hi ha cap formulari", capEstat: " en aquest estat",
+    rebutsN: "rebuts", ambPass: "Amb passaport", sensePass: "Sense passaport", creatEl: "creat el",
+    rebutEl: "Rebut el", esperant: "Esperant resposta", estRebut: "✓ Rebut", estPendent: "Pendent",
+    veureDades: "Veure dades", esborrar: "Esborrar", copiarDades: "Copiar totes les dades",
+    fotoDni: "Foto DNI", fotoPass: "Foto passaport", veureFoto: "👁 Veure foto", jaLaTenies: "Ja la tenies",
+    confirmEsb: "Segur que vols esborrar aquest formulari i les seves dades (també les fotos)? No es pot desfer.",
+    esborrat: "Esborrat", noEsborrat: "No s'ha pogut esborrar", noFoto: "No s'ha pogut obrir la foto", copiat: "Copiat!", copia: "Copia l'enllaç:",
+    locale: "ca",
+    camps: { nom:"Nom", cognoms:"Cognoms", naixement:"Data de naixement", dni:"DNI", passaport:"Núm. passaport", caducitat:"Caducitat passaport",
+      carrer:"Carrer, número i pis", poblacio:"Població", cp:"Codi postal", provincia:"Província", telefon:"Telèfon", email:"Correu electrònic" }
+  },
+  es: {
+    lemaPanell: "PANEL DE FORMULARIOS", tabNou: "➕ Nuevo formulario", tabLlista: "📋 Formularios",
+    elViatge: "El viaje", titolViatge: "Título del viaje", phTitol: "Ej.: Jordania – Petra y Wadi Rum",
+    dataInici: "Fecha de inicio", dataFi: "Fecha de regreso", idiomaForm: "Idioma del formulario", catala: "Catalán", castella: "Castellano",
+    documentacio: "Documentación", calPassaport: "Este viaje necesita <strong>pasaporte</strong> (se pedirá el número, la caducidad y la foto)",
+    numViatgers: "Número de viajeros", comEnviar: "¿Cómo quieres enviarlo?", unPerTots: "Un solo enlace para todos", unPerCadascu: "Un enlace para cada viajero",
+    dadesQueTens: "Datos que ya tienes", ompleNomes: "Rellena solo lo que ya sepas. El resto lo completará el cliente.",
+    crear: "Crear y generar el enlace", creant: "Creando…", creat: "<strong>¡Formulario creado!</strong> Copia el enlace o envíalo directamente por WhatsApp.",
+    altre: "Crear otro formulario", tots: "Todos", pendents: "Pendientes", rebuts: "Recibidos", actualitzar: "↻ Actualizar", sortir: "Cerrar sesión",
+    totesAg: "Todas las agencias",
+    viatger: "Viajero", fotosQueTens: "Fotos que ya tienes (no se pedirán)", jaFotoDni: "Ya tengo la foto del DNI", jaFotoPass: "Ya tengo la foto del pasaporte",
+    posaTitol: "Pon el título del viaje.", noCreat: "No se ha podido crear: ",
+    enllac: "Enlace", enllacPerN: "Enlace para los {n} viajeros", whatsapp: "WhatsApp", copiarEnllac: "Copiar enlace", copiarMsg: "Copiar mensaje", veure: "Ver",
+    carregant: "Cargando…", cap: "No hay ningún formulario", capEstat: " en este estado",
+    rebutsN: "recibidos", ambPass: "Con pasaporte", sensePass: "Sin pasaporte", creatEl: "creado el",
+    rebutEl: "Recibido el", esperant: "Esperando respuesta", estRebut: "✓ Recibido", estPendent: "Pendiente",
+    veureDades: "Ver datos", esborrar: "Borrar", copiarDades: "Copiar todos los datos",
+    fotoDni: "Foto DNI", fotoPass: "Foto pasaporte", veureFoto: "👁 Ver foto", jaLaTenies: "Ya la tenías",
+    confirmEsb: "¿Seguro que quieres borrar este formulario y sus datos (también las fotos)? No se puede deshacer.",
+    esborrat: "Borrado", noEsborrat: "No se ha podido borrar", noFoto: "No se ha podido abrir la foto", copiat: "¡Copiado!", copia: "Copia el enlace:",
+    locale: "es",
+    camps: { nom:"Nombre", cognoms:"Apellidos", naixement:"Fecha de nacimiento", dni:"DNI", passaport:"Núm. pasaporte", caducitat:"Caducidad pasaporte",
+      carrer:"Calle, número y piso", poblacio:"Población", cp:"Código postal", provincia:"Provincia", telefon:"Teléfono", email:"Correo electrónico" }
+  }
+};
+
 const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const CAMPS = [
-  ["nom","Nom","text"],["cognoms","Cognoms","text"],["naixement","Data de naixement","date"],["dni","DNI","text"],
-  ["passaport","Núm. passaport","text"],["caducitat","Caducitat passaport","date"],
-  ["carrer","Carrer, número i pis","text"],["poblacio","Població","text"],["cp","Codi postal","text"],["provincia","Província","text"],
-  ["telefon","Telèfon","tel"],["email","Correu electrònic","email"]
+  ["nom","text"],["cognoms","text"],["naixement","date"],["dni","text"],["passaport","text"],["caducitat","date"],
+  ["carrer","text"],["poblacio","text"],["cp","text"],["provincia","text"],["telefon","tel"],["email","email"]
 ];
 const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
 const urlForm = id => BASE + "index.html?f=" + id;
-let filtre = "tots", dadesLlista = [];
+let filtre = "tots", filtreAg = "totes", dadesLlista = [], P = null, t = D.ca, AGENCIES = {};
 
-function toast(t){ const e=$("toast"); e.textContent=t; e.classList.add("vist"); setTimeout(()=>e.classList.remove("vist"),1800); }
+function toast(x){ const e=$("toast"); e.textContent=x; e.classList.add("vist"); setTimeout(()=>e.classList.remove("vist"),1800); }
 function dataCurta(iso){ if(!iso) return ""; const [a,m,d]=iso.split("-"); return `${d}/${m}/${a}`; }
 function datesText(f){ return f.data_inici ? dataCurta(f.data_inici) + (f.data_fi ? " – " + dataCurta(f.data_fi) : "") : ""; }
+const nomAg = id => (AGENCIES[id] || {}).nom || "";
 
 function missatgeWA(f, nom){
-  const dates = datesText(f);
+  const dates = datesText(f), ag = nomAg(f.agencia) || P.agencia.nom;
   if(f.idioma === "es")
-    return `Hola${nom?" "+nom:""}! Para preparar el viaje «${f.titol}»${dates?" ("+dates+")":""} necesitamos tus datos. Puedes rellenarlos aquí:\n${urlForm(f.id)}\n\n¡Gracias! Rimu Viatges`;
-  return `Hola${nom?" "+nom:""}! Per preparar el viatge «${f.titol}»${dates?" ("+dates+")":""} necessitem les teves dades. Les pots omplir aquí:\n${urlForm(f.id)}\n\nGràcies! Rimu Viatges`;
+    return `¡Hola${nom?" "+nom:""}! Para preparar el viaje «${f.titol}»${dates?" ("+dates+")":""} necesitamos tus datos. Puedes rellenarlos aquí:\n${urlForm(f.id)}\n\n¡Gracias! ${ag}`;
+  return `Hola${nom?" "+nom:""}! Per preparar el viatge «${f.titol}»${dates?" ("+dates+")":""} necessitem les teves dades. Les pots omplir aquí:\n${urlForm(f.id)}\n\nGràcies! ${ag}`;
 }
 const waLink = (f, nom) => "https://wa.me/?text=" + encodeURIComponent(missatgeWA(f, nom));
-async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast("Copiat!"); }catch(e){ prompt("Copia l'enllaç:", t); } }
+async function copiar(x){ try{ await navigator.clipboard.writeText(x); toast(t.copiat); }catch(e){ prompt(t.copia, x); } }
+
+function traduir(){
+  document.documentElement.lang = t.locale;
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = t[el.dataset.t]; if(v === undefined) return;
+    if(el.dataset.html) el.innerHTML = v; else el.textContent = v;
+  });
+  $("nTitol").placeholder = t.phTitol;
+}
 
 /* ---------- SESSIÓ ---------- */
-$("lEmail").value = RIMU.EMAIL_AVIS;
 async function iniciar(){
   const { data:{ session } } = await sb.auth.getSession();
-  mostrar(!!session);
+  if(session) await entrarAmbPerfil(); else mostrarLogin();
 }
-function mostrar(dins){
-  $("vistaLogin").classList.toggle("amagat", dins);
-  $("vistaApp").classList.toggle("amagat", !dins);
-  if(dins){ pintarPrefills(); }
+function mostrarLogin(){
+  $("vistaLogin").classList.remove("amagat"); $("vistaApp").classList.add("amagat");
+  document.querySelectorAll("img.logo").forEach(i => i.style.visibility = "hidden");
+}
+async function entrarAmbPerfil(){
+  const { data, error } = await sb.rpc("perfil_actual");
+  if(error || !data){
+    await sb.auth.signOut(); mostrarLogin();
+    $("lErr").textContent = "Aquest compte no té accés al panell · Esta cuenta no tiene acceso al panel.";
+    $("lErr").classList.remove("amagat"); return;
+  }
+  P = data;
+  t = D[P.agencia.idioma_fix || "ca"];
+  aplicarMarca(P.agencia);
+  document.title = P.agencia.nom + " · " + t.lemaPanell.toLowerCase();
+  traduir();
+  const { data: ags } = await sb.from("agencies").select("id,nom");
+  (ags || [P.agencia]).forEach(a => AGENCIES[a.id] = a);
+  if(P.agencia.idioma_fix){
+    $("blocIdioma").classList.add("amagat");
+    document.querySelector(`input[name=idioma][value=${P.agencia.idioma_fix}]`).checked = true;
+  }
+  if(P.superadmin && Object.keys(AGENCIES).length > 1){
+    const b = [`<button data-a="totes" class="actiu">${esc(t.totesAg)}</button>`]
+      .concat(Object.values(AGENCIES).map(a => `<button data-a="${esc(a.id)}">${esc(a.nom)}</button>`));
+    $("filtreAg").innerHTML = b.join(""); $("filtreAg").classList.remove("amagat");
+    $("filtreAg").querySelectorAll("button").forEach(x => x.onclick = () => {
+      filtreAg = x.dataset.a;
+      $("filtreAg").querySelectorAll("button").forEach(y => y.classList.toggle("actiu", y===x));
+      pintarLlista();
+    });
+  }
+  $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
+  pintarPrefills();
 }
 $("btnEntrar").onclick = async () => {
   $("lErr").classList.add("amagat"); $("lOk").classList.add("amagat");
   const { error } = await sb.auth.signInWithPassword({ email:$("lEmail").value.trim(), password:$("lPass").value });
   if(error){
-    $("lErr").textContent = /confirm/i.test(error.message) ? "Encara cal confirmar el compte des del correu." : "Correu o contrasenya incorrectes.";
+    $("lErr").textContent = /confirm/i.test(error.message)
+      ? "Encara cal confirmar el compte des del correu · Falta confirmar la cuenta desde el correo."
+      : "Correu o contrasenya incorrectes · Correo o contraseña incorrectos.";
     $("lErr").classList.remove("amagat"); return;
   }
-  mostrar(true);
+  await entrarAmbPerfil();
 };
 $("lPass").addEventListener("keydown", e => { if(e.key==="Enter") $("btnEntrar").click(); });
 $("lnkCrear").onclick = async e => {
   e.preventDefault();
   $("lErr").classList.add("amagat"); $("lOk").classList.add("amagat");
   const pass = $("lPass").value;
-  if(pass.length < 8){ $("lErr").textContent = "Escriu primer una contrasenya d'almenys 8 caràcters al camp de dalt."; $("lErr").classList.remove("amagat"); return; }
+  if(!$("lEmail").value.trim() || pass.length < 8){
+    $("lErr").textContent = "Escriu el correu i una contrasenya d'almenys 8 caràcters · Escribe el correo y una contraseña de al menos 8 caracteres.";
+    $("lErr").classList.remove("amagat"); return;
+  }
   const { data, error } = await sb.auth.signUp({ email:$("lEmail").value.trim(), password:pass });
-  if(error){ $("lErr").textContent = "No s'ha pogut crear: " + error.message; $("lErr").classList.remove("amagat"); return; }
-  if(data.session){ mostrar(true); return; }
-  $("lOk").textContent = "Compte creat. Ara cal activar-lo (confirmació per correu). Un cop activat, entra amb aquesta contrasenya.";
+  if(error){ $("lErr").textContent = error.message; $("lErr").classList.remove("amagat"); return; }
+  if(data.session){ await entrarAmbPerfil(); return; }
+  $("lOk").textContent = "Compte creat: confirma'l des del correu i després entra · Cuenta creada: confírmala desde el correo y después entra.";
   $("lOk").classList.remove("amagat");
 };
-$("lnkSortir").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); mostrar(false); };
+$("lnkSortir").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
 
 /* ---------- PESTANYES ---------- */
 function pestanya(q){
@@ -236,14 +332,14 @@ function pintarPrefills(){
   let html = "";
   for(let i=0;i<n;i++){
     const v = vells[i] || {};
-    html += `<details class="viatger" ${i===0?"open":""}><summary>Viatger ${i+1}</summary><div class="graella">`;
-    CAMPS.forEach(([k, et, t]) => {
+    html += `<details class="viatger" ${i===0?"open":""}><summary>${esc(t.viatger)} ${i+1}</summary><div class="graella">`;
+    CAMPS.forEach(([k, tp]) => {
       const amagat = !ambPass && (k==="passaport" || k==="caducitat");
-      html += `<div class="${k==="carrer"?"ample":""}${amagat?" amagat":""}"><label>${et}</label><input data-k="${k}" type="${t}" value="${esc(v[k]||"")}"></div>`;
+      html += `<div class="${k==="carrer"?"ample":""}${amagat?" amagat":""}"><label>${esc(t.camps[k])}</label><input data-k="${k}" type="${tp}" value="${esc(v[k]||"")}"></div>`;
     });
-    html += `<div class="ample"><h3 style="margin-top:6px">Fotos que ja tens (no es demanaran)</h3>
-      <label class="consentiment" style="font-weight:500"><input type="checkbox" data-k="te_foto_dni" ${v.te_foto_dni?"checked":""}> Ja tinc la foto del DNI</label>
-      <label class="consentiment${ambPass?"":" amagat"}" style="font-weight:500;margin-top:6px"><input type="checkbox" data-k="te_foto_passaport" ${v.te_foto_passaport?"checked":""}> Ja tinc la foto del passaport</label>
+    html += `<div class="ample"><h3 style="margin-top:6px">${esc(t.fotosQueTens)}</h3>
+      <label class="consentiment" style="font-weight:500"><input type="checkbox" data-k="te_foto_dni" ${v.te_foto_dni?"checked":""}> ${esc(t.jaFotoDni)}</label>
+      <label class="consentiment${ambPass?"":" amagat"}" style="font-weight:500;margin-top:6px"><input type="checkbox" data-k="te_foto_passaport" ${v.te_foto_passaport?"checked":""}> ${esc(t.jaFotoPass)}</label>
     </div>`;
     html += `</div></details>`;
   }
@@ -252,8 +348,7 @@ function pintarPrefills(){
 function llegirViatger(d){
   const o = {};
   d.querySelectorAll("input").forEach(i => { o[i.dataset.k] = i.type === "checkbox" ? i.checked : i.value.trim(); });
-  const ambPass = $("nPass").checked;
-  if(!ambPass){ o.passaport = ""; o.caducitat = ""; o.te_foto_passaport = false; }
+  if(!$("nPass").checked){ o.passaport = ""; o.caducitat = ""; o.te_foto_passaport = false; }
   return o;
 }
 $("nPass").addEventListener("change", pintarPrefills);
@@ -264,31 +359,31 @@ $("mes").onclick = () => { $("nNum").value = numViatgers() + 1; pintarPrefills()
 $("btnCrear").onclick = async () => {
   const err = $("nErr"); err.classList.add("amagat");
   const titol = $("nTitol").value.trim();
-  if(!titol){ err.textContent = "Posa el títol del viatge."; err.classList.remove("amagat"); $("nTitol").focus(); return; }
-  const idioma = document.querySelector("input[name=idioma]:checked").value;
+  if(!titol){ err.textContent = t.posaTitol; err.classList.remove("amagat"); $("nTitol").focus(); return; }
+  const idioma = P.agencia.idioma_fix || document.querySelector("input[name=idioma]:checked").value;
   const n = numViatgers();
   const mode = n > 1 ? document.querySelector("input[name=mode]:checked").value : "un";
   const viatgers = [...$("prefills").querySelectorAll("details")].map(llegirViatger);
   const grup_id = crypto.randomUUID();
-  const base = { grup_id, titol, idioma, passaport_obligatori: $("nPass").checked,
+  const base = { grup_id, titol, idioma, agencia: P.agencia.id, passaport_obligatori: $("nPass").checked,
                  data_inici: $("nInici").value || null, data_fi: $("nFi").value || null };
   const files = mode === "un" ? [{ ...base, viatgers }] : viatgers.map(v => ({ ...base, viatgers:[v] }));
 
-  const b = $("btnCrear"); b.disabled = true; b.textContent = "Creant…";
+  const b = $("btnCrear"); b.disabled = true; b.textContent = t.creant;
   const { data, error } = await sb.from("formularis").insert(files).select();
-  b.disabled = false; b.textContent = "Crear i generar l'enllaç";
-  if(error){ err.textContent = "No s'ha pogut crear: " + error.message; err.classList.remove("amagat"); return; }
+  b.disabled = false; b.textContent = t.crear;
+  if(error){ err.textContent = t.noCreat + error.message; err.classList.remove("amagat"); return; }
 
   let html = "";
   data.forEach((f, idx) => {
     const v = f.viatgers[0] || {};
-    const etiqueta = mode === "un" ? (n>1 ? `Enllaç per als ${n} viatgers` : "Enllaç") : `Viatger ${idx+1}${v.nom?": "+esc(v.nom+" "+(v.cognoms||"")):""}`;
+    const etiqueta = mode === "un" ? (n>1 ? t.enllacPerN.replace("{n}", n) : t.enllac) : `${esc(t.viatger)} ${idx+1}${v.nom?": "+esc(v.nom+" "+(v.cognoms||"")):""}`;
     html += `<div class="enllac"><strong>${etiqueta}</strong><div class="url">${esc(urlForm(f.id))}</div>
       <div class="fila-botons">
-        <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, mode==="cadascu"?v.nom:"")}">WhatsApp</a>
-        <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">Copiar enllaç</button>
-        <button class="boto sec petit" data-copiamsg="${f.id}">Copiar missatge</button>
-        <a class="boto sec petit" target="_blank" href="${esc(urlForm(f.id))}">Veure</a>
+        <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, mode==="cadascu"?v.nom:"")}">${t.whatsapp}</a>
+        <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">${esc(t.copiarEnllac)}</button>
+        <button class="boto sec petit" data-copiamsg="${f.id}">${esc(t.copiarMsg)}</button>
+        <a class="boto sec petit" target="_blank" href="${esc(urlForm(f.id))}">${esc(t.veure)}</a>
       </div></div>`;
   });
   $("enllacos").innerHTML = html;
@@ -308,14 +403,16 @@ $("btnAltre").onclick = () => {
 
 /* ---------- LLISTA ---------- */
 async function carregarLlista(){
-  $("llista").innerHTML = `<div class="targeta centre meta">Carregant…</div>`;
+  $("llista").innerHTML = `<div class="targeta centre meta">${esc(t.carregant)}</div>`;
   const { data, error } = await sb.from("formularis").select("*").order("created_at", { ascending:false });
   if(error){ $("llista").innerHTML = `<div class="targeta error">Error: ${esc(error.message)}</div>`; return; }
   dadesLlista = data; pintarLlista();
 }
 function pintarLlista(){
   const grups = new Map();
-  dadesLlista.forEach(f => { if(!grups.has(f.grup_id)) grups.set(f.grup_id, []); grups.get(f.grup_id).push(f); });
+  dadesLlista.filter(f => filtreAg==="totes" || f.agencia===filtreAg)
+    .forEach(f => { if(!grups.has(f.grup_id)) grups.set(f.grup_id, []); grups.get(f.grup_id).push(f); });
+  const veigAltres = P.superadmin && Object.keys(AGENCIES).length > 1;
   let html = "";
   for(const [gid, fs] of grups){
     const visibles = fs.filter(f => filtre==="tots" || f.estat===filtre);
@@ -323,51 +420,51 @@ function pintarLlista(){
     const f0 = fs[0];
     const rebuts = fs.filter(f => f.estat==="rebut").length;
     html += `<div class="grup"><div class="grup-cap"><div>
-        <div class="grup-titol">${esc(f0.titol)}</div>
-        <div class="meta">${datesText(f0)}${datesText(f0)?" · ":""}${f0.idioma==="es"?"Castellà":"Català"} · ${f0.passaport_obligatori===false?"Sense passaport":"Amb passaport"} · creat el ${new Date(f0.created_at).toLocaleDateString("ca")}</div>
-      </div><div class="meta">${rebuts}/${fs.length} rebuts</div></div>`;
+        <div class="grup-titol">${esc(f0.titol)}${veigAltres?`<span class="etiq-ag">${esc(nomAg(f0.agencia))}</span>`:""}</div>
+        <div class="meta">${datesText(f0)}${datesText(f0)?" · ":""}${P.agencia.idioma_fix?"":(f0.idioma==="es"?t.castella:t.catala)+" · "}${f0.passaport_obligatori===false?t.sensePass:t.ambPass} · ${t.creatEl} ${new Date(f0.created_at).toLocaleDateString(t.locale)}</div>
+      </div><div class="meta">${rebuts}/${fs.length} ${t.rebutsN}</div></div>`;
     visibles.forEach(f => {
-      const noms = f.viatgers.map((v,i) => (v.nom||v.cognoms) ? `${v.nom||""} ${v.cognoms||""}`.trim() : `Viatger ${i+1}`).join(", ");
+      const noms = f.viatgers.map((v,i) => (v.nom||v.cognoms) ? `${v.nom||""} ${v.cognoms||""}`.trim() : `${t.viatger} ${i+1}`).join(", ");
       html += `<div class="form-fila"><div class="form-fila-cap">
           <div><strong>${esc(noms)}</strong>
-            <div class="meta">${f.estat==="rebut" ? "Rebut el " + new Date(f.submitted_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"}) : "Esperant resposta"}</div></div>
-          <span class="estat ${f.estat}">${f.estat==="rebut"?"✓ Rebut":"Pendent"}</span>
+            <div class="meta">${f.estat==="rebut" ? t.rebutEl + " " + new Date(f.submitted_at).toLocaleString(t.locale,{dateStyle:"short",timeStyle:"short"}) : t.esperant}</div></div>
+          <span class="estat ${f.estat}">${f.estat==="rebut"?t.estRebut:t.estPendent}</span>
         </div>
         <div class="fila-botons" style="margin-top:10px">
-          <button class="boto petit ${f.estat==="rebut"?"":"sec"}" data-veure="${f.id}">Veure dades</button>
-          <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">Copiar enllaç</button>
-          <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, fs.length>1?(f.viatgers[0]||{}).nom:"")}">WhatsApp</a>
-          <button class="boto perill petit" data-esborra="${f.id}">Esborrar</button>
+          <button class="boto petit ${f.estat==="rebut"?"":"sec"}" data-veure="${f.id}">${esc(t.veureDades)}</button>
+          <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">${esc(t.copiarEnllac)}</button>
+          <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, fs.length>1?(f.viatgers[0]||{}).nom:"")}">${t.whatsapp}</a>
+          <button class="boto perill petit" data-esborra="${f.id}">${esc(t.esborrar)}</button>
         </div>
         <div id="det_${f.id}" class="amagat"></div></div>`;
     });
     html += `</div>`;
   }
-  $("llista").innerHTML = html || `<div class="targeta centre meta">No hi ha cap formulari${filtre!=="tots"?" en aquest estat":""}.</div>`;
+  $("llista").innerHTML = html || `<div class="targeta centre meta">${esc(t.cap)}${filtre!=="tots"?esc(t.capEstat):""}.</div>`;
   $("llista").querySelectorAll("[data-copia]").forEach(x => x.onclick = () => copiar(x.dataset.copia));
   $("llista").querySelectorAll("[data-veure]").forEach(x => x.onclick = () => veure(x.dataset.veure));
   $("llista").querySelectorAll("[data-esborra]").forEach(x => x.onclick = () => esborrar(x.dataset.esborra));
 }
 const campsDe = f => CAMPS.filter(([k]) => f.passaport_obligatori !== false || (k!=="passaport" && k!=="caducitat"));
 function textDades(f){
-  return f.viatgers.map((v,i) => (f.viatgers.length>1?`VIATGER ${i+1}\n`:"") +
-    campsDe(f).map(([k,et,t]) => `${et}: ${t==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
+  return f.viatgers.map((v,i) => (f.viatgers.length>1?`${t.viatger.toUpperCase()} ${i+1}\n`:"") +
+    campsDe(f).map(([k,tp]) => `${t.camps[k]}: ${tp==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
 }
-function filaFoto(f, v, i, tipus, nom){
+function filaFoto(f, v, tipus, nom){
   if(tipus==="passaport" && f.passaport_obligatori===false) return "";
   const ruta = v["foto_"+tipus];
   let cel;
-  if(ruta) cel = `<button class="boto sec petit" data-foto="${esc(ruta)}">👁 Veure foto</button>`;
-  else if(v["te_foto_"+tipus]) cel = `<span class="meta">Ja la tenies</span>`;
+  if(ruta) cel = `<button class="boto sec petit" data-foto="${esc(ruta)}">${esc(t.veureFoto)}</button>`;
+  else if(v["te_foto_"+tipus]) cel = `<span class="meta">${esc(t.jaLaTenies)}</span>`;
   else cel = `<span class="meta">—</span>`;
-  return `<tr><td>${nom}</td><td>${cel}</td></tr>`;
+  return `<tr><td>${esc(nom)}</td><td>${cel}</td></tr>`;
 }
 async function obrirFoto(ruta, boto){
   const w = window.open("", "_blank");
   boto.disabled = true;
   const { data, error } = await sb.storage.from("documents").createSignedUrl(ruta, 600);
   boto.disabled = false;
-  if(error || !data){ if(w) w.close(); toast("No s'ha pogut obrir la foto"); return; }
+  if(error || !data){ if(w) w.close(); toast(t.noFoto); return; }
   if(w) w.location = data.signedUrl; else location.href = data.signedUrl;
 }
 function veure(id){
@@ -376,27 +473,27 @@ function veure(id){
   const f = dadesLlista.find(x => x.id===id);
   let html = "";
   f.viatgers.forEach((v,i) => {
-    if(f.viatgers.length>1) html += `<div class="sub-viatger">Viatger ${i+1}</div>`;
-    html += `<table class="dades">` + campsDe(f).map(([k,et,t]) =>
-      `<tr><td>${et}</td><td>${esc(t==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("")
-      + filaFoto(f, v, i, "dni", "Foto DNI") + filaFoto(f, v, i, "passaport", "Foto passaport") + `</table>`;
+    if(f.viatgers.length>1) html += `<div class="sub-viatger">${esc(t.viatger)} ${i+1}</div>`;
+    html += `<table class="dades">` + campsDe(f).map(([k,tp]) =>
+      `<tr><td>${esc(t.camps[k])}</td><td>${esc(tp==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("")
+      + filaFoto(f, v, "dni", t.fotoDni) + filaFoto(f, v, "passaport", t.fotoPass) + `</table>`;
   });
-  html += `<div style="margin-top:10px"><button class="boto sec petit" data-copiadades="${id}">Copiar totes les dades</button></div>`;
+  html += `<div style="margin-top:10px"><button class="boto sec petit" data-copiadades="${id}">${esc(t.copiarDades)}</button></div>`;
   box.innerHTML = html; box.classList.remove("amagat");
   box.querySelector("[data-copiadades]").onclick = () => copiar(textDades(f));
   box.querySelectorAll("[data-foto]").forEach(b => b.onclick = () => obrirFoto(b.dataset.foto, b));
 }
 async function esborrar(id){
-  if(!confirm("Segur que vols esborrar aquest formulari i les seves dades (també les fotos)? No es pot desfer.")) return;
+  if(!confirm(t.confirmEsb)) return;
   const { data: arxius } = await sb.storage.from("documents").list(id, { limit: 100 });
   if(arxius && arxius.length) await sb.storage.from("documents").remove(arxius.map(a => `${id}/${a.name}`));
   const { error } = await sb.from("formularis").delete().eq("id", id);
-  if(error){ toast("No s'ha pogut esborrar"); return; }
-  dadesLlista = dadesLlista.filter(f => f.id !== id); pintarLlista(); toast("Esborrat");
+  if(error){ toast(t.noEsborrat); return; }
+  dadesLlista = dadesLlista.filter(f => f.id !== id); pintarLlista(); toast(t.esborrat);
 }
-document.querySelectorAll(".filtre button").forEach(b => b.onclick = () => {
+document.querySelectorAll("#filtreEstat button").forEach(b => b.onclick = () => {
   filtre = b.dataset.f;
-  document.querySelectorAll(".filtre button").forEach(x => x.classList.toggle("actiu", x===b));
+  document.querySelectorAll("#filtreEstat button").forEach(x => x.classList.toggle("actiu", x===b));
   pintarLlista();
 });
 $("btnRefresca").onclick = carregarLlista;
