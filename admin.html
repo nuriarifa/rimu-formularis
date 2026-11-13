@@ -178,6 +178,8 @@ const D = {
     veureDades: "Veure dades", esborrar: "Esborrar", copiarDades: "Copiar totes les dades",
     fotoDni: "Foto DNI", fotoPass: "Foto passaport", veureFoto: "👁 Veure foto", jaLaTenies: "Ja la tenies",
     confirmEsb: "Segur que vols esborrar aquest formulari i les seves dades (també les fotos)? No es pot desfer.",
+    reobrir: "↺ Reobrir", reobert: "Reobert", noReobert: "No s'ha pogut reobrir",
+    confirmReobrir: "El client podrà tornar a veure i corregir les seves dades amb el mateix enllaç fins que les torni a enviar. Vols reobrir-lo?",
     esborrat: "Esborrat", noEsborrat: "No s'ha pogut esborrar", noFoto: "No s'ha pogut obrir la foto", copiat: "Copiat!", copia: "Copia l'enllaç:",
     locale: "ca",
     camps: { nom:"Nom", cognoms:"Cognoms", naixement:"Data de naixement", dni:"DNI", passaport:"Núm. passaport", caducitat:"Caducitat passaport",
@@ -202,6 +204,8 @@ const D = {
     veureDades: "Ver datos", esborrar: "Borrar", copiarDades: "Copiar todos los datos",
     fotoDni: "Foto DNI", fotoPass: "Foto pasaporte", veureFoto: "👁 Ver foto", jaLaTenies: "Ya la tenías",
     confirmEsb: "¿Seguro que quieres borrar este formulario y sus datos (también las fotos)? No se puede deshacer.",
+    reobrir: "↺ Reabrir", reobert: "Reabierto", noReobert: "No se ha podido reabrir",
+    confirmReobrir: "El cliente podrá volver a ver y corregir sus datos con el mismo enlace hasta que los vuelva a enviar. ¿Quieres reabrirlo?",
     esborrat: "Borrado", noEsborrat: "No se ha podido borrar", noFoto: "No se ha podido abrir la foto", copiat: "¡Copiado!", copia: "Copia el enlace:",
     locale: "es",
     camps: { nom:"Nombre", cognoms:"Apellidos", naixement:"Fecha de nacimiento", dni:"DNI", passaport:"Núm. pasaporte", caducitat:"Caducidad pasaporte",
@@ -434,6 +438,7 @@ function pintarLlista(){
           <button class="boto petit ${f.estat==="rebut"?"":"sec"}" data-veure="${f.id}">${esc(t.veureDades)}</button>
           <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">${esc(t.copiarEnllac)}</button>
           <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, fs.length>1?(f.viatgers[0]||{}).nom:"")}">${t.whatsapp}</a>
+          ${f.estat==="rebut"?`<button class="boto sec petit" data-reobre="${f.id}">${esc(t.reobrir)}</button>`:""}
           <button class="boto perill petit" data-esborra="${f.id}">${esc(t.esborrar)}</button>
         </div>
         <div id="det_${f.id}" class="amagat"></div></div>`;
@@ -444,6 +449,14 @@ function pintarLlista(){
   $("llista").querySelectorAll("[data-copia]").forEach(x => x.onclick = () => copiar(x.dataset.copia));
   $("llista").querySelectorAll("[data-veure]").forEach(x => x.onclick = () => veure(x.dataset.veure));
   $("llista").querySelectorAll("[data-esborra]").forEach(x => x.onclick = () => esborrar(x.dataset.esborra));
+  $("llista").querySelectorAll("[data-reobre]").forEach(x => x.onclick = () => reobrir(x.dataset.reobre));
+}
+async function reobrir(id){
+  if(!confirm(t.confirmReobrir)) return;
+  const { error } = await sb.from("formularis").update({ estat: "pendent" }).eq("id", id);
+  if(error){ toast(t.noReobert); return; }
+  const f = dadesLlista.find(x => x.id === id); if(f) f.estat = "pendent";
+  pintarLlista(); toast(t.reobert);
 }
 const campsDe = f => CAMPS.filter(([k]) => f.passaport_obligatori !== false || (k!=="passaport" && k!=="caducitat"));
 function textDades(f){
