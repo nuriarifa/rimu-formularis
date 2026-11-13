@@ -71,6 +71,7 @@ const T = {
     faltaConsent: "Cal acceptar el tractament de les dades per poder enviar.",
     errEnviar: "No s'han pogut enviar les dades. Comprova la connexió i torna-ho a provar.",
     gracies: "Moltes gràcies!", gracies2: "Hem rebut les dades correctament. Ens posarem en contacte amb tu si cal res més.",
+    jaRebut: "Ja hem rebut les teves dades", jaRebut2: "Per seguretat, ja no es mostren en aquest enllaç. Si cal corregir alguna cosa, posa't en contacte amb {ag}.",
     lema: "El teu pròxim destí comença aquí",
     fotoDni: "Foto del DNI (cara de davant)", fotoPass: "Foto del passaport (pàgina de la foto)",
     opcional: "opcional", triaFoto: "📷 Fer foto o triar arxiu", pujant: "Pujant la foto…",
@@ -102,6 +103,7 @@ const T = {
     faltaConsent: "Hay que aceptar el tratamiento de los datos para poder enviar.",
     errEnviar: "No se han podido enviar los datos. Comprueba la conexión y vuelve a intentarlo.",
     gracies: "¡Muchas gracias!", gracies2: "Hemos recibido los datos correctamente. Nos pondremos en contacto contigo si hace falta algo más.",
+    jaRebut: "Ya hemos recibido tus datos", jaRebut2: "Por seguridad, ya no se muestran en este enlace. Si hay que corregir algo, ponte en contacto con {ag}.",
     lema: "Tu próximo destino empieza aquí",
     fotoDni: "Foto del DNI (cara delantera)", fotoPass: "Foto del pasaporte (página de la foto)",
     opcional: "opcional", triaFoto: "📷 Hacer foto o elegir archivo", pujant: "Subiendo la foto…",
@@ -274,10 +276,24 @@ async function carregar(){
     if(error){ mostrarError(/uuid/i.test(error.message) ? T.ca.noTrobat : T.ca.errConn); return; }
     if(!data){ mostrarError(T.ca.noTrobat); return; }
     F = data; L = T[F.idioma] || T.ca;
+    if(F.estat !== "pendent"){ mostrarJaRebut(); return; }
     pintar();
     $("carregant").classList.add("amagat");
     $("form").classList.remove("amagat");
   }catch(e){ mostrarError(T.ca.errConn); }
+}
+// Formulari ja enviat: només un missatge, sense cap dada personal
+function mostrarJaRebut(){
+  const AG = F.agencia || { nom: "" };
+  document.documentElement.lang = F.idioma;
+  aplicarMarca(F.agencia);
+  document.title = AG.nom + " · " + F.titol;
+  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
+  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
+  $("txtGracies").textContent = L.jaRebut;
+  $("txtGracies2").textContent = L.jaRebut2.replace("{ag}", AG.nom);
+  $("carregant").classList.add("amagat");
+  $("gracies").classList.remove("amagat");
 }
 function mostrarError(t){
   $("carregant").classList.add("amagat");
