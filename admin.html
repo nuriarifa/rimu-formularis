@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rimu Viatges · Panell de formularis</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="estil.css">
+<script src="config.js"></script>
+<script src="logo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .contingut{max-width:860px}
+  .pestanyes{display:flex;gap:8px;margin-bottom:16px}
+  .pestanyes button{flex:1;font:inherit;font-weight:600;padding:12px;border-radius:10px;border:1px solid var(--linia);
+    background:#fff;color:var(--gris);cursor:pointer}
+  .pestanyes button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .opcions{display:flex;gap:8px;flex-wrap:wrap}
+  .opcions label{flex:1;min-width:150px;display:flex;gap:8px;align-items:center;font-weight:500;border:1px solid var(--linia);
+    border-radius:10px;padding:11px 12px;cursor:pointer;margin:0}
+  .opcions input{width:auto;margin:0}
+  .opcions label:has(input:checked){border-color:var(--blau);background:var(--blau-clar)}
+  details.viatger{border:1px solid var(--linia);border-radius:12px;padding:0 14px;margin-top:10px;background:#fff}
+  details.viatger summary{cursor:pointer;padding:13px 0;font-weight:600;color:var(--blau)}
+  details.viatger[open]{padding-bottom:14px}
+  .enllac{border:1px solid var(--linia);border-radius:12px;padding:12px;margin-top:10px}
+  .enllac .url{font-size:13px;color:var(--gris);word-break:break-all;margin:4px 0 10px}
+  .fila-botons{display:flex;gap:8px;flex-wrap:wrap}
+  .grup{border:1px solid var(--linia);border-radius:14px;background:#fff;padding:16px;margin-bottom:12px}
+  .grup-cap{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .grup-titol{font-weight:700;color:var(--blau);font-size:17px}
+  .meta{font-size:13px;color:var(--gris)}
+  .form-fila{border-top:1px solid var(--linia);margin-top:12px;padding-top:12px}
+  .form-fila-cap{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .estat{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .estat.pendent{background:var(--coral-clar);color:#A4504A}
+  .estat.rebut{background:var(--verd-clar);color:var(--verd)}
+  table.dades{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+  table.dades td{padding:6px 8px;border-bottom:1px solid var(--linia);vertical-align:top}
+  table.dades td:first-child{color:var(--gris);width:42%}
+  .sub-viatger{font-weight:700;color:var(--blau);margin-top:12px}
+  .barra{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#fff;
+    padding:10px 18px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.vist{opacity:1}
+  .filtre{display:flex;gap:6px}
+  .filtre button{font:inherit;font-size:13px;padding:6px 12px;border-radius:20px;border:1px solid var(--linia);background:#fff;cursor:pointer}
+  .filtre button.actiu{background:var(--blau-clar);border-color:var(--blau);color:var(--blau);font-weight:600}
+</style>
+</head>
+<body>
+<header class="cap">
+  <img class="logo" alt="Rimu Viatges">
+  <div class="lema">PANELL DE FORMULARIS</div>
+</header>
+
+<main class="contingut">
+
+  <!-- ENTRADA -->
+  <section id="vistaLogin" class="amagat">
+    <div class="targeta" style="max-width:420px;margin:0 auto">
+      <h2>Entrar al panell</h2>
+      <label for="lEmail">Correu</label>
+      <input id="lEmail" type="email" autocomplete="username">
+      <div style="height:12px"></div>
+      <label for="lPass">Contrasenya</label>
+      <input id="lPass" type="password" autocomplete="current-password">
+      <div id="lErr" class="error amagat"></div>
+      <div id="lOk" class="ok amagat" style="margin-top:10px;font-size:14px"></div>
+      <div style="margin-top:16px"><button class="boto ample" id="btnEntrar">Entrar</button></div>
+      <p class="centre" style="font-size:14px;margin:14px 0 0">
+        Primer cop? <a href="#" id="lnkCrear" style="color:var(--blau)">Crear la contrasenya</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="vistaApp" class="amagat">
+    <div class="pestanyes">
+      <button id="tabNou" class="actiu">➕ Nou formulari</button>
+      <button id="tabLlista">📋 Formularis</button>
+    </div>
+
+    <!-- NOU -->
+    <div id="panNou">
+      <div id="creacio">
+        <div class="targeta">
+          <h2>El viatge</h2>
+          <div class="graella">
+            <div class="ample"><label for="nTitol">Títol del viatge</label>
+              <input id="nTitol" placeholder="Ex.: Jordània – Petra i Wadi Rum"></div>
+            <div><label for="nInici">Data d'inici</label><input id="nInici" type="date"></div>
+            <div><label for="nFi">Data de tornada</label><input id="nFi" type="date"></div>
+          </div>
+          <h3>Idioma del formulari</h3>
+          <div class="opcions">
+            <label><input type="radio" name="idioma" value="ca" checked> Català</label>
+            <label><input type="radio" name="idioma" value="es"> Castellà</label>
+          </div>
+          <h3>Nombre de viatgers</h3>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="boto sec petit" type="button" id="menys" aria-label="Menys">−</button>
+            <input id="nNum" type="number" min="1" max="10" value="1" style="width:80px;text-align:center">
+            <button class="boto sec petit" type="button" id="mes" aria-label="Més">+</button>
+          </div>
+          <div id="blocMode" class="amagat">
+            <h3>Com vols enviar-ho?</h3>
+            <div class="opcions">
+              <label><input type="radio" name="mode" value="un" checked> Un sol enllaç per a tots</label>
+              <label><input type="radio" name="mode" value="cadascu"> Un enllaç per a cada viatger</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="targeta">
+          <h2>Dades que ja tens</h2>
+          <p class="meta" style="margin-top:-6px">Omple només el que ja sàpigues. La resta la completarà el client.</p>
+          <div id="prefills"></div>
+        </div>
+
+        <div id="nErr" class="error amagat" style="margin-bottom:10px"></div>
+        <button class="boto ample" id="btnCrear">Crear i generar l'enllaç</button>
+      </div>
+
+      <div id="resultat" class="amagat">
+        <div class="targeta">
+          <div class="ok"><strong>Formulari creat!</strong> Copia l'enllaç o envia'l directament per WhatsApp.</div>
+          <div id="enllacos"></div>
+          <div style="margin-top:16px"><button class="boto sec ample" id="btnAltre">Crear un altre formulari</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LLISTA -->
+    <div id="panLlista" class="amagat">
+      <div class="barra">
+        <div class="filtre">
+          <button data-f="tots" class="actiu">Tots</button>
+          <button data-f="pendent">Pendents</button>
+          <button data-f="rebut">Rebuts</button>
+        </div>
+        <button class="boto sec petit" id="btnRefresca">↻ Actualitzar</button>
+      </div>
+      <div id="llista"></div>
+    </div>
+
+    <p class="centre" style="margin-top:28px"><a href="#" id="lnkSortir" style="color:var(--gris);font-size:14px">Tancar sessió</a></p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CAMPS = [
+  ["nom","Nom","text"],["cognoms","Cognoms","text"],["naixement","Data de naixement","date"],["dni","DNI","text"],
+  ["passaport","Núm. passaport","text"],["caducitat","Caducitat passaport","date"],
+  ["carrer","Carrer, número i pis","text"],["poblacio","Població","text"],["cp","Codi postal","text"],["provincia","Província","text"],
+  ["telefon","Telèfon","tel"],["email","Correu electrònic","email"]
+];
+const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
+const urlForm = id => BASE + "index.html?f=" + id;
+let filtre = "tots", dadesLlista = [];
+
+function toast(t){ const e=$("toast"); e.textContent=t; e.classList.add("vist"); setTimeout(()=>e.classList.remove("vist"),1800); }
+function dataCurta(iso){ if(!iso) return ""; const [a,m,d]=iso.split("-"); return `${d}/${m}/${a}`; }
+function datesText(f){ return f.data_inici ? dataCurta(f.data_inici) + (f.data_fi ? " – " + dataCurta(f.data_fi) : "") : ""; }
+
+function missatgeWA(f, nom){
+  const dates = datesText(f);
+  if(f.idioma === "es")
+    return `Hola${nom?" "+nom:""}! Para preparar el viaje «${f.titol}»${dates?" ("+dates+")":""} necesitamos tus datos. Puedes rellenarlos aquí:\n${urlForm(f.id)}\n\n¡Gracias! Rimu Viatges`;
+  return `Hola${nom?" "+nom:""}! Per preparar el viatge «${f.titol}»${dates?" ("+dates+")":""} necessitem les teves dades. Les pots omplir aquí:\n${urlForm(f.id)}\n\nGràcies! Rimu Viatges`;
+}
+const waLink = (f, nom) => "https://wa.me/?text=" + encodeURIComponent(missatgeWA(f, nom));
+async function copiar(t){ try{ await navigator.clipboard.writeText(t); toast("Copiat!"); }catch(e){ prompt("Copia l'enllaç:", t); } }
+
+/* ---------- SESSIÓ ---------- */
+$("lEmail").value = RIMU.EMAIL_AVIS;
+async function iniciar(){
+  const { data:{ session } } = await sb.auth.getSession();
+  mostrar(!!session);
+}
+function mostrar(dins){
+  $("vistaLogin").classList.toggle("amagat", dins);
+  $("vistaApp").classList.toggle("amagat", !dins);
+  if(dins){ pintarPrefills(); }
+}
+$("btnEntrar").onclick = async () => {
+  $("lErr").classList.add("amagat"); $("lOk").classList.add("amagat");
+  const { error } = await sb.auth.signInWithPassword({ email:$("lEmail").value.trim(), password:$("lPass").value });
+  if(error){
+    $("lErr").textContent = /confirm/i.test(error.message) ? "Encara cal confirmar el compte des del correu." : "Correu o contrasenya incorrectes.";
+    $("lErr").classList.remove("amagat"); return;
+  }
+  mostrar(true);
+};
+$("lPass").addEventListener("keydown", e => { if(e.key==="Enter") $("btnEntrar").click(); });
+$("lnkCrear").onclick = async e => {
+  e.preventDefault();
+  $("lErr").classList.add("amagat"); $("lOk").classList.add("amagat");
+  const pass = $("lPass").value;
+  if(pass.length < 8){ $("lErr").textContent = "Escriu primer una contrasenya d'almenys 8 caràcters al camp de dalt."; $("lErr").classList.remove("amagat"); return; }
+  const { data, error } = await sb.auth.signUp({ email:$("lEmail").value.trim(), password:pass });
+  if(error){ $("lErr").textContent = "No s'ha pogut crear: " + error.message; $("lErr").classList.remove("amagat"); return; }
+  if(data.session){ mostrar(true); return; }
+  $("lOk").textContent = "Compte creat. Ara cal activar-lo (confirmació per correu). Un cop activat, entra amb aquesta contrasenya.";
+  $("lOk").classList.remove("amagat");
+};
+$("lnkSortir").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); mostrar(false); };
+
+/* ---------- PESTANYES ---------- */
+function pestanya(q){
+  $("tabNou").classList.toggle("actiu", q==="nou"); $("tabLlista").classList.toggle("actiu", q==="llista");
+  $("panNou").classList.toggle("amagat", q!=="nou"); $("panLlista").classList.toggle("amagat", q!=="llista");
+  if(q==="llista") carregarLlista();
+}
+$("tabNou").onclick = () => pestanya("nou");
+$("tabLlista").onclick = () => pestanya("llista");
+
+/* ---------- NOU FORMULARI ---------- */
+function numViatgers(){ return Math.min(10, Math.max(1, parseInt($("nNum").value) || 1)); }
+function pintarPrefills(){
+  const n = numViatgers();
+  $("nNum").value = n;
+  $("blocMode").classList.toggle("amagat", n < 2);
+  const cont = $("prefills");
+  const vells = [...cont.querySelectorAll("details")].map(d => {
+    const o = {}; d.querySelectorAll("input").forEach(i => o[i.dataset.k] = i.value); return o;
+  });
+  let html = "";
+  for(let i=0;i<n;i++){
+    const v = vells[i] || {};
+    html += `<details class="viatger" ${i===0?"open":""}><summary>Viatger ${i+1}</summary><div class="graella">`;
+    CAMPS.forEach(([k, et, t]) => {
+      html += `<div class="${k==="carrer"?"ample":""}"><label>${et}</label><input data-k="${k}" type="${t}" value="${esc(v[k]||"")}"></div>`;
+    });
+    html += `</div></details>`;
+  }
+  cont.innerHTML = html;
+}
+$("nNum").addEventListener("change", pintarPrefills);
+$("menys").onclick = () => { $("nNum").value = numViatgers() - 1; pintarPrefills(); };
+$("mes").onclick = () => { $("nNum").value = numViatgers() + 1; pintarPrefills(); };
+
+$("btnCrear").onclick = async () => {
+  const err = $("nErr"); err.classList.add("amagat");
+  const titol = $("nTitol").value.trim();
+  if(!titol){ err.textContent = "Posa el títol del viatge."; err.classList.remove("amagat"); $("nTitol").focus(); return; }
+  const idioma = document.querySelector("input[name=idioma]:checked").value;
+  const n = numViatgers();
+  const mode = n > 1 ? document.querySelector("input[name=mode]:checked").value : "un";
+  const viatgers = [...$("prefills").querySelectorAll("details")].map(d => {
+    const o = {}; d.querySelectorAll("input").forEach(i => o[i.dataset.k] = i.value.trim()); return o;
+  });
+  const grup_id = crypto.randomUUID();
+  const base = { grup_id, titol, idioma, data_inici: $("nInici").value || null, data_fi: $("nFi").value || null };
+  const files = mode === "un" ? [{ ...base, viatgers }] : viatgers.map(v => ({ ...base, viatgers:[v] }));
+
+  const b = $("btnCrear"); b.disabled = true; b.textContent = "Creant…";
+  const { data, error } = await sb.from("formularis").insert(files).select();
+  b.disabled = false; b.textContent = "Crear i generar l'enllaç";
+  if(error){ err.textContent = "No s'ha pogut crear: " + error.message; err.classList.remove("amagat"); return; }
+
+  let html = "";
+  data.forEach((f, idx) => {
+    const v = f.viatgers[0] || {};
+    const etiqueta = mode === "un" ? (n>1 ? `Enllaç per als ${n} viatgers` : "Enllaç") : `Viatger ${idx+1}${v.nom?": "+esc(v.nom+" "+(v.cognoms||"")):""}`;
+    html += `<div class="enllac"><strong>${etiqueta}</strong><div class="url">${esc(urlForm(f.id))}</div>
+      <div class="fila-botons">
+        <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, mode==="cadascu"?v.nom:"")}">WhatsApp</a>
+        <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">Copiar enllaç</button>
+        <button class="boto sec petit" data-copiamsg="${f.id}">Copiar missatge</button>
+        <a class="boto sec petit" target="_blank" href="${esc(urlForm(f.id))}">Veure</a>
+      </div></div>`;
+  });
+  $("enllacos").innerHTML = html;
+  $("enllacos").querySelectorAll("[data-copia]").forEach(x => x.onclick = () => copiar(x.dataset.copia));
+  $("enllacos").querySelectorAll("[data-copiamsg]").forEach(x => x.onclick = () => {
+    const f = data.find(d => d.id === x.dataset.copiamsg);
+    copiar(missatgeWA(f, mode==="cadascu" ? (f.viatgers[0]||{}).nom : ""));
+  });
+  $("creacio").classList.add("amagat"); $("resultat").classList.remove("amagat");
+  window.scrollTo(0,0);
+};
+$("btnAltre").onclick = () => {
+  $("nTitol").value = ""; $("nInici").value = ""; $("nFi").value = ""; $("nNum").value = 1;
+  $("prefills").innerHTML = ""; pintarPrefills();
+  $("resultat").classList.add("amagat"); $("creacio").classList.remove("amagat");
+};
+
+/* ---------- LLISTA ---------- */
+async function carregarLlista(){
+  $("llista").innerHTML = `<div class="targeta centre meta">Carregant…</div>`;
+  const { data, error } = await sb.from("formularis").select("*").order("created_at", { ascending:false });
+  if(error){ $("llista").innerHTML = `<div class="targeta error">Error: ${esc(error.message)}</div>`; return; }
+  dadesLlista = data; pintarLlista();
+}
+function pintarLlista(){
+  const grups = new Map();
+  dadesLlista.forEach(f => { if(!grups.has(f.grup_id)) grups.set(f.grup_id, []); grups.get(f.grup_id).push(f); });
+  let html = "";
+  for(const [gid, fs] of grups){
+    const visibles = fs.filter(f => filtre==="tots" || f.estat===filtre);
+    if(!visibles.length) continue;
+    const f0 = fs[0];
+    const rebuts = fs.filter(f => f.estat==="rebut").length;
+    html += `<div class="grup"><div class="grup-cap"><div>
+        <div class="grup-titol">${esc(f0.titol)}</div>
+        <div class="meta">${datesText(f0)}${datesText(f0)?" · ":""}${f0.idioma==="es"?"Castellà":"Català"} · creat el ${new Date(f0.created_at).toLocaleDateString("ca")}</div>
+      </div><div class="meta">${rebuts}/${fs.length} rebuts</div></div>`;
+    visibles.forEach(f => {
+      const noms = f.viatgers.map((v,i) => (v.nom||v.cognoms) ? `${v.nom||""} ${v.cognoms||""}`.trim() : `Viatger ${i+1}`).join(", ");
+      html += `<div class="form-fila"><div class="form-fila-cap">
+          <div><strong>${esc(noms)}</strong>
+            <div class="meta">${f.estat==="rebut" ? "Rebut el " + new Date(f.submitted_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"}) : "Esperant resposta"}</div></div>
+          <span class="estat ${f.estat}">${f.estat==="rebut"?"✓ Rebut":"Pendent"}</span>
+        </div>
+        <div class="fila-botons" style="margin-top:10px">
+          <button class="boto petit ${f.estat==="rebut"?"":"sec"}" data-veure="${f.id}">Veure dades</button>
+          <button class="boto sec petit" data-copia="${esc(urlForm(f.id))}">Copiar enllaç</button>
+          <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(f, fs.length>1?(f.viatgers[0]||{}).nom:"")}">WhatsApp</a>
+          <button class="boto perill petit" data-esborra="${f.id}">Esborrar</button>
+        </div>
+        <div id="det_${f.id}" class="amagat"></div></div>`;
+    });
+    html += `</div>`;
+  }
+  $("llista").innerHTML = html || `<div class="targeta centre meta">No hi ha cap formulari${filtre!=="tots"?" en aquest estat":""}.</div>`;
+  $("llista").querySelectorAll("[data-copia]").forEach(x => x.onclick = () => copiar(x.dataset.copia));
+  $("llista").querySelectorAll("[data-veure]").forEach(x => x.onclick = () => veure(x.dataset.veure));
+  $("llista").querySelectorAll("[data-esborra]").forEach(x => x.onclick = () => esborrar(x.dataset.esborra));
+}
+function textDades(f){
+  return f.viatgers.map((v,i) => (f.viatgers.length>1?`VIATGER ${i+1}\n`:"") +
+    CAMPS.map(([k,et,t]) => `${et}: ${t==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
+}
+function veure(id){
+  const box = $("det_"+id);
+  if(!box.classList.contains("amagat")){ box.classList.add("amagat"); return; }
+  const f = dadesLlista.find(x => x.id===id);
+  let html = "";
+  f.viatgers.forEach((v,i) => {
+    if(f.viatgers.length>1) html += `<div class="sub-viatger">Viatger ${i+1}</div>`;
+    html += `<table class="dades">` + CAMPS.map(([k,et,t]) =>
+      `<tr><td>${et}</td><td>${esc(t==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("") + `</table>`;
+  });
+  html += `<div style="margin-top:10px"><button class="boto sec petit" data-copiadades="${id}">Copiar totes les dades</button></div>`;
+  box.innerHTML = html; box.classList.remove("amagat");
+  box.querySelector("[data-copiadades]").onclick = () => copiar(textDades(f));
+}
+async function esborrar(id){
+  if(!confirm("Segur que vols esborrar aquest formulari i les seves dades? No es pot desfer.")) return;
+  const { error } = await sb.from("formularis").delete().eq("id", id);
+  if(error){ toast("No s'ha pogut esborrar"); return; }
+  dadesLlista = dadesLlista.filter(f => f.id !== id); pintarLlista(); toast("Esborrat");
+}
+document.querySelectorAll(".filtre button").forEach(b => b.onclick = () => {
+  filtre = b.dataset.f;
+  document.querySelectorAll(".filtre button").forEach(x => x.classList.toggle("actiu", x===b));
+  pintarLlista();
+});
+$("btnRefresca").onclick = carregarLlista;
+
+iniciar();
+</script>
+</body>
+</html>
