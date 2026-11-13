@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rimu Viatges · Dades del viatge</title>
+<title>…</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="estil.css">
 <script src="config.js"></script>
-<script src="logo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="cap">
-  <img class="logo" alt="Rimu Viatges">
+  <img class="logo" alt="" style="visibility:hidden">
 </header>
 
 <main class="contingut">
@@ -46,14 +45,14 @@
     <p id="txtGracies2"></p>
   </div>
 
-  <div class="peu">Rimu Viatges · <span id="lema"></span></div>
+  <div class="peu" id="peu"></div>
 </main>
 
 <script>
 const T = {
   ca: {
     carregant: "Carregant…",
-    noTrobat: "No hem trobat aquest formulari. Revisa l'enllaç o contacta amb Rimu Viatges.",
+    noTrobat: "No hem trobat aquest formulari. Revisa l'enllaç o contacta amb la teva agència.",
     errConn: "No s'ha pogut carregar el formulari. Torna-ho a provar d'aquí a una estona.",
     intro1: "Per preparar el teu viatge necessitem algunes dades. Algunes ja les tenim i les veuràs omplertes: revisa que siguin correctes i completa la resta.",
     introN: "Per preparar el viatge necessitem les dades de tots els viatgers. Les que ja tenim les veureu omplertes: reviseu que siguin correctes i completeu la resta.",
@@ -66,7 +65,7 @@ const T = {
     carrer: "Carrer, número i pis", poblacio: "Població", cp: "Codi postal", provincia: "Província",
     telefon: "Telèfon", email: "Correu electrònic",
     avisPass: "Atenció: el passaport ha de tenir com a mínim 6 mesos de validesa a partir de la data del viatge. Si caduca abans, caldrà renovar-lo.",
-    consent: "Accepto que Rimu Viatges utilitzi aquestes dades únicament per gestionar la reserva i la documentació d'aquest viatge.",
+    consent: "Accepto que {ag} utilitzi aquestes dades únicament per gestionar la reserva i la documentació d'aquest viatge.",
     enviar: "Enviar les dades", enviant: "Enviant…",
     falten: "Falten alguns camps obligatoris (marcats en vermell).",
     faltaConsent: "Cal acceptar el tractament de les dades per poder enviar.",
@@ -84,7 +83,7 @@ const T = {
   },
   es: {
     carregant: "Cargando…",
-    noTrobat: "No hemos encontrado este formulario. Revisa el enlace o contacta con Rimu Viatges.",
+    noTrobat: "No hemos encontrado este formulario. Revisa el enlace o contacta con tu agencia.",
     errConn: "No se ha podido cargar el formulario. Vuelve a intentarlo en un rato.",
     intro1: "Para preparar tu viaje necesitamos algunos datos. Algunos ya los tenemos y los verás rellenados: revisa que sean correctos y completa el resto.",
     introN: "Para preparar el viaje necesitamos los datos de todos los viajeros. Los que ya tenemos los veréis rellenados: revisad que sean correctos y completad el resto.",
@@ -97,7 +96,7 @@ const T = {
     carrer: "Calle, número y piso", poblacio: "Población", cp: "Código postal", provincia: "Provincia",
     telefon: "Teléfono", email: "Correo electrónico",
     avisPass: "Atención: el pasaporte debe tener como mínimo 6 meses de validez a partir de la fecha del viaje. Si caduca antes, habrá que renovarlo.",
-    consent: "Acepto que Rimu Viatges utilice estos datos únicamente para gestionar la reserva y la documentación de este viaje.",
+    consent: "Acepto que {ag} utilice estos datos únicamente para gestionar la reserva y la documentación de este viaje.",
     enviar: "Enviar los datos", enviant: "Enviando…",
     falten: "Faltan algunos campos obligatorios (marcados en rojo).",
     faltaConsent: "Hay que aceptar el tratamiento de los datos para poder enviar.",
@@ -183,7 +182,11 @@ function dataLlarga(iso){
 
 function pintar(){
   document.documentElement.lang = F.idioma;
-  $("lema").textContent = L.lema;
+  const AG = F.agencia || { nom: "Rimu Viatges" };
+  aplicarMarca(F.agencia);
+  document.title = AG.nom + " · " + F.titol;
+  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
+  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
   $("titol").textContent = F.titol;
   let d = "";
   if(F.data_inici && F.data_fi) d = "Del " + dataLlarga(F.data_inici) + " " + L.al + " " + dataLlarga(F.data_fi);
@@ -191,7 +194,7 @@ function pintar(){
   $("dates").textContent = d;
   $("intro").textContent = F.viatgers.length > 1 ? L.introN : L.intro1;
   if(F.estat === "rebut"){ $("jaEnviat").textContent = L.jaEnviat; $("jaEnviat").classList.remove("amagat"); }
-  $("txtConsent").textContent = L.consent;
+  $("txtConsent").textContent = L.consent.replace("{ag}", AG.nom);
   $("btnEnviar").textContent = L.enviar;
   $("txtGracies").textContent = L.gracies;
   $("txtGracies2").textContent = L.gracies2;
@@ -327,19 +330,18 @@ $("form").addEventListener("submit", async ev => {
 
 // Avís per correu a l'agència (sense dades personals sensibles)
 function avisarPerCorreu(viatgers){
-  if(!RIMU.EMAIL_AVIS) return;
+  const email = F.agencia && F.agencia.email_avis;
+  if(!email) return;
+  const es = F.agencia.idioma_fix === "es";
   const noms = viatgers.map(v => (v.nom + " " + v.cognoms).trim()).join(", ");
   const panell = location.href.replace(/index\.html.*$/, "").replace(/\?.*$/, "").replace(/\/?$/, "/") + "admin.html";
-  fetch("https://formsubmit.co/ajax/" + RIMU.EMAIL_AVIS, {
+  const cos = es
+    ? { _subject: "Nuevo formulario recibido: " + F.titol + " – " + noms, "Viaje": F.titol, "Viajeros": noms, "Consúltalo en el panel": panell }
+    : { _subject: "Nou formulari rebut: " + F.titol + " – " + noms, "Viatge": F.titol, "Viatgers": noms, "Consulta-ho al panell": panell };
+  fetch("https://formsubmit.co/ajax/" + email, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({
-      _subject: "Nou formulari rebut: " + F.titol + " – " + noms,
-      _template: "table", _captcha: "false",
-      "Viatge": F.titol,
-      "Viatgers": noms,
-      "Consulta-ho al panell": panell
-    })
+    body: JSON.stringify({ ...cos, _template: "table", _captcha: "false" })
   }).catch(() => {});
 }
 
