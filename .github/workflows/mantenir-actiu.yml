@@ -1,0 +1,28 @@
+name: Mantenir actiu
+on:
+  schedule:
+    - cron: "17 6 */3 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta a Supabase
+        run: |
+          curl -sS -f -X POST "https://ewcrlyoiyfcbzjsqaqzr.supabase.co/rest/v1/rpc/obtenir_formulari" \
+            -H "apikey: sb_publishable_fEZ3TlyG9yWIw1QM_DQhLA_FwpdQn5C" \
+            -H "Content-Type: application/json" \
+            -d '{"p_id":"00000000-0000-0000-0000-000000000000"}'
+      - uses: actions/checkout@v4
+      - name: Evitar que GitHub desactivi la tasca
+        run: |
+          ultim=$(git log -1 --format=%ct)
+          ara=$(date +%s)
+          if [ $(( (ara - ultim) / 86400 )) -ge 45 ]; then
+            date -u +%Y-%m-%d > .actiu
+            git config user.name "mantenir-actiu"
+            git config user.email "actions@users.noreply.github.com"
+            git add .actiu && git commit -m "Manteniment automatic" && git push
+          fi
