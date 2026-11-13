@@ -47,5 +47,10 @@ input.prefill{background:var(--blau-clar)}
 .consentiment input{width:auto;margin-top:3px}
 .centre{text-align:center}
 .peu{text-align:center;color:var(--gris);font-size:12.5px;margin-top:24px}
+.foto-boto{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;
+  border:2px dashed var(--linia);border-radius:12px;padding:14px;background:var(--fons);color:var(--blau);cursor:pointer;margin:0}
+.foto-boto.feta{border-style:solid;border-color:var(--verd);background:var(--verd-clar);color:var(--verd)}
+.foto-boto.malament{border-color:#B3261E}
+.foto-mini{height:48px;width:auto;border-radius:6px}
 .amagat{display:none!important}
 .error{color:#B3261E;font-size:14px;margin-top:8px}

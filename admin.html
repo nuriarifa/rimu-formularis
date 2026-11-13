@@ -97,6 +97,11 @@
             <label><input type="radio" name="idioma" value="ca" checked> Català</label>
             <label><input type="radio" name="idioma" value="es"> Castellà</label>
           </div>
+          <h3>Documentació</h3>
+          <label class="consentiment" style="font-weight:500">
+            <input type="checkbox" id="nPass" checked>
+            <span>Aquest viatge necessita <strong>passaport</strong> (es demanarà el número, la caducitat i la foto)</span>
+          </label>
           <h3>Nombre de viatgers</h3>
           <div style="display:flex;gap:10px;align-items:center">
             <button class="boto sec petit" type="button" id="menys" aria-label="Menys">−</button>
@@ -226,20 +231,32 @@ function pintarPrefills(){
   $("nNum").value = n;
   $("blocMode").classList.toggle("amagat", n < 2);
   const cont = $("prefills");
-  const vells = [...cont.querySelectorAll("details")].map(d => {
-    const o = {}; d.querySelectorAll("input").forEach(i => o[i.dataset.k] = i.value); return o;
-  });
+  const vells = [...cont.querySelectorAll("details")].map(llegirViatger);
+  const ambPass = $("nPass").checked;
   let html = "";
   for(let i=0;i<n;i++){
     const v = vells[i] || {};
     html += `<details class="viatger" ${i===0?"open":""}><summary>Viatger ${i+1}</summary><div class="graella">`;
     CAMPS.forEach(([k, et, t]) => {
-      html += `<div class="${k==="carrer"?"ample":""}"><label>${et}</label><input data-k="${k}" type="${t}" value="${esc(v[k]||"")}"></div>`;
+      const amagat = !ambPass && (k==="passaport" || k==="caducitat");
+      html += `<div class="${k==="carrer"?"ample":""}${amagat?" amagat":""}"><label>${et}</label><input data-k="${k}" type="${t}" value="${esc(v[k]||"")}"></div>`;
     });
+    html += `<div class="ample"><h3 style="margin-top:6px">Fotos que ja tens (no es demanaran)</h3>
+      <label class="consentiment" style="font-weight:500"><input type="checkbox" data-k="te_foto_dni" ${v.te_foto_dni?"checked":""}> Ja tinc la foto del DNI</label>
+      <label class="consentiment${ambPass?"":" amagat"}" style="font-weight:500;margin-top:6px"><input type="checkbox" data-k="te_foto_passaport" ${v.te_foto_passaport?"checked":""}> Ja tinc la foto del passaport</label>
+    </div>`;
     html += `</div></details>`;
   }
   cont.innerHTML = html;
 }
+function llegirViatger(d){
+  const o = {};
+  d.querySelectorAll("input").forEach(i => { o[i.dataset.k] = i.type === "checkbox" ? i.checked : i.value.trim(); });
+  const ambPass = $("nPass").checked;
+  if(!ambPass){ o.passaport = ""; o.caducitat = ""; o.te_foto_passaport = false; }
+  return o;
+}
+$("nPass").addEventListener("change", pintarPrefills);
 $("nNum").addEventListener("change", pintarPrefills);
 $("menys").onclick = () => { $("nNum").value = numViatgers() - 1; pintarPrefills(); };
 $("mes").onclick = () => { $("nNum").value = numViatgers() + 1; pintarPrefills(); };
@@ -251,11 +268,10 @@ $("btnCrear").onclick = async () => {
   const idioma = document.querySelector("input[name=idioma]:checked").value;
   const n = numViatgers();
   const mode = n > 1 ? document.querySelector("input[name=mode]:checked").value : "un";
-  const viatgers = [...$("prefills").querySelectorAll("details")].map(d => {
-    const o = {}; d.querySelectorAll("input").forEach(i => o[i.dataset.k] = i.value.trim()); return o;
-  });
+  const viatgers = [...$("prefills").querySelectorAll("details")].map(llegirViatger);
   const grup_id = crypto.randomUUID();
-  const base = { grup_id, titol, idioma, data_inici: $("nInici").value || null, data_fi: $("nFi").value || null };
+  const base = { grup_id, titol, idioma, passaport_obligatori: $("nPass").checked,
+                 data_inici: $("nInici").value || null, data_fi: $("nFi").value || null };
   const files = mode === "un" ? [{ ...base, viatgers }] : viatgers.map(v => ({ ...base, viatgers:[v] }));
 
   const b = $("btnCrear"); b.disabled = true; b.textContent = "Creant…";
@@ -285,7 +301,7 @@ $("btnCrear").onclick = async () => {
   window.scrollTo(0,0);
 };
 $("btnAltre").onclick = () => {
-  $("nTitol").value = ""; $("nInici").value = ""; $("nFi").value = ""; $("nNum").value = 1;
+  $("nTitol").value = ""; $("nInici").value = ""; $("nFi").value = ""; $("nNum").value = 1; $("nPass").checked = true;
   $("prefills").innerHTML = ""; pintarPrefills();
   $("resultat").classList.add("amagat"); $("creacio").classList.remove("amagat");
 };
@@ -308,7 +324,7 @@ function pintarLlista(){
     const rebuts = fs.filter(f => f.estat==="rebut").length;
     html += `<div class="grup"><div class="grup-cap"><div>
         <div class="grup-titol">${esc(f0.titol)}</div>
-        <div class="meta">${datesText(f0)}${datesText(f0)?" · ":""}${f0.idioma==="es"?"Castellà":"Català"} · creat el ${new Date(f0.created_at).toLocaleDateString("ca")}</div>
+        <div class="meta">${datesText(f0)}${datesText(f0)?" · ":""}${f0.idioma==="es"?"Castellà":"Català"} · ${f0.passaport_obligatori===false?"Sense passaport":"Amb passaport"} · creat el ${new Date(f0.created_at).toLocaleDateString("ca")}</div>
       </div><div class="meta">${rebuts}/${fs.length} rebuts</div></div>`;
     visibles.forEach(f => {
       const noms = f.viatgers.map((v,i) => (v.nom||v.cognoms) ? `${v.nom||""} ${v.cognoms||""}`.trim() : `Viatger ${i+1}`).join(", ");
@@ -332,9 +348,27 @@ function pintarLlista(){
   $("llista").querySelectorAll("[data-veure]").forEach(x => x.onclick = () => veure(x.dataset.veure));
   $("llista").querySelectorAll("[data-esborra]").forEach(x => x.onclick = () => esborrar(x.dataset.esborra));
 }
+const campsDe = f => CAMPS.filter(([k]) => f.passaport_obligatori !== false || (k!=="passaport" && k!=="caducitat"));
 function textDades(f){
   return f.viatgers.map((v,i) => (f.viatgers.length>1?`VIATGER ${i+1}\n`:"") +
-    CAMPS.map(([k,et,t]) => `${et}: ${t==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
+    campsDe(f).map(([k,et,t]) => `${et}: ${t==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
+}
+function filaFoto(f, v, i, tipus, nom){
+  if(tipus==="passaport" && f.passaport_obligatori===false) return "";
+  const ruta = v["foto_"+tipus];
+  let cel;
+  if(ruta) cel = `<button class="boto sec petit" data-foto="${esc(ruta)}">👁 Veure foto</button>`;
+  else if(v["te_foto_"+tipus]) cel = `<span class="meta">Ja la tenies</span>`;
+  else cel = `<span class="meta">—</span>`;
+  return `<tr><td>${nom}</td><td>${cel}</td></tr>`;
+}
+async function obrirFoto(ruta, boto){
+  const w = window.open("", "_blank");
+  boto.disabled = true;
+  const { data, error } = await sb.storage.from("documents").createSignedUrl(ruta, 600);
+  boto.disabled = false;
+  if(error || !data){ if(w) w.close(); toast("No s'ha pogut obrir la foto"); return; }
+  if(w) w.location = data.signedUrl; else location.href = data.signedUrl;
 }
 function veure(id){
   const box = $("det_"+id);
@@ -343,15 +377,19 @@ function veure(id){
   let html = "";
   f.viatgers.forEach((v,i) => {
     if(f.viatgers.length>1) html += `<div class="sub-viatger">Viatger ${i+1}</div>`;
-    html += `<table class="dades">` + CAMPS.map(([k,et,t]) =>
-      `<tr><td>${et}</td><td>${esc(t==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("") + `</table>`;
+    html += `<table class="dades">` + campsDe(f).map(([k,et,t]) =>
+      `<tr><td>${et}</td><td>${esc(t==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("")
+      + filaFoto(f, v, i, "dni", "Foto DNI") + filaFoto(f, v, i, "passaport", "Foto passaport") + `</table>`;
   });
   html += `<div style="margin-top:10px"><button class="boto sec petit" data-copiadades="${id}">Copiar totes les dades</button></div>`;
   box.innerHTML = html; box.classList.remove("amagat");
   box.querySelector("[data-copiadades]").onclick = () => copiar(textDades(f));
+  box.querySelectorAll("[data-foto]").forEach(b => b.onclick = () => obrirFoto(b.dataset.foto, b));
 }
 async function esborrar(id){
-  if(!confirm("Segur que vols esborrar aquest formulari i les seves dades? No es pot desfer.")) return;
+  if(!confirm("Segur que vols esborrar aquest formulari i les seves dades (també les fotos)? No es pot desfer.")) return;
+  const { data: arxius } = await sb.storage.from("documents").list(id, { limit: 100 });
+  if(arxius && arxius.length) await sb.storage.from("documents").remove(arxius.map(a => `${id}/${a.name}`));
   const { error } = await sb.from("formularis").delete().eq("id", id);
   if(error){ toast("No s'ha pogut esborrar"); return; }
   dadesLlista = dadesLlista.filter(f => f.id !== id); pintarLlista(); toast("Esborrat");
