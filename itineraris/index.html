@@ -146,9 +146,13 @@ function pintar(){
     h += `<div class="targeta" id="resum"><h2>${esc(t.resum)}</h2><div id="resumCos"></div>
       <div class="ajuda">${esc(t.preuNota)}</div></div>`;
   }
-  if(D.notes){
-    h += `<div class="targeta"><h2>${esc(t.observacions)}</h2><div>${text(D.notes)}</div></div>`;
-  }
+  h += `<div class="targeta info"><h2>${esc(t.observacions)}</h2>` +
+    IT.INFO.map(a => {
+      const v = IT.valorInfo(D, a.k).trim();
+      if(!v) return "";
+      return `<h3>${a.ico} ${esc(a[D.idioma] || a.ca)}</h3>${a.llista ? IT.llista(v) : `<div>${text(v)}</div>`}`;
+    }).join("") +
+    `<div class="avisos">${(IT.AVISOS[D.idioma] || IT.AVISOS.ca).map(x => `<p>${esc(x)}</p>`).join("")}</div></div>`;
   if(D.documents.length){
     h += `<div class="targeta docs"><h2>${esc(t.documents)}</h2>` + D.documents.map(doc =>
       `<a href="${RIMU.SUPABASE_URL}/functions/v1/it-document?t=${token}&d=${doc.id}" target="_blank" rel="noopener">📄 <span>${esc(doc.nom)}</span></a>`).join("") + `</div>`;
