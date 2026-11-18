@@ -46,6 +46,12 @@
 .resum-preu{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px solid var(--linia)}
 .resum-preu:first-child{border-top:0}
 .resum-preu b{font-size:20px;color:var(--blau)}
+.info h3{color:var(--blau);text-transform:none;letter-spacing:0;font-size:15px;margin:16px 0 6px}
+.info h3:first-of-type{margin-top:4px}
+.info ul{margin:0;padding-left:20px}
+.info li{margin:2px 0}
+.avisos{margin-top:16px;background:var(--fons);border-left:4px solid var(--blau);border-radius:8px;padding:8px 12px;font-size:13.5px;color:var(--gris)}
+.avisos p{margin:4px 0}
 .nomes-print{display:none}
 .carregant{padding:60px 20px;text-align:center;color:var(--gris)}
 
