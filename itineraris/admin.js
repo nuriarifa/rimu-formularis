@@ -329,9 +329,10 @@ function pintarDies(){
       </div>
       <div class="dia-ed-cos">
         <div class="camp"><label>${L("Títol del dia", "Título del día")}</label><input data-dc="titol" value="${esc(d.titol)}" placeholder="${L("Ex.: Arribada a Tòquio", "Ej.: Llegada a Tokio")}"></div>
+        <div data-llista-abans="${d.id}" style="margin-bottom:10px">${serveisDe(d.id).filter(esAbans).map(htmlSrvEd).join("")}</div>
         <div class="camp"><div class="cap-camp"><label>${L("Què faran", "Qué harán")}</label><button type="button" class="ia" data-ia-dia="${d.id}">✨ ${L("Redactar amb IA", "Redactar con IA")}</button></div>
           <textarea data-dc="descripcio" placeholder="${L("Explicació del dia (pots escriure quatre notes i prémer «Redactar amb IA»)", "Explicación del día (puedes escribir cuatro notas y pulsar «Redactar con IA»)")}">${esc(d.descripcio)}</textarea></div>
-        <div data-llista-srv="${d.id}">${serveisDe(d.id).map(htmlSrvEd).join("")}</div>
+        <div data-llista-srv="${d.id}">${serveisDe(d.id).filter(s => !esAbans(s)).map(htmlSrvEd).join("")}</div>
         <div class="fila-botons" style="margin-top:10px">
           <button class="boto sec petit" type="button" data-nou-srv="${d.id}">➕ ${L("Servei", "Servicio")}</button>
           <button class="boto sec petit" type="button" data-bib-srv="${d.id}">📚 ${L("De la biblioteca", "De la biblioteca")}</button>
@@ -384,7 +385,7 @@ function resumPreu(s){
 }
 function htmlSrvEd(s){
   const tp = IT.TIPUS[s.tipus] || IT.TIPUS.altre;
-  const germans = serveisDe(s.dia_id), i = germans.findIndex(x => x.id === s.id);
+  const germans = serveisDe(s.dia_id).filter(x => esAbans(x) === esAbans(s)), i = germans.findIndex(x => x.id === s.id);
   const nomPh = s.tipus === "vol" ? L("Si el deixes buit, surt la ruta", "Si lo dejas vacío, sale la ruta")
     : s.tipus === "hotel" ? L("Ex.: Hotel Gracery Shinjuku", "Ej.: Hotel Gracery Shinjuku") : L("Ex.: Excursió a Nara", "Ej.: Excursión a Nara");
   return `<details class="srv" data-srv="${s.id}" ${s._obert ? "open" : ""}>
@@ -415,6 +416,15 @@ function htmlSrvEd(s){
           ${s.imatge_url ? `<button class="boto perill petit" type="button" data-streufoto>${L("Treure", "Quitar")}</button>` : ""}</div>
           ${s.imatge_url ? `<img class="img-prev" src="${esc(s.imatge_url)}" alt="">` : ""}</div>
       </div>
+      <div class="graella" style="margin-top:10px">
+        ${s.dia_id ? `<div><label>${L("On surt dins del dia", "Dónde sale dentro del día")}</label><select data-pos>
+          <option value="despres" ${esAbans(s) ? "" : "selected"}>${L("Després del text del dia", "Después del texto del día")}</option>
+          <option value="abans" ${esAbans(s) ? "selected" : ""}>${L("Abans del text del dia", "Antes del texto del día")}</option></select></div>` : ""}
+        <div class="${s.dia_id ? "" : "ample"}"><label>${L("Moure a", "Mover a")}</label><select data-mou>
+          <option value="" ${s.dia_id ? "" : "selected"}>${L("Tot el viatge", "Todo el viaje")}</option>
+          ${E.dies.map((d, n) => `<option value="${d.id}" ${s.dia_id === d.id ? "selected" : ""}>${L("Dia", "Día")} ${n + 1}${d.titol ? " · " + esc(d.titol.slice(0, 30)) : ""}</option>`).join("")}
+        </select></div>
+      </div>
       <div class="fila-botons" style="margin-top:12px;justify-content:space-between">
         <div class="fila-botons" style="gap:4px">
           <button class="mini" type="button" data-spuja ${i <= 0 ? "disabled" : ""}>↑</button>
@@ -426,11 +436,31 @@ function htmlSrvEd(s){
       </div>
     </div></details>`;
 }
+const esAbans = s => !!(s.extra && s.extra.abans);
 function repintarLlistaSrv(diaId){
   if(!diaId){ pintarGenerals(); return; }
-  const c = document.querySelector(`[data-llista-srv="${diaId}"]`);
-  c.innerHTML = serveisDe(diaId).map(htmlSrvEd).join("");
-  lligarServeis(c);
+  const a = document.querySelector(`[data-llista-abans="${diaId}"]`), c = document.querySelector(`[data-llista-srv="${diaId}"]`);
+  if(!a || !c) return;
+  a.innerHTML = serveisDe(diaId).filter(esAbans).map(htmlSrvEd).join("");
+  c.innerHTML = serveisDe(diaId).filter(s => !esAbans(s)).map(htmlSrvEd).join("");
+  lligarServeis(a); lligarServeis(c);
+}
+// Mou un servei a un altre dia (o a "tot el viatge" si diaId és null)
+function moureADia(s, diaId){
+  const abans = s.dia_id || null;
+  if(abans === (diaId || null)) return;
+  s.extra = s.extra || {};
+  if(!diaId){
+    if(IT.TOT_VIATGE.includes(s.tipus)){ s.extra.tot_viatge = true; s.extra.dia_original = abans; }
+    delete s.extra.abans;
+  } else {
+    delete s.extra.tot_viatge; delete s.extra.dia_original;
+    if(s.tipus === "vol"){ const i = E.dies.findIndex(d => d.id === diaId); if(i === 0) s.extra.abans = true; else if(i === E.dies.length - 1) delete s.extra.abans; }
+  }
+  s.dia_id = diaId || null; s.ordre = 999; s._obert = true;
+  renumerar(serveisDe(abans)); renumerar(serveisDe(s.dia_id));
+  repintarLlistaSrv(abans); repintarLlistaSrv(s.dia_id);
+  brut(); toast(L("Servei mogut", "Servicio movido"));
 }
 function lligarServeis(cont){
   cont.querySelectorAll("details.srv").forEach(det => {
@@ -452,6 +482,7 @@ function lligarServeis(cont){
         if(k === "tipus"){
           s.extra = s.extra || {};
           if(s.tipus === "vol" && !s.extra.data) s.extra.data = isoDia(s.dia_id);
+          if(s.tipus === "vol" && s.dia_id && E.dies.length && E.dies[0].id === s.dia_id && s.extra.abans === undefined) s.extra.abans = true;
           if(!IT.TOT_VIATGE.includes(s.tipus) && s.extra.tot_viatge){ treureTotViatge(s); pintarGenerals(); }
           s._obert = true; repintarLlistaSrv(s.dia_id); brut(); return;
         }
@@ -474,6 +505,9 @@ function lligarServeis(cont){
     };
     det.querySelector("[data-sbib]").onclick = () => desarABib(s);
     const bia = det.querySelector("[data-ia-srv]"); if(bia) bia.onclick = e => iaServei(e.currentTarget, s, det);
+    const sp = det.querySelector("[data-pos]");
+    if(sp) sp.onchange = () => { s.extra = s.extra || {}; if(sp.value === "abans") s.extra.abans = true; else delete s.extra.abans; s._obert = true; repintarLlistaSrv(s.dia_id); brut(); };
+    det.querySelector("[data-mou]").onchange = e => moureADia(s, e.target.value || null);
     lligarExtra(det, s, resum);
   });
   cont.querySelectorAll("[data-nou-srv]").forEach(b => { if(b.dataset.lligat) return; b.dataset.lligat = 1; b.onclick = () => nouServei(b.dataset.nouSrv || null); });
@@ -580,7 +614,7 @@ async function buscarVol(s, boto){
   finally{ boto.disabled = false; boto.textContent = "🔎"; }
 }
 function moureSrv(s, dir){
-  const g = serveisDe(s.dia_id), i = g.findIndex(x => x.id === s.id), j = i + dir;
+  const g = serveisDe(s.dia_id).filter(x => esAbans(x) === esAbans(s)), i = g.findIndex(x => x.id === s.id), j = i + dir;
   if(j < 0 || j >= g.length) return;
   [g[i], g[j]] = [g[j], g[i]]; renumerar(g); repintarLlistaSrv(s.dia_id); brut();
 }
