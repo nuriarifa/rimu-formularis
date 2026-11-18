@@ -103,7 +103,8 @@ function htmlServei(s){
     <div class="ico" aria-hidden="true">${tp.ico}</div>
     <div class="cos">
       <div class="tipus">${esc(tp[D.idioma] || tp.ca)}${s.opcional ? `<span class="etiq opc">${esc(t.opcional)}</span>` : ""}</div>
-      <div class="nom">${esc(s.nom)}${persTxt}</div>
+      <div class="nom">${esc(IT.nomServei(s))}${persTxt}</div>
+      ${IT.htmlExtra(s, D.idioma)}
       ${s.detalls ? `<div class="det">${text(s.detalls)}</div>` : ""}
       ${s.descripcio ? `<div class="desc">${text(s.descripcio)}</div>` : ""}
       ${s.imatge_url ? `<img class="foto" src="${esc(s.imatge_url)}" alt="" loading="lazy">` : ""}
@@ -127,6 +128,9 @@ function pintar(){
     ${D.introduccio ? `<div class="it-intro">${text(D.introduccio)}</div>` : ""}
   </div>`;
 
+  const allotTot = D.serveis.filter(s => !s.dia_id && s.tipus === "hotel" && (s.extra || {}).tot_viatge
+    && (!s.opcional || IT.estatOpcional(s, D.seleccio, N).actiu));
+  const allotTxt = allotTot.length ? `<p class="allot-dia">🏨 ${esc((IT.TXT[D.idioma] || IT.TXT.ca).allotjament)}: ${allotTot.map(s => esc(s.nom)).join(" / ")}</p>` : "";
   D.dies.forEach((d, i) => {
     const serveis = D.serveis.filter(s => s.dia_id === d.id);
     h += `<section class="dia">
@@ -135,6 +139,7 @@ function pintar(){
       <div class="dia-cos">
         ${d.descripcio ? `<p>${text(d.descripcio)}</p>` : ""}
         ${serveis.map(htmlServei).join("")}
+        ${allotTxt}
       </div></section>`;
   });
 
@@ -182,6 +187,7 @@ function actualitzarTotals(){
 
 function repintarServei(id){
   const s = D.serveis.find(x => x.id === id);
+  if(s && s.tipus === "hotel" && (s.extra || {}).tot_viatge){ const y = window.scrollY; pintar(); window.scrollTo(0, y); return; }
   const el = $("s_" + id);
   if(!s || !el) return;
   el.outerHTML = htmlServei(s);

@@ -93,5 +93,62 @@ window.IT = (function(){
     return "<ul>" + l.map(x => `<li>${esc(x)}</li>`).join("") + "</ul>";
   }
 
-  return { INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
+  // ---- Vols i allotjaments ----
+  const REGIMS = {
+    sa: { ca: "Només allotjament",       es: "Solo alojamiento" },
+    ad: { ca: "Allotjament i esmorzar",  es: "Alojamiento y desayuno" },
+    mp: { ca: "Mitja pensió",            es: "Media pensión" },
+    pc: { ca: "Pensió completa",         es: "Pensión completa" },
+    ti: { ca: "Tot inclòs",              es: "Todo incluido" }
+  };
+  const ALLOTJAMENTS = {
+    hotel:      { ca: "Hotel",      es: "Hotel" },
+    apartament: { ca: "Apartament", es: "Apartamento" },
+    hostal:     { ca: "Hostal",     es: "Hostal" },
+    alberg:     { ca: "Alberg",     es: "Albergue" },
+    hostel:     { ca: "Hostel",     es: "Hostel" },
+    casa_rural: { ca: "Casa rural", es: "Casa rural" },
+    resort:     { ca: "Resort",     es: "Resort" },
+    vaixell:    { ca: "Creuer / vaixell", es: "Crucero / barco" },
+    altre:      { ca: "Altre",      es: "Otro" }
+  };
+  const TXT = {
+    ca: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Tot el viatge", allotjament: "Allotjament" },
+    es: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Todo el viaje", allotjament: "Alojamiento" }
+  };
+  const ex = s => s.extra || {};
+  function rutaVol(e){ return [e.origen, e.desti].filter(Boolean).join(" → "); }
+  // Nom que es mostra d'un servei (els vols sense nom fan servir la ruta)
+  function nomServei(s){ return s.nom || (s.tipus === "vol" ? rutaVol(ex(s)) : "") || ""; }
+  function dataLlarga(iso, idioma){
+    if(!iso) return "";
+    return new Date(iso + "T12:00:00").toLocaleDateString(idioma === "es" ? "es-ES" : "ca-ES", { weekday: "short", day: "numeric", month: "short" });
+  }
+  // Línies extra (vol / allotjament) per a la pàgina del client
+  function htmlExtra(s, idioma){
+    const e = ex(s), L = TXT[idioma] || TXT.ca, out = [];
+    if(s.tipus === "vol"){
+      const cap = [e.numero && e.numero.toUpperCase(), e.companyia].filter(Boolean).join(" · ");
+      if(cap) out.push(`<div class="det"><strong>${esc(cap)}</strong></div>`);
+      const ruta = e.sortida || e.arribada
+        ? `${e.origen ? e.origen + " " : ""}${e.sortida || ""} → ${e.desti ? e.desti + " " : ""}${e.arribada || ""}${e.data_arribada ? " (+1)" : ""}` : "";
+      const hores = [dataLlarga(e.data, idioma), ruta].filter(Boolean).join(" · ");
+      if(hores) out.push(`<div class="det">🕑 ${esc(hores)}</div>`);
+      const mal = [];
+      if(e.cabina) mal.push(`🎒 ${L.cabina}${e.cabina_kg ? " " + esc(e.cabina_kg) + " kg" : ""}`);
+      if(e.facturada) mal.push(`🧳 ${L.facturada}${e.facturada_kg ? " " + esc(e.facturada_kg) + " kg" : ""}`);
+      if(mal.length) out.push(`<div class="xips-srv">${mal.map(x => `<span>${x}</span>`).join("")}</div>`);
+    }
+    if(s.tipus === "hotel"){
+      const parts = [];
+      if(e.estrelles) parts.push(`<span class="estrelles">${"★".repeat(Math.min(5, e.estrelles))}</span>`);
+      if(e.allotjament && ALLOTJAMENTS[e.allotjament]) parts.push(esc(ALLOTJAMENTS[e.allotjament][idioma] || ALLOTJAMENTS[e.allotjament].ca));
+      if(e.regim && REGIMS[e.regim]) parts.push(esc(REGIMS[e.regim][idioma] || REGIMS[e.regim].ca));
+      if(e.tot_viatge) parts.push(esc(L.totViatge));
+      if(parts.length) out.push(`<div class="xips-srv">${parts.map(x => `<span>${x}</span>`).join("")}</div>`);
+    }
+    return out.join("");
+  }
+
+  return { REGIMS, ALLOTJAMENTS, TXT, nomServei, rutaVol, htmlExtra, INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
 })();
