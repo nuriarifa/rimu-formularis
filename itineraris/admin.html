@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Itineraris · Rimu Viatges</title>
+<title>Itineraris</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="../estil.css">
 <link rel="stylesheet" href="it.css">
 <script src="../config.js"></script>
-<script src="../logo.js"></script>
 <script src="comu.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -72,12 +71,18 @@
   .doc-fila{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--linia)}
   .doc-fila:first-child{border-top:0}
   .buit{border:2px dashed var(--linia);border-radius:12px;padding:16px;text-align:center;color:var(--gris);font-size:14px}
+  .idiomes{position:absolute;top:10px;right:12px;display:flex;border:1px solid var(--linia);border-radius:8px;overflow:hidden}
+  .idiomes button{font:inherit;font-size:12px;font-weight:700;border:0;background:#fff;color:var(--gris);padding:5px 9px;cursor:pointer}
+  .idiomes button.actiu{background:var(--blau);color:#fff}
 </style>
 </head>
 <body>
-<header class="cap">
-  <img class="logo" alt="Rimu Viatges">
-  <div class="lema">ITINERARIS</div>
+<header class="cap" style="position:relative">
+  <img class="logo" alt="" style="visibility:hidden">
+  <div class="lema" data-es="ITINERARIOS">ITINERARIS</div>
+  <div class="idiomes" id="idiomes">
+    <button type="button" data-lang="ca">CA</button><button type="button" data-lang="es">ES</button>
+  </div>
 </header>
 
 <main class="contingut">
@@ -85,30 +90,34 @@
   <!-- ENTRADA -->
   <section id="vistaLogin" class="amagat">
     <div class="targeta" style="max-width:420px;margin:0 auto">
-      <h2>Entrar</h2>
-      <label for="lEmail">Correu</label>
+      <h2 data-es="Entrar">Entrar</h2>
+      <label for="lEmail" data-es="Correo">Correu</label>
       <input id="lEmail" type="email" autocomplete="username">
       <div style="height:12px"></div>
-      <label for="lPass">Contrasenya</label>
+      <label for="lPass" data-es="Contraseña">Contrasenya</label>
       <input id="lPass" type="password" autocomplete="current-password">
       <div id="lErr" class="error amagat"></div>
-      <div style="margin-top:16px"><button class="boto ample" id="btnEntrar">Entrar</button></div>
-      <p class="ajuda centre" style="margin-top:12px">És el mateix correu i contrasenya del panell de formularis.</p>
+      <div id="lOk" class="ok amagat" style="margin-top:10px;font-size:14px"></div>
+      <div style="margin-top:16px"><button class="boto ample" id="btnEntrar" data-es="Entrar">Entrar</button></div>
+      <p class="centre" style="font-size:14px;margin:14px 0 0">
+        <a href="#" id="lnkCrear" style="color:var(--blau)" data-es="¿Primera vez? Crear la contraseña">Primer cop? Crear la contrasenya</a>
+      </p>
+      <p class="ajuda centre" style="margin-top:10px" data-es="Es el mismo correo y contraseña que el panel de formularios.">És el mateix correu i contrasenya del panell de formularis.</p>
     </div>
   </section>
 
   <!-- APP -->
   <section id="vistaApp" class="amagat">
     <div class="pestanyes" id="pestanyes">
-      <button data-p="llista" class="actiu">🗺️ Itineraris</button>
-      <button data-p="bib">📚 Biblioteca</button>
+      <button data-p="llista" class="actiu" data-es="🗺️ Itinerarios">🗺️ Itineraris</button>
+      <button data-p="bib" data-es="📚 Biblioteca">📚 Biblioteca</button>
     </div>
 
     <!-- LLISTA -->
     <div id="panLlista">
       <div class="fila-botons" style="margin-bottom:14px;justify-content:space-between">
-        <button class="boto" id="btnNou">➕ Nou itinerari</button>
-        <button class="boto sec petit" id="btnRefresca">↻ Actualitzar</button>
+        <button class="boto" id="btnNou" data-es="➕ Nuevo itinerario">➕ Nou itinerari</button>
+        <button class="boto sec petit" id="btnRefresca" data-es="↻ Actualizar">↻ Actualitzar</button>
       </div>
       <div id="llista"></div>
     </div>
@@ -116,92 +125,92 @@
     <!-- BIBLIOTECA -->
     <div id="panBib" class="amagat">
       <div class="targeta">
-        <h2>Biblioteca de serveis</h2>
-        <p class="meta" style="margin-top:-6px">Hotels, excursions i serveis que fas servir sovint. Des de cada itinerari els pots afegir amb un clic, i allà pots desar-ne de nous amb el botó «📚 Desar a la biblioteca».</p>
-        <input id="bibCerca" placeholder="Cerca…" style="margin-bottom:10px">
+        <h2 data-es="Biblioteca de servicios">Biblioteca de serveis</h2>
+        <p class="meta" style="margin-top:-6px" data-es="Hoteles, excursiones y servicios que usas a menudo. Desde cada itinerario los puedes añadir con un clic, y allí puedes guardar nuevos con el botón «📚 Guardar en la biblioteca».">Hotels, excursions i serveis que fas servir sovint. Des de cada itinerari els pots afegir amb un clic, i allà pots desar-ne de nous amb el botó «📚 Desar a la biblioteca».</p>
+        <input id="bibCerca" placeholder="Cerca…" data-es-ph="Buscar…" style="margin-bottom:10px">
         <div id="bibLlista"></div>
-        <button class="boto sec" id="btnBibNou" style="margin-top:6px">➕ Afegir a la biblioteca</button>
+        <button class="boto sec" id="btnBibNou" style="margin-top:6px" data-es="➕ Añadir a la biblioteca">➕ Afegir a la biblioteca</button>
       </div>
     </div>
 
     <!-- EDITOR -->
     <div id="panEditor" class="amagat">
       <div class="fila-botons" style="margin-bottom:12px;justify-content:space-between">
-        <button class="boto sec petit" id="btnTornar">← Tornar a la llista</button>
+        <button class="boto sec petit" id="btnTornar" data-es="← Volver a la lista">← Tornar a la llista</button>
         <div class="fila-botons">
-          <a class="boto sec petit amagat" id="lnkVeure" target="_blank" rel="noopener">👁 Veure com el client</a>
+          <a class="boto sec petit amagat" id="lnkVeure" target="_blank" rel="noopener" data-es="👁 Ver como el cliente">👁 Veure com el client</a>
           <a class="boto wa petit amagat" id="lnkWA" target="_blank" rel="noopener">WhatsApp</a>
-          <button class="boto sec petit amagat" id="btnCopiar">Copiar enllaç</button>
+          <button class="boto sec petit amagat" id="btnCopiar" data-es="Copiar enlace">Copiar enllaç</button>
         </div>
       </div>
 
       <div class="targeta">
-        <h2>Dades del viatge</h2>
+        <h2 data-es="Datos del viaje">Dades del viatge</h2>
         <div class="graella">
-          <div class="ample"><label for="eTitol">Títol del viatge</label><input id="eTitol" placeholder="Ex.: Japó clàssic – 12 dies"></div>
-          <div><label for="eClient">Client <span class="opc">(nom que veurà)</span></label><input id="eClient" placeholder="Ex.: Família Puig"></div>
-          <div><label for="eDesti">Destinació</label><input id="eDesti" placeholder="Ex.: Tòquio, Kyoto i Osaka"></div>
-          <div><label for="eInici">Data d'inici</label><input id="eInici" type="date"></div>
-          <div><label for="eFi">Data de tornada</label><input id="eFi" type="date"></div>
-          <div><label for="ePers">Nombre de persones</label><input id="ePers" type="number" min="1" max="99" value="2"></div>
-          <div><label>Idioma per al client</label>
-            <div class="opcions"><label><input type="radio" name="eIdioma" value="ca" checked> Català</label><label><input type="radio" name="eIdioma" value="es"> Castellà</label></div></div>
-          <div class="ample"><label class="check"><input type="checkbox" id="eMostrar" checked> <span>Mostrar el preu al client <span class="opc">(el total i el preu per persona; si ho desmarques, no veurà cap preu)</span></span></label></div>
-          <div class="ample"><label>Foto de portada <span class="opc">(opcional)</span></label>
-            <div class="fila-botons"><button class="boto sec petit" type="button" id="btnPortada">📷 Pujar foto</button>
-            <button class="boto perill petit amagat" type="button" id="btnTreurePortada">Treure</button></div>
+          <div class="ample"><label for="eTitol" data-es="Título del viaje">Títol del viatge</label><input id="eTitol" placeholder="Ex.: Japó clàssic – 12 dies" data-es-ph="Ej.: Japón clásico – 12 días"></div>
+          <div><label for="eClient" data-es="Cliente <span class=&quot;opc&quot;>(nombre que verá)</span>">Client <span class="opc">(nom que veurà)</span></label><input id="eClient" placeholder="Ex.: Família Puig" data-es-ph="Ej.: Familia García"></div>
+          <div><label for="eDesti" data-es="Destino">Destinació</label><input id="eDesti" placeholder="Ex.: Tòquio, Kyoto i Osaka" data-es-ph="Ej.: Tokio, Kioto y Osaka"></div>
+          <div><label for="eInici" data-es="Fecha de inicio">Data d'inici</label><input id="eInici" type="date"></div>
+          <div><label for="eFi" data-es="Fecha de regreso">Data de tornada</label><input id="eFi" type="date"></div>
+          <div><label for="ePers" data-es="Número de personas">Nombre de persones</label><input id="ePers" type="number" min="1" max="99" value="2"></div>
+          <div id="blocIdioma"><label data-es="Idioma para el cliente">Idioma per al client</label>
+            <div class="opcions"><label><input type="radio" name="eIdioma" value="ca" checked> <span data-es="Catalán">Català</span></label><label><input type="radio" name="eIdioma" value="es"> <span data-es="Castellano">Castellà</span></label></div></div>
+          <div class="ample"><label class="check"><input type="checkbox" id="eMostrar" checked> <span data-es="Mostrar el precio al cliente <span class=&quot;opc&quot;>(el total y el precio por persona; si lo desmarcas, no verá ningún precio)</span>">Mostrar el preu al client <span class="opc">(el total i el preu per persona; si ho desmarques, no veurà cap preu)</span></span></label></div>
+          <div class="ample"><label data-es="Foto de portada <span class=&quot;opc&quot;>(opcional)</span>">Foto de portada <span class="opc">(opcional)</span></label>
+            <div class="fila-botons"><button class="boto sec petit" type="button" id="btnPortada" data-es="📷 Subir foto">📷 Pujar foto</button>
+            <button class="boto perill petit amagat" type="button" id="btnTreurePortada" data-es="Quitar">Treure</button></div>
             <img id="imgPortada" class="img-prev amagat" alt=""></div>
-          <div class="ample"><div class="cap-camp"><label for="eIntro">Introducció</label><button type="button" class="ia" data-ia="intro">✨ Redactar amb IA</button></div>
-            <textarea id="eIntro" placeholder="Unes frases de benvinguda al viatge (opcional)"></textarea></div>
+          <div class="ample"><div class="cap-camp"><label for="eIntro" data-es="Introducción">Introducció</label><button type="button" class="ia" data-ia="intro" data-es="✨ Redactar con IA">✨ Redactar amb IA</button></div>
+            <textarea id="eIntro" placeholder="Unes frases de benvinguda al viatge (opcional)" data-es-ph="Unas frases de bienvenida al viaje (opcional)"></textarea></div>
         </div>
       </div>
 
       <div class="targeta">
-        <h2>Dia a dia</h2>
+        <h2 data-es="Día a día">Dia a dia</h2>
         <div id="dies"></div>
         <div class="fila-botons">
-          <button class="boto sec" type="button" id="btnDia">➕ Afegir dia</button>
-          <button class="boto sec amagat" type="button" id="btnDiesDates">📅 Crear els dies segons les dates</button>
+          <button class="boto sec" type="button" id="btnDia" data-es="➕ Añadir día">➕ Afegir dia</button>
+          <button class="boto sec amagat" type="button" id="btnDiesDates"></button>
         </div>
       </div>
 
       <div class="targeta">
-        <h2>Serveis de tot el viatge</h2>
-        <p class="meta" style="margin-top:-6px">Per als serveis que no són d'un dia concret (per exemple, l'assegurança o un paquet de vols).</p>
+        <h2 data-es="Servicios de todo el viaje">Serveis de tot el viatge</h2>
+        <p class="meta" style="margin-top:-6px" data-es="Para los servicios que no son de un día concreto (por ejemplo, el seguro o un paquete de vuelos).">Per als serveis que no són d'un dia concret (per exemple, l'assegurança o un paquet de vols).</p>
         <div id="generals"></div>
         <div class="fila-botons" style="margin-top:10px">
-          <button class="boto sec petit" type="button" data-nou-srv="">➕ Servei</button>
-          <button class="boto sec petit" type="button" data-bib-srv="">📚 De la biblioteca</button>
+          <button class="boto sec petit" type="button" data-nou-srv="" data-es="➕ Servicio">➕ Servei</button>
+          <button class="boto sec petit" type="button" data-bib-srv="" data-es="📚 De la biblioteca">📚 De la biblioteca</button>
         </div>
       </div>
 
       <div class="targeta">
-        <h2>Informació important</h2>
-        <p class="meta" style="margin-top:-6px">Omple només els apartats que vulguis: els buits no surten al client.</p>
+        <h2 data-es="Información importante">Informació important</h2>
+        <p class="meta" style="margin-top:-6px" data-es="Rellena solo los apartados que quieras: los vacíos no salen al cliente.">Omple només els apartats que vulguis: els buits no surten al client.</p>
         <div id="infoEd"></div>
         <div class="avisos" id="avisosEd"></div>
       </div>
 
       <div class="targeta">
-        <h2>Documents per al client</h2>
-        <p class="meta" style="margin-top:-6px">Precontracte, condicions de l'assegurança… El client els podrà descarregar des de l'itinerari.</p>
+        <h2 data-es="Documentos para el cliente">Documents per al client</h2>
+        <p class="meta" style="margin-top:-6px" data-es="Precontrato, condiciones del seguro… El cliente los podrá descargar desde el itinerario.">Precontracte, condicions de l'assegurança… El client els podrà descarregar des de l'itinerari.</p>
         <div id="docs"></div>
-        <button class="boto sec petit" type="button" id="btnDoc" style="margin-top:10px">📎 Pujar document</button>
+        <button class="boto sec petit" type="button" id="btnDoc" style="margin-top:10px" data-es="📎 Subir documento">📎 Pujar document</button>
         <input type="file" id="fDoc" class="amagat" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
       </div>
 
       <div class="targeta amagat" id="activitat">
-        <h2>Què ha fet el client</h2>
+        <h2 data-es="Qué ha hecho el cliente">Què ha fet el client</h2>
         <div id="actResum"></div>
-        <h3>Historial</h3>
+        <h3 data-es="Historial">Historial</h3>
         <div id="actEvents"></div>
-        <button class="boto sec petit" type="button" id="btnActRefresca" style="margin-top:10px">↻ Actualitzar</button>
+        <button class="boto sec petit" type="button" id="btnActRefresca" style="margin-top:10px" data-es="↻ Actualizar">↻ Actualitzar</button>
       </div>
 
-      <div class="centre" style="margin-top:10px"><button class="boto perill petit" type="button" id="btnEsborrar">Esborrar aquest itinerari</button></div>
+      <div class="centre" style="margin-top:10px"><button class="boto perill petit" type="button" id="btnEsborrar" data-es="Borrar este itinerario">Esborrar aquest itinerari</button></div>
     </div>
 
-    <p class="centre" style="margin-top:28px"><a href="#" id="lnkSortir" style="color:var(--gris);font-size:14px">Tancar sessió</a></p>
+    <p class="centre" style="margin-top:28px"><a href="#" id="lnkSortir" style="color:var(--gris);font-size:14px" data-es="Cerrar sesión">Tancar sessió</a></p>
   </section>
 </main>
 
@@ -210,828 +219,28 @@
     <div>
       <div class="tot" id="edTotal"></div>
       <div class="meta" id="edPP"></div>
-      <div class="canvis amagat" id="edCanvis">● Canvis sense desar</div>
+      <div class="canvis amagat" id="edCanvis" data-es="● Cambios sin guardar">● Canvis sense desar</div>
     </div>
-    <button class="boto" id="btnDesar">💾 Desar</button>
+    <button class="boto" id="btnDesar" data-es="💾 Guardar">💾 Desar</button>
   </div>
 </div>
 
 <dialog id="dlgBib">
-  <div class="dlg-cap"><strong>Afegir des de la biblioteca</strong><button class="mini" type="button" id="dlgTancar">✕</button></div>
+  <div class="dlg-cap"><strong data-es="Añadir desde la biblioteca">Afegir des de la biblioteca</strong><button class="mini" type="button" id="dlgTancar">✕</button></div>
   <div class="dlg-cos">
-    <input id="dlgCerca" placeholder="Cerca…" style="margin-bottom:10px">
+    <input id="dlgCerca" placeholder="Cerca…" data-es-ph="Buscar…" style="margin-bottom:10px">
     <div id="dlgLlista"></div>
   </div>
 </dialog>
 
 <dialog id="dlgBibEd">
-  <div class="dlg-cap"><strong id="bibEdTitol">Servei de la biblioteca</strong><button class="mini" type="button" id="bibEdTancar">✕</button></div>
+  <div class="dlg-cap"><strong id="bibEdTitol"></strong><button class="mini" type="button" id="bibEdTancar">✕</button></div>
   <div class="dlg-cos" id="bibEdCos"></div>
 </dialog>
 
 <input type="file" id="fImg" class="amagat" accept="image/*">
 <div class="toast" id="toast"></div>
 
-<script>
-const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
-const $ = id => document.getElementById(id);
-const { esc, euros } = IT;
-const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
-const urlClient = tok => BASE + "index.html?i=" + tok;
-const uuid = () => crypto.randomUUID();
-const TIPUS_OPC = Object.entries(IT.TIPUS).map(([k, v]) => `<option value="${k}">${v.ico} ${v.ca}</option>`).join("");
-
-let USER = null, LLISTA = [], BIB = [];
-let E = null;            // itinerari obert: { it, dies, serveis, docs, nou }
-let BRUT = false;        // hi ha canvis sense desar
-let destiBib = null;     // a quin dia s'afegeix el servei de la biblioteca ("" = tot el viatge)
-
-function toast(x){ const e = $("toast"); e.textContent = x; e.classList.add("vist"); setTimeout(() => e.classList.remove("vist"), 2200); }
-async function copiar(x){ try{ await navigator.clipboard.writeText(x); toast("Copiat!"); }catch(e){ prompt("Copia:", x); } }
-function brut(){ BRUT = true; $("edCanvis").classList.remove("amagat"); actualitzarTotal(); }
-function net(){ BRUT = false; $("edCanvis").classList.add("amagat"); }
-const quan = iso => new Date(iso).toLocaleString("ca-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-
-/* ================= SESSIÓ ================= */
-async function iniciar(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(session) await entrar(); else mostrarLogin();
-}
-function mostrarLogin(){ $("vistaLogin").classList.remove("amagat"); $("vistaApp").classList.add("amagat"); }
-async function entrar(){
-  const { data: { user } } = await sb.auth.getUser();
-  const { data: perm } = await sb.from("it_usuaris").select("user_id").eq("user_id", user.id).maybeSingle();
-  if(!perm){
-    await sb.auth.signOut(); mostrarLogin();
-    $("lErr").textContent = "Aquest compte no té accés als itineraris."; $("lErr").classList.remove("amagat"); return;
-  }
-  USER = user;
-  $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
-  const obrir = new URLSearchParams(location.search).get("e");
-  if(obrir) obrirEditor(obrir); else carregarLlista();
-}
-$("btnEntrar").onclick = async () => {
-  $("lErr").classList.add("amagat");
-  const { error } = await sb.auth.signInWithPassword({ email: $("lEmail").value.trim(), password: $("lPass").value });
-  if(error){ $("lErr").textContent = "Correu o contrasenya incorrectes."; $("lErr").classList.remove("amagat"); return; }
-  await entrar();
-};
-$("lPass").addEventListener("keydown", e => { if(e.key === "Enter") $("btnEntrar").click(); });
-$("lnkSortir").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.href = "admin.html"; };
-
-/* ================= PESTANYES ================= */
-function pestanya(p){
-  if(!$("panEditor").classList.contains("amagat") && BRUT && !confirm("Tens canvis sense desar. Vols sortir igualment?")) return false;
-  document.querySelectorAll("#pestanyes button").forEach(b => b.classList.toggle("actiu", b.dataset.p === p));
-  $("pestanyes").classList.remove("amagat");
-  $("panLlista").classList.toggle("amagat", p !== "llista");
-  $("panBib").classList.toggle("amagat", p !== "bib");
-  $("panEditor").classList.add("amagat"); $("barraEd").classList.add("amagat");
-  E = null; net();
-  history.replaceState(null, "", "admin.html");
-  if(p === "llista") carregarLlista();
-  if(p === "bib") carregarBib().then(pintarBib);
-  return true;
-}
-document.querySelectorAll("#pestanyes button").forEach(b => b.onclick = () => pestanya(b.dataset.p));
-window.addEventListener("beforeunload", e => { if(BRUT){ e.preventDefault(); e.returnValue = ""; } });
-
-/* ================= LLISTA ================= */
-async function carregarLlista(){
-  $("llista").innerHTML = `<div class="targeta centre meta">Carregant…</div>`;
-  const [{ data: its, error }, { data: evs }] = await Promise.all([
-    sb.from("it_itineraris").select("id,token,titol,client_nom,destinacio,data_inici,data_fi,num_persones,idioma,seleccio_at,updated_at").order("updated_at", { ascending: false }),
-    sb.from("it_events").select("itinerari_id,tipus,created_at").eq("tipus", "obert").order("created_at", { ascending: false }).limit(5000)
-  ]);
-  if(error){ $("llista").innerHTML = `<div class="targeta error">Error: ${esc(error.message)}</div>`; return; }
-  const vistes = {};
-  (evs || []).forEach(e => { const v = vistes[e.itinerari_id] ||= { n: 0, ultim: e.created_at }; v.n++; });
-  LLISTA = its.map(i => ({ ...i, vistes: vistes[i.id] || { n: 0 } }));
-  if(!LLISTA.length){
-    $("llista").innerHTML = `<div class="buit">Encara no tens cap itinerari. Prem «➕ Nou itinerari» per començar.</div>`; return;
-  }
-  $("llista").innerHTML = LLISTA.map(i => {
-    const dates = i.data_inici ? IT.dataCurta(i.data_inici) + (i.data_fi ? " – " + IT.dataCurta(i.data_fi) : "") : "";
-    return `<div class="it-fila">
-      <div class="titol">${esc(i.titol || "(sense títol)")}</div>
-      <div class="meta">${[i.client_nom, i.destinacio, dates, i.num_persones + " pers.", i.idioma === "es" ? "Castellà" : "Català"].filter(Boolean).map(esc).join(" · ")}</div>
-      <div class="stats">
-        ${i.vistes.n ? `<span class="xip verd">👁 Vist ${i.vistes.n} ${i.vistes.n === 1 ? "cop" : "cops"} · últim ${esc(quan(i.vistes.ultim))}</span>` : `<span class="xip">👁 Encara no l'ha obert</span>`}
-        ${i.seleccio_at ? `<span class="xip coral">✋ Ha tocat opcionals · ${esc(quan(i.seleccio_at))}</span>` : ""}
-      </div>
-      <div class="fila-botons">
-        <button class="boto petit" data-ed="${i.id}">✏️ Editar</button>
-        <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(i)}">WhatsApp</a>
-        <button class="boto sec petit" data-cp="${esc(urlClient(i.token))}">Copiar enllaç</button>
-        <a class="boto sec petit" target="_blank" rel="noopener" href="${esc(urlClient(i.token))}">👁 Veure</a>
-        <button class="boto sec petit" data-dup="${i.id}">⧉ Duplicar</button>
-      </div></div>`;
-  }).join("");
-  $("llista").querySelectorAll("[data-ed]").forEach(b => b.onclick = () => obrirEditor(b.dataset.ed));
-  $("llista").querySelectorAll("[data-cp]").forEach(b => b.onclick = () => copiar(b.dataset.cp));
-  $("llista").querySelectorAll("[data-dup]").forEach(b => b.onclick = () => duplicar(b.dataset.dup, b));
-}
-$("btnRefresca").onclick = carregarLlista;
-
-function missatgeWA(i){
-  const nom = i.client_nom ? " " + i.client_nom : "";
-  if(i.idioma === "es")
-    return `¡Hola${nom}! Te paso la propuesta de viaje «${i.titol}». Puedes ver el itinerario día a día, quitar los servicios opcionales que no te interesen y descargarlo en PDF:\n${urlClient(i.token)}\n\nCualquier duda, me dices. ¡Gracias!\nRimu Viatges`;
-  return `Hola${nom}! Et passo la proposta de viatge «${i.titol}». Hi pots veure l'itinerari dia a dia, treure els serveis opcionals que no t'interessin i descarregar-lo en PDF:\n${urlClient(i.token)}\n\nQualsevol dubte, em dius. Gràcies!\nRimu Viatges`;
-}
-const waLink = i => "https://wa.me/?text=" + encodeURIComponent(missatgeWA(i));
-
-/* ================= EDITOR: obrir ================= */
-$("btnNou").onclick = () => {
-  E = { nou: true, it: { id: uuid(), titol: "", client_nom: "", destinacio: "", data_inici: null, data_fi: null, num_persones: 2,
-        idioma: "ca", mostrar_preus: true, introduccio: "", notes: "", info: {}, imatge_portada: null, seleccio: {} },
-        dies: [], serveis: [], docs: [] };
-  mostrarEditor();
-};
-
-async function obrirEditor(id){
-  const [a, b, c, d] = await Promise.all([
-    sb.from("it_itineraris").select("*").eq("id", id).single(),
-    sb.from("it_dies").select("*").eq("itinerari_id", id).order("ordre"),
-    sb.from("it_serveis").select("*").eq("itinerari_id", id).order("ordre"),
-    sb.from("it_documents").select("*").eq("itinerari_id", id).order("created_at")
-  ]);
-  if(a.error){ toast("No s'ha pogut obrir"); carregarLlista(); return; }
-  E = { nou: false, it: a.data, dies: b.data || [], serveis: c.data || [], docs: d.data || [] };
-  E.serveis.forEach(s => s.preu = Number(s.preu));
-  mostrarEditor();
-}
-
-function mostrarEditor(){
-  $("pestanyes").classList.add("amagat");
-  $("panLlista").classList.add("amagat"); $("panBib").classList.add("amagat");
-  $("panEditor").classList.remove("amagat"); $("barraEd").classList.remove("amagat");
-  history.replaceState(null, "", E.nou ? "admin.html" : "admin.html?e=" + E.it.id);
-  const it = E.it;
-  $("eTitol").value = it.titol; $("eClient").value = it.client_nom; $("eDesti").value = it.destinacio;
-  $("eInici").value = it.data_inici || ""; $("eFi").value = it.data_fi || ""; $("ePers").value = it.num_persones;
-  document.querySelector(`input[name=eIdioma][value=${it.idioma}]`).checked = true;
-  $("eMostrar").checked = it.mostrar_preus; $("eIntro").value = it.introduccio;
-  it.info = it.info || {};
-  pintarInfo(); pintarPortada(); pintarDies(); pintarGenerals(); pintarDocs(); pintarEnllacos();
-  $("activitat").classList.toggle("amagat", E.nou);
-  $("btnEsborrar").classList.toggle("amagat", E.nou);
-  if(!E.nou) carregarActivitat();
-  net(); actualitzarTotal();
-  window.scrollTo(0, 0);
-}
-$("btnTornar").onclick = () => pestanya("llista");
-
-function pintarEnllacos(){
-  const ok = !E.nou && E.it.token;
-  ["lnkVeure", "lnkWA", "btnCopiar"].forEach(x => $(x).classList.toggle("amagat", !ok));
-  if(!ok) return;
-  $("lnkVeure").href = urlClient(E.it.token);
-  $("lnkWA").href = waLink(E.it);
-  $("btnCopiar").onclick = () => copiar(urlClient(E.it.token));
-}
-
-/* ---------- camps generals ---------- */
-const lligams = { eTitol: "titol", eClient: "client_nom", eDesti: "destinacio", eIntro: "introduccio" };
-Object.entries(lligams).forEach(([id, k]) => $(id).addEventListener("input", () => { E.it[k] = $(id).value; brut(); }));
-$("eInici").addEventListener("change", () => {
-  E.it.data_inici = $("eInici").value || null;
-  if(E.it.data_inici && (!E.it.data_fi || E.it.data_fi < E.it.data_inici)){ $("eFi").value = E.it.data_inici; E.it.data_fi = E.it.data_inici; }
-  brut(); pintarDies();
-});
-$("eFi").addEventListener("change", () => { E.it.data_fi = $("eFi").value || null; brut(); pintarDies(); });
-$("ePers").addEventListener("input", () => { E.it.num_persones = Math.max(1, Math.min(99, parseInt($("ePers").value) || 1)); brut(); });
-document.querySelectorAll("input[name=eIdioma]").forEach(r => r.onchange = () => { E.it.idioma = r.value; brut(); pintarAvisos(); });
-
-/* ---------- informació important ---------- */
-const PH_INFO = {
-  inclou: "Un concepte per línia. Ex.:\nVols d'anada i tornada\n7 nits d'hotel amb esmorzar",
-  no_inclou: "Un concepte per línia. Ex.:\nTaxes turístiques locals\nÀpats no especificats",
-  documentacio: "Ex.: Passaport amb una validesa mínima de 6 mesos. Visat electrònic…",
-  pagament: "Ex.: 30% a la reserva i la resta 30 dies abans de la sortida. Transferència o targeta.",
-  cancelacio: "Ex.: Fins a 45 dies abans: 10%. De 44 a 15 dies: 50%…",
-  altres: "Qualsevol altra informació útil"
-};
-function pintarInfo(){
-  $("infoEd").innerHTML = IT.INFO.map(a => `<div class="camp">
-    <div class="cap-camp"><label>${a.ico} ${esc(a.ca)}</label>${a.k === "inclou" ? `<button type="button" class="ia" id="btnOmplirInclou">↧ Omplir amb els serveis</button>` : ""}</div>
-    <textarea data-info="${a.k}" placeholder="${esc(PH_INFO[a.k])}">${esc(IT.valorInfo(E.it, a.k))}</textarea></div>`).join("");
-  $("infoEd").querySelectorAll("[data-info]").forEach(ta => ta.addEventListener("input", () => {
-    if(ta.dataset.info === "altres") E.it.notes = ta.value; else E.it.info[ta.dataset.info] = ta.value;
-    brut();
-  }));
-  $("btnOmplirInclou").onclick = () => {
-    const ta = $("infoEd").querySelector('[data-info="inclou"]');
-    const ordre = [null, ...E.dies.map(d => d.id)];
-    const l = ordre.flatMap(did => serveisDe(did)).filter(s => IT.nomServei(s).trim()).map(s => IT.nomServei(s).trim() + (s.opcional ? " (opcional)" : ""));
-    if(!l.length){ toast("Encara no hi ha serveis"); return; }
-    if(ta.value.trim() && !confirm("Substituir el que ja hi ha escrit?")) return;
-    ta.value = [...new Set(l)].join("\n"); E.it.info.inclou = ta.value; brut();
-  };
-  pintarAvisos();
-}
-function pintarAvisos(){
-  $("avisosEd").innerHTML = `<strong style="font-size:12px">Surt sempre al final (no cal escriure-ho):</strong>` +
-    (IT.AVISOS[E.it.idioma] || IT.AVISOS.ca).map(x => `<p>${esc(x)}</p>`).join("");
-}
-$("eMostrar").onchange = () => { E.it.mostrar_preus = $("eMostrar").checked; brut(); };
-
-/* ---------- imatges ---------- */
-let destiImg = null;
-function triarImatge(callback){ destiImg = callback; $("fImg").value = ""; $("fImg").click(); }
-$("fImg").onchange = async () => {
-  const f = $("fImg").files[0]; if(!f || !destiImg) return;
-  toast("Pujant la foto…");
-  try{
-    const blob = await reduirImatge(f);
-    const ruta = `${USER.id}/${uuid()}.jpg`;
-    const { error } = await sb.storage.from("it-imatges").upload(ruta, blob, { contentType: "image/jpeg" });
-    if(error) throw error;
-    destiImg(sb.storage.from("it-imatges").getPublicUrl(ruta).data.publicUrl);
-    brut(); toast("Foto afegida");
-  }catch(e){ toast("No s'ha pogut pujar la foto"); }
-};
-function reduirImatge(f){
-  return new Promise((ok, ko) => {
-    const img = new Image();
-    img.onload = () => {
-      const max = 1600, r = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement("canvas"); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(b => b ? ok(b) : ko(), "image/jpeg", 0.82);
-      URL.revokeObjectURL(img.src);
-    };
-    img.onerror = ko;
-    img.src = URL.createObjectURL(f);
-  });
-}
-function pintarPortada(){
-  const u = E.it.imatge_portada;
-  $("imgPortada").classList.toggle("amagat", !u); if(u) $("imgPortada").src = u;
-  $("btnTreurePortada").classList.toggle("amagat", !u);
-}
-$("btnPortada").onclick = () => triarImatge(u => { E.it.imatge_portada = u; pintarPortada(); });
-$("btnTreurePortada").onclick = () => { E.it.imatge_portada = null; pintarPortada(); brut(); };
-
-/* ---------- dies ---------- */
-function numDiesDates(){
-  if(!E.it.data_inici || !E.it.data_fi) return 0;
-  return Math.round((new Date(E.it.data_fi + "T12:00:00") - new Date(E.it.data_inici + "T12:00:00")) / 86400000) + 1;
-}
-function pintarDies(){
-  E.dies.sort((a, b) => a.ordre - b.ordre);
-  const n = numDiesDates();
-  $("btnDiesDates").classList.toggle("amagat", !(n > 0 && n <= 60 && E.dies.length < n));
-  $("btnDiesDates").textContent = E.dies.length ? `📅 Completar fins a ${n} dies (segons les dates)` : `📅 Crear els ${n} dies segons les dates`;
-  if(!E.dies.length){ $("dies").innerHTML = `<div class="buit" style="margin-bottom:12px">Encara no hi ha dies.</div>`; return; }
-  $("dies").innerHTML = E.dies.map((d, i) => `
-    <div class="dia-ed" data-dia="${d.id}">
-      <div class="dia-ed-cap">
-        <div><b>Dia ${i + 1}</b> ${E.it.data_inici ? `<span class="meta">· ${esc(IT.dataDia(E.it.data_inici, i, "ca"))}</span>` : ""}</div>
-        <div class="fila-botons" style="gap:4px">
-          <button class="mini" type="button" data-dpuja="${d.id}" ${i === 0 ? "disabled" : ""} title="Pujar">↑</button>
-          <button class="mini" type="button" data-dbaixa="${d.id}" ${i === E.dies.length - 1 ? "disabled" : ""} title="Baixar">↓</button>
-          <button class="mini perill" type="button" data-desb="${d.id}" title="Esborrar dia">🗑</button>
-        </div>
-      </div>
-      <div class="dia-ed-cos">
-        <div class="camp"><label>Títol del dia</label><input data-dc="titol" value="${esc(d.titol)}" placeholder="Ex.: Arribada a Tòquio"></div>
-        <div class="camp"><div class="cap-camp"><label>Què faran</label><button type="button" class="ia" data-ia-dia="${d.id}">✨ Redactar amb IA</button></div>
-          <textarea data-dc="descripcio" placeholder="Explicació del dia (pots escriure quatre notes i prémer «Redactar amb IA»)">${esc(d.descripcio)}</textarea></div>
-        <div data-llista-srv="${d.id}">${serveisDe(d.id).map(htmlSrvEd).join("")}</div>
-        <div class="fila-botons" style="margin-top:10px">
-          <button class="boto sec petit" type="button" data-nou-srv="${d.id}">➕ Servei</button>
-          <button class="boto sec petit" type="button" data-bib-srv="${d.id}">📚 De la biblioteca</button>
-        </div>
-      </div>
-    </div>`).join("");
-  lligarDies();
-}
-function pintarGenerals(){
-  $("generals").innerHTML = serveisDe(null).map(htmlSrvEd).join("");
-  lligarServeis($("generals"));
-}
-function lligarDies(){
-  const c = $("dies");
-  c.querySelectorAll("[data-dia]").forEach(box => {
-    const d = E.dies.find(x => x.id === box.dataset.dia);
-    box.querySelectorAll(":scope > .dia-ed-cos > .camp [data-dc]").forEach(inp => inp.addEventListener("input", () => { d[inp.dataset.dc] = inp.value; brut(); }));
-  });
-  c.querySelectorAll("[data-dpuja]").forEach(b => b.onclick = () => moureDia(b.dataset.dpuja, -1));
-  c.querySelectorAll("[data-dbaixa]").forEach(b => b.onclick = () => moureDia(b.dataset.dbaixa, 1));
-  c.querySelectorAll("[data-desb]").forEach(b => b.onclick = () => {
-    const n = serveisDe(b.dataset.desb).length;
-    if(!confirm(n ? `S'esborrarà el dia i els seus ${n} serveis. Continuar?` : "Esborrar aquest dia?")) return;
-    E.dies = E.dies.filter(x => x.id !== b.dataset.desb);
-    E.serveis = E.serveis.filter(s => s.dia_id !== b.dataset.desb);
-    renumerar(E.dies); pintarDies(); brut();
-  });
-  c.querySelectorAll("[data-ia-dia]").forEach(b => b.onclick = () => iaDia(b));
-  lligarServeis(c);
-}
-function renumerar(arr){ arr.forEach((x, i) => x.ordre = i + 1); }
-function moureDia(id, dir){
-  const i = E.dies.findIndex(x => x.id === id), j = i + dir;
-  if(j < 0 || j >= E.dies.length) return;
-  [E.dies[i], E.dies[j]] = [E.dies[j], E.dies[i]];
-  renumerar(E.dies); pintarDies(); brut();
-}
-function nouDia(titol = ""){ E.dies.push({ id: uuid(), itinerari_id: E.it.id, ordre: E.dies.length + 1, titol, descripcio: "" }); }
-$("btnDia").onclick = () => {
-  nouDia(); pintarDies(); brut();
-  const ult = $("dies").lastElementChild; if(ult){ ult.scrollIntoView({ behavior: "smooth", block: "center" }); ult.querySelector("input").focus(); }
-};
-$("btnDiesDates").onclick = () => { const n = numDiesDates(); while(E.dies.length < n) nouDia(); pintarDies(); brut(); };
-
-/* ---------- serveis ---------- */
-const serveisDe = diaId => E.serveis.filter(s => (s.dia_id || null) === (diaId || null)).sort((a, b) => a.ordre - b.ordre);
-function resumPreu(s){
-  if(!s.preu) return "sense preu";
-  return euros(s.preu, "ca") + (s.preu_unitat === "grup" ? " total" : " /pers.");
-}
-function htmlSrvEd(s){
-  const tp = IT.TIPUS[s.tipus] || IT.TIPUS.altre;
-  const germans = serveisDe(s.dia_id), i = germans.findIndex(x => x.id === s.id);
-  return `<details class="srv" data-srv="${s.id}" ${s._obert ? "open" : ""}>
-    <summary><span>${tp.ico}</span><span class="n">${esc(IT.nomServei(s) || "(servei nou)")}</span>
-      ${s.opcional ? `<span class="etiq opc">Opcional</span>` : ""}<span class="p">${esc(resumPreu(s))}</span></summary>
-    <div class="srv-cos">
-      <div class="graella">
-        <div><label>Tipus</label><select data-sc="tipus">${TIPUS_OPC.replace(`value="${s.tipus}"`, `value="${s.tipus}" selected`)}</select></div>
-        <div><label>Nom${s.tipus === "vol" ? ` <span class="opc">(opcional, ex.: Vol d'anada)</span>` : ""}</label><input data-sc="nom" value="${esc(s.nom)}" placeholder="${s.tipus === "vol" ? "Si el deixes buit, surt la ruta" : s.tipus === "hotel" ? "Ex.: Hotel Gracery Shinjuku" : "Ex.: Excursió a Nara"}"></div>
-        ${s.tipus === "vol" ? htmlVolEd(s) : ""}
-        ${s.tipus === "hotel" ? htmlHotelEd(s) : ""}
-        ${IT.TOT_VIATGE.includes(s.tipus) ? htmlTotViatgeEd(s) : ""}
-        <div class="ample"><label>${s.tipus === "vol" ? "Notes" : "Detalls"} <span class="opc">(${s.tipus === "vol" ? "opcional, ex.: escala a Doha" : "horaris, habitació… surten en petit"})</span></label><input data-sc="detalls" value="${esc(s.detalls)}" placeholder="${s.tipus === "hotel" ? "Ex.: 3 nits · Habitació doble" : ""}"></div>
-        ${s.tipus === "vol" ? "" : `<div class="ample"><div class="cap-camp"><label>Descripció</label><button type="button" class="ia" data-ia-srv="${s.id}">✨ Redactar amb IA</button></div>
-          <textarea data-sc="descripcio" placeholder="Opcional">${esc(s.descripcio)}</textarea></div>`}
-        <div><label>Preu (€)</label><input data-sc="preu" type="number" min="0" step="0.01" inputmode="decimal" value="${s.preu || ""}" placeholder="0,00"></div>
-        <div><label>El preu és…</label><select data-sc="preu_unitat">
-          <option value="persona" ${s.preu_unitat !== "grup" ? "selected" : ""}>Per persona</option>
-          <option value="grup" ${s.preu_unitat === "grup" ? "selected" : ""}>Total per a tot el grup</option></select></div>
-        <div class="ample"><label class="check"><input type="checkbox" data-sc="opcional" ${s.opcional ? "checked" : ""}> <span>És <strong>opcional</strong> <span class="opc">(el client el pot treure; per defecte surt inclòs)</span></span></label></div>
-        <div class="ample ${s.opcional ? "" : "amagat"}" data-mode-opc>
-          <div class="opcions">
-            <label><input type="radio" name="m_${s.id}" value="grup" ${!s.opcional_per_persones ? "checked" : ""}> Es treu per a tot el grup</label>
-            <label><input type="radio" name="m_${s.id}" value="persones" ${s.opcional_per_persones ? "checked" : ""}> El client tria per a quantes persones</label>
-          </div></div>
-        <div class="ample"><label>Foto <span class="opc">(opcional)</span></label>
-          <div class="fila-botons"><button class="boto sec petit" type="button" data-sfoto>📷 ${s.imatge_url ? "Canviar" : "Pujar"} foto</button>
-          ${s.imatge_url ? `<button class="boto perill petit" type="button" data-streufoto>Treure</button>` : ""}</div>
-          ${s.imatge_url ? `<img class="img-prev" src="${esc(s.imatge_url)}" alt="">` : ""}</div>
-      </div>
-      <div class="fila-botons" style="margin-top:12px;justify-content:space-between">
-        <div class="fila-botons" style="gap:4px">
-          <button class="mini" type="button" data-spuja ${i <= 0 ? "disabled" : ""}>↑</button>
-          <button class="mini" type="button" data-sbaixa ${i >= germans.length - 1 ? "disabled" : ""}>↓</button>
-          <button class="mini" type="button" data-sdup title="Duplicar">⧉</button>
-          <button class="mini perill" type="button" data-sesb>🗑 Esborrar</button>
-        </div>
-        <button class="boto sec petit" type="button" data-sbib>📚 Desar a la biblioteca</button>
-      </div>
-    </div></details>`;
-}
-function repintarLlistaSrv(diaId){
-  if(!diaId){ pintarGenerals(); return; }
-  const c = document.querySelector(`[data-llista-srv="${diaId}"]`);
-  c.innerHTML = serveisDe(diaId).map(htmlSrvEd).join("");
-  lligarServeis(c);
-}
-function lligarServeis(cont){
-  cont.querySelectorAll("details.srv").forEach(det => {
-    if(det.dataset.lligat) return; det.dataset.lligat = 1;
-    const s = E.serveis.find(x => x.id === det.dataset.srv);
-    det.addEventListener("toggle", () => { s._obert = det.open; });
-    const resum = () => {
-      det.querySelector("summary .n").textContent = IT.nomServei(s) || "(servei nou)";
-      det.querySelector("summary .p").textContent = resumPreu(s);
-      det.querySelector("summary span").textContent = (IT.TIPUS[s.tipus] || IT.TIPUS.altre).ico;
-    };
-    det.querySelectorAll("[data-sc]").forEach(inp => {
-      const k = inp.dataset.sc;
-      const ev = inp.type === "checkbox" || inp.tagName === "SELECT" ? "change" : "input";
-      inp.addEventListener(ev, () => {
-        if(k === "opcional"){ s.opcional = inp.checked; det.querySelector("[data-mode-opc]").classList.toggle("amagat", !s.opcional); repintarLlistaSrv(s.dia_id); }
-        else if(k === "preu") s.preu = Math.max(0, parseFloat(String(inp.value).replace(",", ".")) || 0);
-        else s[k] = inp.value;
-        if(k === "tipus"){
-          s.extra = s.extra || {};
-          if(s.tipus === "vol" && !s.extra.data) s.extra.data = isoDia(s.dia_id);
-          if(!IT.TOT_VIATGE.includes(s.tipus) && s.extra.tot_viatge){ treureTotViatge(s); pintarGenerals(); }
-          s._obert = true; repintarLlistaSrv(s.dia_id); brut(); return;
-        }
-        if(k !== "opcional") resum();
-        brut();
-      });
-    });
-    det.querySelectorAll(`input[name="m_${s.id}"]`).forEach(r => r.onchange = () => { s.opcional_per_persones = r.value === "persones"; brut(); });
-    det.querySelector("[data-sfoto]").onclick = () => triarImatge(u => { s.imatge_url = u; repintarLlistaSrv(s.dia_id); });
-    const tf = det.querySelector("[data-streufoto]"); if(tf) tf.onclick = () => { s.imatge_url = null; repintarLlistaSrv(s.dia_id); brut(); };
-    det.querySelector("[data-spuja]").onclick = () => moureSrv(s, -1);
-    det.querySelector("[data-sbaixa]").onclick = () => moureSrv(s, 1);
-    det.querySelector("[data-sdup]").onclick = () => {
-      const c = { ...s, extra: { ...(s.extra || {}) }, id: uuid(), _obert: true, nom: s.nom ? s.nom + " (còpia)" : "", ordre: s.ordre + 0.5 };
-      E.serveis.push(c); renumerar(serveisDe(s.dia_id)); repintarLlistaSrv(s.dia_id); brut();
-    };
-    det.querySelector("[data-sesb]").onclick = () => {
-      if(!confirm(`Esborrar «${s.nom || "servei"}»?`)) return;
-      E.serveis = E.serveis.filter(x => x.id !== s.id); renumerar(serveisDe(s.dia_id)); repintarLlistaSrv(s.dia_id); brut();
-    };
-    det.querySelector("[data-sbib]").onclick = () => desarABib(s);
-    const bia = det.querySelector("[data-ia-srv]"); if(bia) bia.onclick = e => iaServei(e.currentTarget, s, det);
-    lligarExtra(det, s, resum);
-  });
-  cont.querySelectorAll("[data-nou-srv]").forEach(b => { if(b.dataset.lligat) return; b.dataset.lligat = 1; b.onclick = () => nouServei(b.dataset.nouSrv || null); });
-  cont.querySelectorAll("[data-bib-srv]").forEach(b => { if(b.dataset.lligat) return; b.dataset.lligat = 1; b.onclick = () => obrirDlgBib(b.dataset.bibSrv || null); });
-}
-// botons de la secció "tot el viatge" (fora de #generals)
-document.querySelectorAll("#panEditor > .targeta > .fila-botons [data-nou-srv], #panEditor > .targeta > .fila-botons [data-bib-srv]").forEach(b => {
-  b.dataset.lligat = 1;
-  if(b.hasAttribute("data-nou-srv")) b.onclick = () => nouServei(null); else b.onclick = () => obrirDlgBib(null);
-});
-/* ---------- camps de vol i allotjament ---------- */
-function isoDia(diaId){
-  if(!diaId || !E.it.data_inici) return "";
-  const i = E.dies.findIndex(d => d.id === diaId); if(i < 0) return "";
-  const d = new Date(E.it.data_inici + "T12:00:00"); d.setDate(d.getDate() + i);
-  return d.toISOString().slice(0, 10);
-}
-function htmlVolEd(s){
-  const e = s.extra || {};
-  return `<div class="ample bloc-tipus">
-    <div class="graella">
-      <div><label>Número de vol</label><div style="display:flex;gap:6px"><input data-ex="numero" value="${esc(e.numero || "")}" placeholder="Ex.: VY1234" style="text-transform:uppercase">
-        <button type="button" class="boto sec petit" data-buscavol title="Buscar horari i companyia">🔎</button></div></div>
-      <div><label>Companyia</label><input data-ex="companyia" value="${esc(e.companyia || "")}" placeholder="Ex.: Vueling"></div>
-      <div><label>Data del vol</label><input data-ex="data" type="date" value="${esc(e.data || "")}"></div>
-      <div></div>
-      <div><label>Origen</label><input data-ex="origen" value="${esc(e.origen || "")}" placeholder="Ex.: Barcelona (BCN)"></div>
-      <div><label>Destí</label><input data-ex="desti" value="${esc(e.desti || "")}" placeholder="Ex.: Roma (FCO)"></div>
-      <div><label>Hora de sortida</label><input data-ex="sortida" type="time" value="${esc(e.sortida || "")}"></div>
-      <div><label>Hora d'arribada</label><input data-ex="arribada" type="time" value="${esc(e.arribada || "")}"></div>
-      <div class="ample"><label class="check"><input type="checkbox" data-ex="data_arribada" ${e.data_arribada ? "checked" : ""}> <span>Arriba l'endemà (+1)</span></label></div>
-      <div><label class="check"><input type="checkbox" data-ex="cabina" ${e.cabina ? "checked" : ""}> <span>🎒 Inclou maleta de cabina</span></label>
-        <div class="kg ${e.cabina ? "" : "amagat"}"><input data-ex="cabina_kg" type="number" min="0" max="50" inputmode="numeric" value="${esc(e.cabina_kg || "")}" placeholder="kg"> kg</div></div>
-      <div><label class="check"><input type="checkbox" data-ex="facturada" ${e.facturada ? "checked" : ""}> <span>🧳 Inclou maleta facturada</span></label>
-        <div class="kg ${e.facturada ? "" : "amagat"}"><input data-ex="facturada_kg" type="number" min="0" max="50" inputmode="numeric" value="${esc(e.facturada_kg || "")}" placeholder="kg"> kg</div></div>
-    </div></div>`;
-}
-function htmlHotelEd(s){
-  const e = s.extra || {};
-  const opc = (obj, val) => `<option value="">—</option>` + Object.entries(obj).map(([k, v]) => `<option value="${k}" ${val === k ? "selected" : ""}>${esc(v.ca)}</option>`).join("");
-  return `<div class="ample bloc-tipus"><div class="graella">
-      <div><label>Tipus d'allotjament</label><select data-ex="allotjament">${opc(IT.ALLOTJAMENTS, e.allotjament || "")}</select></div>
-      <div><label>Categoria</label><select data-ex="estrelles"><option value="">—</option>${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(e.estrelles) === n ? "selected" : ""}>${"★".repeat(n)}</option>`).join("")}</select></div>
-      <div class="ample"><label>Règim</label><select data-ex="regim">${opc(IT.REGIMS, e.regim || "")}</select></div>
-    </div></div>`;
-}
-function htmlTotViatgeEd(s){
-  const e = s.extra || {};
-  const txt = s.tipus === "hotel" ? `Mateix allotjament per a tot l'itinerari <span class="opc">(surt a tots els dies)</span>`
-    : `És per a tot el viatge <span class="opc">(no és d'un dia concret; surt a «Serveis del viatge»)</span>`;
-  return `<div class="ample"><label class="check"><input type="checkbox" data-ex="tot_viatge" ${e.tot_viatge ? "checked" : ""}> <span>${txt}</span></label></div>`;
-}
-function treureTotViatge(s){
-  const e = s.extra || {};
-  const tornar = E.dies.find(d => d.id === e.dia_original) || E.dies[0];
-  delete e.tot_viatge; delete e.dia_original;
-  s.dia_id = tornar ? tornar.id : null; s.ordre = 999;
-  renumerar(serveisDe(s.dia_id));
-}
-function lligarExtra(det, s, resum){
-  s.extra = s.extra || {};
-  det.querySelectorAll("[data-ex]").forEach(inp => {
-    const k = inp.dataset.ex;
-    inp.addEventListener(inp.type === "checkbox" || inp.tagName === "SELECT" ? "change" : "input", () => {
-      if(k === "tot_viatge"){
-        const abans = s.dia_id;
-        if(inp.checked){ s.extra.tot_viatge = true; s.extra.dia_original = s.dia_id; s.dia_id = null; s.ordre = 999; renumerar(serveisDe(null)); }
-        else treureTotViatge(s);
-        s._obert = true; if(abans) repintarLlistaSrv(abans); repintarLlistaSrv(s.dia_id); if(s.dia_id) pintarGenerals();
-        brut(); toast(inp.checked ? "Mogut a «Serveis de tot el viatge»" : "Tornat al dia"); return;
-      }
-      let v = inp.type === "checkbox" ? inp.checked : inp.value;
-      if(k === "numero") v = String(v).toUpperCase().replace(/\s+/g, "");
-      if(k === "estrelles") v = v ? Number(v) : null;
-      if(v === "" || v === null || v === false) delete s.extra[k]; else s.extra[k] = v;
-      if(k === "cabina" || k === "facturada") det.querySelector(`[data-ex="${k}_kg"]`).closest(".kg").classList.toggle("amagat", !inp.checked);
-      resum(); brut();
-    });
-  });
-  const bv = det.querySelector("[data-buscavol]");
-  if(bv) bv.onclick = () => buscarVol(s, bv);
-}
-async function buscarVol(s, boto){
-  const e = s.extra;
-  if(!e.numero){ toast("Escriu el número de vol"); return; }
-  const data = e.data || isoDia(s.dia_id);
-  if(!data){ toast("Posa la data del vol"); return; }
-  boto.disabled = true; boto.textContent = "…";
-  try{
-    const { data: r, error } = await sb.functions.invoke("it-vol", { body: { numero: e.numero, data } });
-    if(error) throw error;
-    if(r.error === "FALTA_CLAU"){ alert("La cerca de vols encara no està activada: falta posar la clau d'AeroDataBox a Supabase (et vaig deixar els passos). Mentrestant, omple les dades a mà."); return; }
-    if(r.error === "NO_TROBAT"){ toast("No s'ha trobat aquest vol en aquesta data. Omple-ho a mà."); return; }
-    if(r.error) throw new Error(r.error);
-    Object.assign(e, { data, numero: r.numero || e.numero, companyia: r.companyia || e.companyia,
-      origen: r.origen ? (r.origen_nom ? `${r.origen_nom} (${r.origen})` : r.origen) : e.origen,
-      desti: r.desti ? (r.desti_nom ? `${r.desti_nom} (${r.desti})` : r.desti) : e.desti,
-      sortida: r.sortida || e.sortida, arribada: r.arribada || e.arribada });
-    if(r.data_arribada) e.data_arribada = true; else delete e.data_arribada;
-    s._obert = true; repintarLlistaSrv(s.dia_id); brut(); toast("Dades del vol omplertes ✈️");
-  }catch(err){ toast("No s'ha pogut buscar el vol"); }
-  finally{ boto.disabled = false; boto.textContent = "🔎"; }
-}
-function moureSrv(s, dir){
-  const g = serveisDe(s.dia_id), i = g.findIndex(x => x.id === s.id), j = i + dir;
-  if(j < 0 || j >= g.length) return;
-  [g[i], g[j]] = [g[j], g[i]]; renumerar(g); repintarLlistaSrv(s.dia_id); brut();
-}
-function nouServei(diaId, base = {}){
-  const s = { id: uuid(), itinerari_id: E.it.id, dia_id: diaId, ordre: serveisDe(diaId).length + 1, tipus: "altre", nom: "", descripcio: "", detalls: "",
-    preu: 0, preu_unitat: "persona", opcional: false, opcional_per_persones: false, imatge_url: null, extra: {}, _obert: true, ...base };
-  E.serveis.push(s); repintarLlistaSrv(diaId); brut();
-  const el = document.querySelector(`[data-srv="${s.id}"]`);
-  if(el){ el.scrollIntoView({ behavior: "smooth", block: "center" }); const n = el.querySelector('[data-sc="nom"]'); if(n && !s.nom) n.focus(); }
-}
-
-/* ---------- total ---------- */
-function actualitzarTotal(){
-  if(!E) return;
-  const n = E.it.num_persones || 1;
-  const { total, perPersona } = IT.totals(E.serveis, {}, n);
-  $("edTotal").textContent = euros(total, "ca");
-  $("edPP").textContent = `${euros(perPersona, "ca")} per persona · ${n} pers.${E.it.mostrar_preus ? "" : " · preu ocult al client"}`;
-}
-
-/* ---------- desar ---------- */
-async function desar(){
-  if(!E.it.titol.trim()){ toast("Posa el títol del viatge"); $("eTitol").focus(); return false; }
-  const b = $("btnDesar"); b.disabled = true; b.textContent = "Desant…";
-  try{
-    const it = E.it;
-    const fila = { id: it.id, titol: it.titol.trim(), client_nom: it.client_nom.trim(), destinacio: it.destinacio.trim(), data_inici: it.data_inici || null,
-      data_fi: it.data_fi || null, num_persones: it.num_persones, idioma: it.idioma, mostrar_preus: it.mostrar_preus,
-      introduccio: it.introduccio, notes: it.notes, info: it.info || {}, imatge_portada: it.imatge_portada };
-    const r1 = await sb.from("it_itineraris").upsert(fila).select().single();
-    if(r1.error) throw r1.error;
-    E.it = r1.data;
-
-    renumerar(E.dies);
-    const idsDies = E.dies.map(d => d.id), idsSrv = E.serveis.map(s => s.id);
-    let q = sb.from("it_serveis").delete().eq("itinerari_id", it.id);
-    if(idsSrv.length) q = q.not("id", "in", `(${idsSrv.join(",")})`);
-    let r = await q; if(r.error) throw r.error;
-    q = sb.from("it_dies").delete().eq("itinerari_id", it.id);
-    if(idsDies.length) q = q.not("id", "in", `(${idsDies.join(",")})`);
-    r = await q; if(r.error) throw r.error;
-
-    if(E.dies.length){
-      r = await sb.from("it_dies").upsert(E.dies.map(d => ({ id: d.id, itinerari_id: it.id, ordre: d.ordre, titol: d.titol, descripcio: d.descripcio })));
-      if(r.error) throw r.error;
-    }
-    if(E.serveis.length){
-      // ordre net dins de cada grup
-      [null, ...E.dies.map(d => d.id)].forEach(did => renumerar(serveisDe(did)));
-      r = await sb.from("it_serveis").upsert(E.serveis.map(s => ({ id: s.id, itinerari_id: it.id, dia_id: s.dia_id || null, ordre: s.ordre,
-        tipus: s.tipus, nom: s.nom, descripcio: s.descripcio, detalls: s.detalls, preu: s.preu || 0, preu_unitat: s.preu_unitat,
-        opcional: !!s.opcional, opcional_per_persones: !!s.opcional && !!s.opcional_per_persones, imatge_url: s.imatge_url || null, extra: s.extra || {} })));
-      if(r.error) throw r.error;
-    }
-    const eraNou = E.nou; E.nou = false;
-    net(); pintarEnllacos();
-    $("activitat").classList.remove("amagat"); $("btnEsborrar").classList.remove("amagat");
-    history.replaceState(null, "", "admin.html?e=" + E.it.id);
-    toast(eraNou ? "Desat! Ja pots enviar l'enllaç al client" : "Desat");
-    if(eraNou) carregarActivitat();
-    return true;
-  }catch(e){
-    toast("No s'ha pogut desar: " + (e.message || e)); return false;
-  }finally{ b.disabled = false; b.textContent = "💾 Desar"; }
-}
-$("btnDesar").onclick = desar;
-
-/* ---------- documents ---------- */
-function pintarDocs(){
-  $("docs").innerHTML = E.docs.length ? E.docs.map(d => `<div class="doc-fila"><span>📄 ${esc(d.nom)}</span>
-    <span class="fila-botons" style="gap:4px"><button class="mini" type="button" data-dveure="${d.id}">Obrir</button>
-    <button class="mini perill" type="button" data-desbdoc="${d.id}">🗑</button></span></div>`).join("")
-    : `<div class="meta">Cap document.</div>`;
-  $("docs").querySelectorAll("[data-dveure]").forEach(b => b.onclick = async () => {
-    const d = E.docs.find(x => x.id === b.dataset.dveure);
-    const w = window.open("", "_blank");
-    const { data } = await sb.storage.from("it-documents").createSignedUrl(d.path, 300);
-    if(data && w) w.location = data.signedUrl; else if(w) w.close();
-  });
-  $("docs").querySelectorAll("[data-desbdoc]").forEach(b => b.onclick = async () => {
-    const d = E.docs.find(x => x.id === b.dataset.desbdoc);
-    if(!confirm(`Esborrar «${d.nom}»?`)) return;
-    await sb.storage.from("it-documents").remove([d.path]);
-    const { error } = await sb.from("it_documents").delete().eq("id", d.id);
-    if(error){ toast("No s'ha pogut esborrar"); return; }
-    E.docs = E.docs.filter(x => x.id !== d.id); pintarDocs(); toast("Esborrat");
-  });
-}
-$("btnDoc").onclick = async () => {
-  if(E.nou || BRUT){
-    if(!confirm("Primer cal desar l'itinerari. Vols desar-lo ara?")) return;
-    if(!(await desar())) return;
-  }
-  $("fDoc").value = ""; $("fDoc").click();
-};
-$("fDoc").onchange = async () => {
-  const f = $("fDoc").files[0]; if(!f) return;
-  if(f.size > 20 * 1024 * 1024){ toast("El document és massa gran (màxim 20 MB)"); return; }
-  toast("Pujant el document…");
-  const net_ = f.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-80);
-  const ruta = `${USER.id}/${E.it.id}/${uuid()}-${net_}`;
-  const { error } = await sb.storage.from("it-documents").upload(ruta, f, { contentType: f.type || "application/octet-stream" });
-  if(error){ toast("No s'ha pogut pujar"); return; }
-  const { data, error: e2 } = await sb.from("it_documents").insert({ itinerari_id: E.it.id, nom: f.name, path: ruta }).select().single();
-  if(e2){ toast("No s'ha pogut desar"); return; }
-  E.docs.push(data); pintarDocs(); toast("Document afegit");
-};
-
-/* ---------- activitat ---------- */
-async function carregarActivitat(){
-  if(!E || E.nou) return;
-  const id = E.it.id;
-  const [{ data: evs }, { data: it }] = await Promise.all([
-    sb.from("it_events").select("*").eq("itinerari_id", id).order("created_at", { ascending: false }).limit(300),
-    sb.from("it_itineraris").select("seleccio,seleccio_at").eq("id", id).single()
-  ]);
-  if(!E || E.it.id !== id) return;
-  const sel = (it && it.seleccio) || {};
-  const oberts = (evs || []).filter(e => e.tipus === "obert");
-  const n = E.it.num_persones;
-  const opc = E.serveis.filter(s => s.opcional);
-  const tCli = IT.totals(E.serveis, sel, n);
-  let h = `<div class="stats">
-    ${oberts.length ? `<span class="xip verd">👁 L'ha obert ${oberts.length} ${oberts.length === 1 ? "cop" : "cops"}</span><span class="xip">Últim: ${esc(quan(oberts[0].created_at))}</span>` : `<span class="xip">👁 Encara no l'ha obert</span>`}
-    ${(evs || []).some(e => e.tipus === "pdf") ? `<span class="xip">📄 Ha descarregat el PDF</span>` : ""}
-  </div>`;
-  if(opc.length){
-    h += `<h3>La seva tria d'opcionals ara mateix</h3>` + opc.map(s => {
-      const e = IT.estatOpcional(s, sel, n);
-      const txt = s.opcional_per_persones ? (e.persones ? `✅ per a ${e.persones} de ${n}` : "❌ tret") : (e.actiu ? "✅ inclòs" : "❌ tret");
-      return `<div class="doc-fila"><span>${(IT.TIPUS[s.tipus] || IT.TIPUS.altre).ico} ${esc(s.nom)}</span><strong style="font-size:14px">${txt}</strong></div>`;
-    }).join("");
-    h += `<p class="meta" style="margin-top:10px">Total amb la seva tria: <strong>${esc(euros(tCli.total, "ca"))}</strong> (${esc(euros(tCli.perPersona, "ca"))}/pers.)</p>`;
-  }
-  $("actResum").innerHTML = h;
-  const nomSrv = e => (E.serveis.find(s => s.id === e.servei_id) || {}).nom || (e.detall && e.detall.nom) || "opcional";
-  const linia = e => {
-    if(e.tipus === "obert") return `👁 Ha obert l'itinerari${e.detall && e.detall.dispositiu ? ` <span class="meta">(${esc(e.detall.dispositiu)})</span>` : ""}`;
-    if(e.tipus === "pdf") return `📄 Ha descarregat el PDF`;
-    if(e.tipus === "document") return `📎 Ha obert el document «${esc((e.detall || {}).document || "")}»`;
-    const d = e.detall || {};
-    if(typeof d.persones === "number" && d.persones !== undefined && E.serveis.find(s => s.id === e.servei_id && s.opcional_per_persones))
-      return `✋ «${esc(nomSrv(e))}» → per a ${d.persones} ${d.persones === 1 ? "persona" : "persones"}`;
-    return `✋ ${d.actiu ? "Ha tornat a afegir" : "Ha tret"} «${esc(nomSrv(e))}»`;
-  };
-  $("actEvents").innerHTML = (evs && evs.length) ? evs.map(e => `<div class="event"><span class="q">${esc(quan(e.created_at))}</span><span>${linia(e)}</span></div>`).join("")
-    : `<div class="meta">Encara no hi ha activitat.</div>`;
-}
-$("btnActRefresca").onclick = carregarActivitat;
-
-/* ---------- esborrar / duplicar ---------- */
-$("btnEsborrar").onclick = async () => {
-  if(!confirm("Segur que vols esborrar aquest itinerari? L'enllaç del client deixarà de funcionar. No es pot desfer.")) return;
-  if(E.docs.length) await sb.storage.from("it-documents").remove(E.docs.map(d => d.path));
-  const { error } = await sb.from("it_itineraris").delete().eq("id", E.it.id);
-  if(error){ toast("No s'ha pogut esborrar"); return; }
-  net(); toast("Esborrat"); pestanya("llista");
-};
-async function duplicar(id, boto){
-  boto.disabled = true;
-  try{
-    const [a, b, c] = await Promise.all([
-      sb.from("it_itineraris").select("*").eq("id", id).single(),
-      sb.from("it_dies").select("*").eq("itinerari_id", id).order("ordre"),
-      sb.from("it_serveis").select("*").eq("itinerari_id", id).order("ordre")
-    ]);
-    if(a.error) throw a.error;
-    const nouId = uuid(), mapa = {};
-    const { id: _i, token: _t, owner_id: _o, created_at: _c, updated_at: _u, seleccio: _s, seleccio_at: _sa, ...resta } = a.data;
-    const r1 = await sb.from("it_itineraris").insert({ ...resta, id: nouId, titol: a.data.titol + " (còpia)" });
-    if(r1.error) throw r1.error;
-    const dies = (b.data || []).map(d => { const nid = uuid(); mapa[d.id] = nid; return { ...d, id: nid, itinerari_id: nouId }; });
-    if(dies.length){ const r = await sb.from("it_dies").insert(dies); if(r.error) throw r.error; }
-    const srv = (c.data || []).map(s => ({ ...s, id: uuid(), itinerari_id: nouId, dia_id: s.dia_id ? mapa[s.dia_id] : null }));
-    if(srv.length){ const r = await sb.from("it_serveis").insert(srv); if(r.error) throw r.error; }
-    toast("Duplicat (els documents no es copien)");
-    obrirEditor(nouId);
-  }catch(e){ toast("No s'ha pogut duplicar"); boto.disabled = false; }
-}
-
-/* ================= IA ================= */
-async function demanarIA(boto, que, context, notes){
-  const txt = boto.textContent; boto.disabled = true; boto.textContent = "✨ Escrivint…";
-  try{
-    const { data, error } = await sb.functions.invoke("it-redactar", { body: { que, idioma: E.it.idioma, context, notes } });
-    if(error) throw error;
-    if(data && data.error === "FALTA_CLAU"){
-      alert("La IA encara no està activada: falta posar la clau d'Anthropic a Supabase (et vaig deixar els passos)."); return null;
-    }
-    if(!data || data.error) throw new Error(data && data.error);
-    return data.text;
-  }catch(e){ toast("La IA no ha pogut respondre"); return null; }
-  finally{ boto.disabled = false; boto.textContent = txt; }
-}
-document.querySelector('[data-ia="intro"]').onclick = async e => {
-  const t = await demanarIA(e.currentTarget, "intro", { titol: E.it.titol, destinacio: E.it.destinacio, client: E.it.client_nom }, $("eIntro").value);
-  if(t){ $("eIntro").value = t; E.it.introduccio = t; brut(); }
-};
-async function iaDia(boto){
-  const d = E.dies.find(x => x.id === boto.dataset.iaDia);
-  const serveis = serveisDe(d.id).map(s => `${(IT.TIPUS[s.tipus] || {}).ca}: ${s.nom}${s.detalls ? " (" + s.detalls + ")" : ""}`).join("; ");
-  const t = await demanarIA(boto, "dia", { titol: d.titol, destinacio: E.it.destinacio, serveis }, d.descripcio);
-  if(t){ d.descripcio = t; boto.closest(".camp").querySelector("textarea").value = t; brut(); }
-}
-async function iaServei(boto, s, det){
-  const t = await demanarIA(boto, "servei", { tipus: s.tipus, nom: s.nom, destinacio: E.it.destinacio }, [s.detalls, s.descripcio].filter(Boolean).join("\n"));
-  if(t){ s.descripcio = t; det.querySelector('[data-sc="descripcio"]').value = t; brut(); }
-}
-
-/* ================= BIBLIOTECA ================= */
-async function carregarBib(){
-  const { data } = await sb.from("it_biblioteca").select("*").order("tipus").order("nom");
-  BIB = (data || []).map(b => ({ ...b, preu: Number(b.preu) }));
-}
-function filtrarBib(q){
-  q = (q || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  return BIB.filter(b => !q || (b.nom + " " + b.detalls + " " + b.descripcio).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").includes(q));
-}
-const htmlBibItem = b => `<span style="font-size:22px">${(IT.TIPUS[b.tipus] || IT.TIPUS.altre).ico}</span>
-  <span style="flex:1;min-width:0"><strong>${esc(b.nom)}</strong><br><span class="meta">${esc(b.detalls || "")}</span></span>
-  <span class="meta" style="white-space:nowrap">${esc(resumPreu(b))}</span>`;
-function pintarBib(){
-  const l = filtrarBib($("bibCerca").value);
-  $("bibLlista").innerHTML = l.length ? l.map(b => `<button type="button" class="bib-item" data-bib="${b.id}">${htmlBibItem(b)}</button>`).join("")
-    : `<div class="buit" style="margin-bottom:10px">${BIB.length ? "Cap resultat." : "La biblioteca és buida."}</div>`;
-  $("bibLlista").querySelectorAll("[data-bib]").forEach(x => x.onclick = () => editarBib(BIB.find(b => b.id === x.dataset.bib)));
-}
-$("bibCerca").oninput = pintarBib;
-$("btnBibNou").onclick = () => editarBib({ tipus: "hotel", nom: "", detalls: "", descripcio: "", preu: 0, preu_unitat: "persona", imatge_url: null });
-function editarBib(b){
-  const nou = !b.id;
-  $("bibEdTitol").textContent = nou ? "Nou servei a la biblioteca" : "Editar servei";
-  $("bibEdCos").innerHTML = `
-    <div class="camp"><label>Tipus</label><select id="bTipus">${TIPUS_OPC.replace(`value="${b.tipus}"`, `value="${b.tipus}" selected`)}</select></div>
-    <div class="camp"><label>Nom</label><input id="bNom" value="${esc(b.nom)}"></div>
-    <div class="camp"><label>Detalls</label><input id="bDet" value="${esc(b.detalls)}"></div>
-    <div class="camp"><label>Descripció</label><textarea id="bDesc">${esc(b.descripcio)}</textarea></div>
-    <div class="graella"><div><label>Preu habitual (€)</label><input id="bPreu" type="number" min="0" step="0.01" value="${b.preu || ""}"></div>
-      <div><label>El preu és…</label><select id="bUnitat"><option value="persona">Per persona</option><option value="grup" ${b.preu_unitat === "grup" ? "selected" : ""}>Total del grup</option></select></div></div>
-    ${b.imatge_url ? `<img class="img-prev" src="${esc(b.imatge_url)}" alt="">` : ""}
-    <div class="fila-botons" style="margin-top:14px;justify-content:space-between">
-      ${nou ? "<span></span>" : `<button class="boto perill petit" type="button" id="bEsb">Esborrar</button>`}
-      <button class="boto" type="button" id="bDesa">Desar</button></div>`;
-  $("dlgBibEd").showModal();
-  $("bDesa").onclick = async () => {
-    const fila = { tipus: $("bTipus").value, nom: $("bNom").value.trim(), detalls: $("bDet").value.trim(), descripcio: $("bDesc").value.trim(),
-      preu: Math.max(0, parseFloat($("bPreu").value) || 0), preu_unitat: $("bUnitat").value, imatge_url: b.imatge_url || null };
-    if(!fila.nom){ toast("Posa-hi un nom"); return; }
-    const r = nou ? await sb.from("it_biblioteca").insert(fila) : await sb.from("it_biblioteca").update(fila).eq("id", b.id);
-    if(r.error){ toast("No s'ha pogut desar"); return; }
-    $("dlgBibEd").close(); await carregarBib(); pintarBib(); toast("Desat");
-  };
-  if(!nou) $("bEsb").onclick = async () => {
-    if(!confirm("Esborrar de la biblioteca? (Els itineraris on ja el tens no canvien.)")) return;
-    await sb.from("it_biblioteca").delete().eq("id", b.id);
-    $("dlgBibEd").close(); await carregarBib(); pintarBib(); toast("Esborrat");
-  };
-}
-$("bibEdTancar").onclick = () => $("dlgBibEd").close();
-
-async function desarABib(s){
-  if(!IT.nomServei(s)){ toast("Posa-li un nom primer"); return; }
-  const { tot_viatge, dia_original, data, data_arribada, ...extra } = s.extra || {};
-  const { error } = await sb.from("it_biblioteca").insert({ tipus: s.tipus, nom: s.nom, detalls: s.detalls, descripcio: s.descripcio,
-    preu: s.preu || 0, preu_unitat: s.preu_unitat, imatge_url: s.imatge_url || null, extra });
-  toast(error ? "No s'ha pogut desar" : "Desat a la biblioteca 📚");
-}
-async function obrirDlgBib(diaId){
-  destiBib = diaId;
-  await carregarBib();
-  $("dlgCerca").value = ""; pintarDlg();
-  $("dlgBib").showModal();
-}
-function pintarDlg(){
-  const l = filtrarBib($("dlgCerca").value);
-  $("dlgLlista").innerHTML = l.length ? l.map(b => `<button type="button" class="bib-item" data-tria="${b.id}">${htmlBibItem(b)}</button>`).join("")
-    : `<div class="buit">${BIB.length ? "Cap resultat." : "La biblioteca és buida. Desa-hi serveis amb el botó «📚 Desar a la biblioteca»."}</div>`;
-  $("dlgLlista").querySelectorAll("[data-tria]").forEach(x => x.onclick = () => {
-    const b = BIB.find(y => y.id === x.dataset.tria);
-    $("dlgBib").close();
-    nouServei(destiBib, { tipus: b.tipus, nom: b.nom, detalls: b.detalls, descripcio: b.descripcio, preu: b.preu, preu_unitat: b.preu_unitat, imatge_url: b.imatge_url, extra: { ...(b.extra || {}) }, _obert: false });
-    toast("Afegit: " + b.nom);
-  });
-}
-$("dlgCerca").oninput = pintarDlg;
-$("dlgTancar").onclick = () => $("dlgBib").close();
-
-iniciar();
-</script>
+<script src="admin.js"></script>
 </body>
 </html>
