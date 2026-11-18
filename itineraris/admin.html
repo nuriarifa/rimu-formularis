@@ -45,6 +45,9 @@
   details.srv[open] > summary{border-bottom:1px solid var(--linia)}
   .srv-cos{padding:12px}
   .camp{margin-bottom:10px}
+  .bloc-tipus{background:var(--fons);border-radius:12px;padding:12px}
+  .kg{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .kg input{width:90px}
   .cap-camp{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
   .cap-camp label{margin:0}
   .ia{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--blau);color:var(--blau);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;white-space:nowrap}
@@ -420,7 +423,7 @@ function pintarInfo(){
   $("btnOmplirInclou").onclick = () => {
     const ta = $("infoEd").querySelector('[data-info="inclou"]');
     const ordre = [null, ...E.dies.map(d => d.id)];
-    const l = ordre.flatMap(did => serveisDe(did)).filter(s => s.nom.trim()).map(s => s.nom.trim() + (s.opcional ? " (opcional)" : ""));
+    const l = ordre.flatMap(did => serveisDe(did)).filter(s => IT.nomServei(s).trim()).map(s => IT.nomServei(s).trim() + (s.opcional ? " (opcional)" : ""));
     if(!l.length){ toast("Encara no hi ha serveis"); return; }
     if(ta.value.trim() && !confirm("Substituir el que ja hi ha escrit?")) return;
     ta.value = [...new Set(l)].join("\n"); E.it.info.inclou = ta.value; brut();
@@ -550,15 +553,17 @@ function htmlSrvEd(s){
   const tp = IT.TIPUS[s.tipus] || IT.TIPUS.altre;
   const germans = serveisDe(s.dia_id), i = germans.findIndex(x => x.id === s.id);
   return `<details class="srv" data-srv="${s.id}" ${s._obert ? "open" : ""}>
-    <summary><span>${tp.ico}</span><span class="n">${esc(s.nom || "(servei nou)")}</span>
+    <summary><span>${tp.ico}</span><span class="n">${esc(IT.nomServei(s) || "(servei nou)")}</span>
       ${s.opcional ? `<span class="etiq opc">Opcional</span>` : ""}<span class="p">${esc(resumPreu(s))}</span></summary>
     <div class="srv-cos">
       <div class="graella">
         <div><label>Tipus</label><select data-sc="tipus">${TIPUS_OPC.replace(`value="${s.tipus}"`, `value="${s.tipus}" selected`)}</select></div>
-        <div><label>Nom</label><input data-sc="nom" value="${esc(s.nom)}" placeholder="Ex.: Hotel Gracery Shinjuku"></div>
-        <div class="ample"><label>Detalls <span class="opc">(horaris, règim, habitació… surten en petit)</span></label><input data-sc="detalls" value="${esc(s.detalls)}" placeholder="Ex.: 3 nits · Habitació doble · Esmorzar inclòs"></div>
-        <div class="ample"><div class="cap-camp"><label>Descripció</label><button type="button" class="ia" data-ia-srv="${s.id}">✨ Redactar amb IA</button></div>
-          <textarea data-sc="descripcio" placeholder="Opcional">${esc(s.descripcio)}</textarea></div>
+        <div><label>Nom${s.tipus === "vol" ? ` <span class="opc">(opcional, ex.: Vol d'anada)</span>` : ""}</label><input data-sc="nom" value="${esc(s.nom)}" placeholder="${s.tipus === "vol" ? "Si el deixes buit, surt la ruta" : s.tipus === "hotel" ? "Ex.: Hotel Gracery Shinjuku" : "Ex.: Excursió a Nara"}"></div>
+        ${s.tipus === "vol" ? htmlVolEd(s) : ""}
+        ${s.tipus === "hotel" ? htmlHotelEd(s) : ""}
+        <div class="ample"><label>${s.tipus === "vol" ? "Notes" : "Detalls"} <span class="opc">(${s.tipus === "vol" ? "opcional, ex.: escala a Doha" : "horaris, habitació… surten en petit"})</span></label><input data-sc="detalls" value="${esc(s.detalls)}" placeholder="${s.tipus === "hotel" ? "Ex.: 3 nits · Habitació doble" : ""}"></div>
+        ${s.tipus === "vol" ? "" : `<div class="ample"><div class="cap-camp"><label>Descripció</label><button type="button" class="ia" data-ia-srv="${s.id}">✨ Redactar amb IA</button></div>
+          <textarea data-sc="descripcio" placeholder="Opcional">${esc(s.descripcio)}</textarea></div>`}
         <div><label>Preu (€)</label><input data-sc="preu" type="number" min="0" step="0.01" inputmode="decimal" value="${s.preu || ""}" placeholder="0,00"></div>
         <div><label>El preu és…</label><select data-sc="preu_unitat">
           <option value="persona" ${s.preu_unitat !== "grup" ? "selected" : ""}>Per persona</option>
@@ -597,7 +602,7 @@ function lligarServeis(cont){
     const s = E.serveis.find(x => x.id === det.dataset.srv);
     det.addEventListener("toggle", () => { s._obert = det.open; });
     const resum = () => {
-      det.querySelector("summary .n").textContent = s.nom || "(servei nou)";
+      det.querySelector("summary .n").textContent = IT.nomServei(s) || "(servei nou)";
       det.querySelector("summary .p").textContent = resumPreu(s);
       det.querySelector("summary span").textContent = (IT.TIPUS[s.tipus] || IT.TIPUS.altre).ico;
     };
@@ -608,6 +613,12 @@ function lligarServeis(cont){
         if(k === "opcional"){ s.opcional = inp.checked; det.querySelector("[data-mode-opc]").classList.toggle("amagat", !s.opcional); repintarLlistaSrv(s.dia_id); }
         else if(k === "preu") s.preu = Math.max(0, parseFloat(String(inp.value).replace(",", ".")) || 0);
         else s[k] = inp.value;
+        if(k === "tipus"){
+          s.extra = s.extra || {};
+          if(s.tipus === "vol" && !s.extra.data) s.extra.data = isoDia(s.dia_id);
+          if(s.tipus !== "hotel" && s.extra.tot_viatge){ treureTotViatge(s); pintarGenerals(); }
+          s._obert = true; repintarLlistaSrv(s.dia_id); brut(); return;
+        }
         if(k !== "opcional") resum();
         brut();
       });
@@ -618,7 +629,7 @@ function lligarServeis(cont){
     det.querySelector("[data-spuja]").onclick = () => moureSrv(s, -1);
     det.querySelector("[data-sbaixa]").onclick = () => moureSrv(s, 1);
     det.querySelector("[data-sdup]").onclick = () => {
-      const c = { ...s, id: uuid(), _obert: true, nom: s.nom + " (còpia)", ordre: s.ordre + 0.5 };
+      const c = { ...s, extra: { ...(s.extra || {}) }, id: uuid(), _obert: true, nom: s.nom ? s.nom + " (còpia)" : "", ordre: s.ordre + 0.5 };
       E.serveis.push(c); renumerar(serveisDe(s.dia_id)); repintarLlistaSrv(s.dia_id); brut();
     };
     det.querySelector("[data-sesb]").onclick = () => {
@@ -626,7 +637,8 @@ function lligarServeis(cont){
       E.serveis = E.serveis.filter(x => x.id !== s.id); renumerar(serveisDe(s.dia_id)); repintarLlistaSrv(s.dia_id); brut();
     };
     det.querySelector("[data-sbib]").onclick = () => desarABib(s);
-    det.querySelector("[data-ia-srv]").onclick = e => iaServei(e.currentTarget, s, det);
+    const bia = det.querySelector("[data-ia-srv]"); if(bia) bia.onclick = e => iaServei(e.currentTarget, s, det);
+    lligarExtra(det, s, resum);
   });
   cont.querySelectorAll("[data-nou-srv]").forEach(b => { if(b.dataset.lligat) return; b.dataset.lligat = 1; b.onclick = () => nouServei(b.dataset.nouSrv || null); });
   cont.querySelectorAll("[data-bib-srv]").forEach(b => { if(b.dataset.lligat) return; b.dataset.lligat = 1; b.onclick = () => obrirDlgBib(b.dataset.bibSrv || null); });
@@ -636,6 +648,94 @@ document.querySelectorAll("#panEditor > .targeta > .fila-botons [data-nou-srv], 
   b.dataset.lligat = 1;
   if(b.hasAttribute("data-nou-srv")) b.onclick = () => nouServei(null); else b.onclick = () => obrirDlgBib(null);
 });
+/* ---------- camps de vol i allotjament ---------- */
+function isoDia(diaId){
+  if(!diaId || !E.it.data_inici) return "";
+  const i = E.dies.findIndex(d => d.id === diaId); if(i < 0) return "";
+  const d = new Date(E.it.data_inici + "T12:00:00"); d.setDate(d.getDate() + i);
+  return d.toISOString().slice(0, 10);
+}
+function htmlVolEd(s){
+  const e = s.extra || {};
+  return `<div class="ample bloc-tipus">
+    <div class="graella">
+      <div><label>Número de vol</label><div style="display:flex;gap:6px"><input data-ex="numero" value="${esc(e.numero || "")}" placeholder="Ex.: VY1234" style="text-transform:uppercase">
+        <button type="button" class="boto sec petit" data-buscavol title="Buscar horari i companyia">🔎</button></div></div>
+      <div><label>Companyia</label><input data-ex="companyia" value="${esc(e.companyia || "")}" placeholder="Ex.: Vueling"></div>
+      <div><label>Data del vol</label><input data-ex="data" type="date" value="${esc(e.data || "")}"></div>
+      <div></div>
+      <div><label>Origen</label><input data-ex="origen" value="${esc(e.origen || "")}" placeholder="Ex.: Barcelona (BCN)"></div>
+      <div><label>Destí</label><input data-ex="desti" value="${esc(e.desti || "")}" placeholder="Ex.: Roma (FCO)"></div>
+      <div><label>Hora de sortida</label><input data-ex="sortida" type="time" value="${esc(e.sortida || "")}"></div>
+      <div><label>Hora d'arribada</label><input data-ex="arribada" type="time" value="${esc(e.arribada || "")}"></div>
+      <div class="ample"><label class="check"><input type="checkbox" data-ex="data_arribada" ${e.data_arribada ? "checked" : ""}> <span>Arriba l'endemà (+1)</span></label></div>
+      <div><label class="check"><input type="checkbox" data-ex="cabina" ${e.cabina ? "checked" : ""}> <span>🎒 Inclou maleta de cabina</span></label>
+        <div class="kg ${e.cabina ? "" : "amagat"}"><input data-ex="cabina_kg" type="number" min="0" max="50" inputmode="numeric" value="${esc(e.cabina_kg || "")}" placeholder="kg"> kg</div></div>
+      <div><label class="check"><input type="checkbox" data-ex="facturada" ${e.facturada ? "checked" : ""}> <span>🧳 Inclou maleta facturada</span></label>
+        <div class="kg ${e.facturada ? "" : "amagat"}"><input data-ex="facturada_kg" type="number" min="0" max="50" inputmode="numeric" value="${esc(e.facturada_kg || "")}" placeholder="kg"> kg</div></div>
+    </div></div>`;
+}
+function htmlHotelEd(s){
+  const e = s.extra || {};
+  const opc = (obj, val) => `<option value="">—</option>` + Object.entries(obj).map(([k, v]) => `<option value="${k}" ${val === k ? "selected" : ""}>${esc(v.ca)}</option>`).join("");
+  return `<div class="ample bloc-tipus"><div class="graella">
+      <div><label>Tipus d'allotjament</label><select data-ex="allotjament">${opc(IT.ALLOTJAMENTS, e.allotjament || "")}</select></div>
+      <div><label>Categoria</label><select data-ex="estrelles"><option value="">—</option>${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(e.estrelles) === n ? "selected" : ""}>${"★".repeat(n)}</option>`).join("")}</select></div>
+      <div class="ample"><label>Règim</label><select data-ex="regim">${opc(IT.REGIMS, e.regim || "")}</select></div>
+      <div class="ample"><label class="check"><input type="checkbox" data-ex="tot_viatge" ${e.tot_viatge ? "checked" : ""}> <span>Mateix allotjament per a tot l'itinerari <span class="opc">(surt a tots els dies)</span></span></label></div>
+    </div></div>`;
+}
+function treureTotViatge(s){
+  const e = s.extra || {};
+  const tornar = E.dies.find(d => d.id === e.dia_original) || E.dies[0];
+  delete e.tot_viatge; delete e.dia_original;
+  s.dia_id = tornar ? tornar.id : null; s.ordre = 999;
+  renumerar(serveisDe(s.dia_id));
+}
+function lligarExtra(det, s, resum){
+  s.extra = s.extra || {};
+  det.querySelectorAll("[data-ex]").forEach(inp => {
+    const k = inp.dataset.ex;
+    inp.addEventListener(inp.type === "checkbox" || inp.tagName === "SELECT" ? "change" : "input", () => {
+      if(k === "tot_viatge"){
+        const abans = s.dia_id;
+        if(inp.checked){ s.extra.tot_viatge = true; s.extra.dia_original = s.dia_id; s.dia_id = null; s.ordre = 999; renumerar(serveisDe(null)); }
+        else treureTotViatge(s);
+        s._obert = true; if(abans) repintarLlistaSrv(abans); repintarLlistaSrv(s.dia_id); if(s.dia_id) pintarGenerals();
+        brut(); toast(inp.checked ? "Mogut a «Serveis de tot el viatge»" : "Tornat al dia"); return;
+      }
+      let v = inp.type === "checkbox" ? inp.checked : inp.value;
+      if(k === "numero") v = String(v).toUpperCase().replace(/\s+/g, "");
+      if(k === "estrelles") v = v ? Number(v) : null;
+      if(v === "" || v === null || v === false) delete s.extra[k]; else s.extra[k] = v;
+      if(k === "cabina" || k === "facturada") det.querySelector(`[data-ex="${k}_kg"]`).closest(".kg").classList.toggle("amagat", !inp.checked);
+      resum(); brut();
+    });
+  });
+  const bv = det.querySelector("[data-buscavol]");
+  if(bv) bv.onclick = () => buscarVol(s, bv);
+}
+async function buscarVol(s, boto){
+  const e = s.extra;
+  if(!e.numero){ toast("Escriu el número de vol"); return; }
+  const data = e.data || isoDia(s.dia_id);
+  if(!data){ toast("Posa la data del vol"); return; }
+  boto.disabled = true; boto.textContent = "…";
+  try{
+    const { data: r, error } = await sb.functions.invoke("it-vol", { body: { numero: e.numero, data } });
+    if(error) throw error;
+    if(r.error === "FALTA_CLAU"){ alert("La cerca de vols encara no està activada: falta posar la clau d'AeroDataBox a Supabase (et vaig deixar els passos). Mentrestant, omple les dades a mà."); return; }
+    if(r.error === "NO_TROBAT"){ toast("No s'ha trobat aquest vol en aquesta data. Omple-ho a mà."); return; }
+    if(r.error) throw new Error(r.error);
+    Object.assign(e, { data, numero: r.numero || e.numero, companyia: r.companyia || e.companyia,
+      origen: r.origen ? (r.origen_nom ? `${r.origen_nom} (${r.origen})` : r.origen) : e.origen,
+      desti: r.desti ? (r.desti_nom ? `${r.desti_nom} (${r.desti})` : r.desti) : e.desti,
+      sortida: r.sortida || e.sortida, arribada: r.arribada || e.arribada });
+    if(r.data_arribada) e.data_arribada = true; else delete e.data_arribada;
+    s._obert = true; repintarLlistaSrv(s.dia_id); brut(); toast("Dades del vol omplertes ✈️");
+  }catch(err){ toast("No s'ha pogut buscar el vol"); }
+  finally{ boto.disabled = false; boto.textContent = "🔎"; }
+}
 function moureSrv(s, dir){
   const g = serveisDe(s.dia_id), i = g.findIndex(x => x.id === s.id), j = i + dir;
   if(j < 0 || j >= g.length) return;
@@ -643,7 +743,7 @@ function moureSrv(s, dir){
 }
 function nouServei(diaId, base = {}){
   const s = { id: uuid(), itinerari_id: E.it.id, dia_id: diaId, ordre: serveisDe(diaId).length + 1, tipus: "altre", nom: "", descripcio: "", detalls: "",
-    preu: 0, preu_unitat: "persona", opcional: false, opcional_per_persones: false, imatge_url: null, _obert: true, ...base };
+    preu: 0, preu_unitat: "persona", opcional: false, opcional_per_persones: false, imatge_url: null, extra: {}, _obert: true, ...base };
   E.serveis.push(s); repintarLlistaSrv(diaId); brut();
   const el = document.querySelector(`[data-srv="${s.id}"]`);
   if(el){ el.scrollIntoView({ behavior: "smooth", block: "center" }); const n = el.querySelector('[data-sc="nom"]'); if(n && !s.nom) n.focus(); }
@@ -689,7 +789,7 @@ async function desar(){
       [null, ...E.dies.map(d => d.id)].forEach(did => renumerar(serveisDe(did)));
       r = await sb.from("it_serveis").upsert(E.serveis.map(s => ({ id: s.id, itinerari_id: it.id, dia_id: s.dia_id || null, ordre: s.ordre,
         tipus: s.tipus, nom: s.nom, descripcio: s.descripcio, detalls: s.detalls, preu: s.preu || 0, preu_unitat: s.preu_unitat,
-        opcional: !!s.opcional, opcional_per_persones: !!s.opcional && !!s.opcional_per_persones, imatge_url: s.imatge_url || null })));
+        opcional: !!s.opcional, opcional_per_persones: !!s.opcional && !!s.opcional_per_persones, imatge_url: s.imatge_url || null, extra: s.extra || {} })));
       if(r.error) throw r.error;
     }
     const eraNou = E.nou; E.nou = false;
@@ -899,9 +999,10 @@ function editarBib(b){
 $("bibEdTancar").onclick = () => $("dlgBibEd").close();
 
 async function desarABib(s){
-  if(!s.nom){ toast("Posa-li un nom primer"); return; }
+  if(!IT.nomServei(s)){ toast("Posa-li un nom primer"); return; }
+  const { tot_viatge, dia_original, data, data_arribada, ...extra } = s.extra || {};
   const { error } = await sb.from("it_biblioteca").insert({ tipus: s.tipus, nom: s.nom, detalls: s.detalls, descripcio: s.descripcio,
-    preu: s.preu || 0, preu_unitat: s.preu_unitat, imatge_url: s.imatge_url || null });
+    preu: s.preu || 0, preu_unitat: s.preu_unitat, imatge_url: s.imatge_url || null, extra });
   toast(error ? "No s'ha pogut desar" : "Desat a la biblioteca 📚");
 }
 async function obrirDlgBib(diaId){
@@ -917,7 +1018,7 @@ function pintarDlg(){
   $("dlgLlista").querySelectorAll("[data-tria]").forEach(x => x.onclick = () => {
     const b = BIB.find(y => y.id === x.dataset.tria);
     $("dlgBib").close();
-    nouServei(destiBib, { tipus: b.tipus, nom: b.nom, detalls: b.detalls, descripcio: b.descripcio, preu: b.preu, preu_unitat: b.preu_unitat, imatge_url: b.imatge_url, _obert: false });
+    nouServei(destiBib, { tipus: b.tipus, nom: b.nom, detalls: b.detalls, descripcio: b.descripcio, preu: b.preu, preu_unitat: b.preu_unitat, imatge_url: b.imatge_url, extra: { ...(b.extra || {}) }, _obert: false });
     toast("Afegit: " + b.nom);
   });
 }
