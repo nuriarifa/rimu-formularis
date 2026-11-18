@@ -146,9 +146,14 @@ window.IT = (function(){
       if(e.regim && REGIMS[e.regim]) parts.push(esc(REGIMS[e.regim][idioma] || REGIMS[e.regim].ca));
       if(e.tot_viatge) parts.push(esc(L.totViatge));
       if(parts.length) out.push(`<div class="xips-srv">${parts.map(x => `<span>${x}</span>`).join("")}</div>`);
+    } else if(e.tot_viatge){
+      out.push(`<div class="xips-srv"><span>🗓️ ${esc(L.totViatge)}</span></div>`);
     }
     return out.join("");
   }
 
-  return { REGIMS, ALLOTJAMENTS, TXT, nomServei, rutaVol, htmlExtra, INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
+  // Tipus de servei que es poden marcar com a "per a tot el viatge"
+  const TOT_VIATGE = ["hotel", "asseguranca", "excursio", "trasllat", "altre"];
+
+  return { TOT_VIATGE, REGIMS, ALLOTJAMENTS, TXT, nomServei, rutaVol, htmlExtra, INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
 })();

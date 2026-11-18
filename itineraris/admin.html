@@ -561,6 +561,7 @@ function htmlSrvEd(s){
         <div><label>Nom${s.tipus === "vol" ? ` <span class="opc">(opcional, ex.: Vol d'anada)</span>` : ""}</label><input data-sc="nom" value="${esc(s.nom)}" placeholder="${s.tipus === "vol" ? "Si el deixes buit, surt la ruta" : s.tipus === "hotel" ? "Ex.: Hotel Gracery Shinjuku" : "Ex.: Excursió a Nara"}"></div>
         ${s.tipus === "vol" ? htmlVolEd(s) : ""}
         ${s.tipus === "hotel" ? htmlHotelEd(s) : ""}
+        ${IT.TOT_VIATGE.includes(s.tipus) ? htmlTotViatgeEd(s) : ""}
         <div class="ample"><label>${s.tipus === "vol" ? "Notes" : "Detalls"} <span class="opc">(${s.tipus === "vol" ? "opcional, ex.: escala a Doha" : "horaris, habitació… surten en petit"})</span></label><input data-sc="detalls" value="${esc(s.detalls)}" placeholder="${s.tipus === "hotel" ? "Ex.: 3 nits · Habitació doble" : ""}"></div>
         ${s.tipus === "vol" ? "" : `<div class="ample"><div class="cap-camp"><label>Descripció</label><button type="button" class="ia" data-ia-srv="${s.id}">✨ Redactar amb IA</button></div>
           <textarea data-sc="descripcio" placeholder="Opcional">${esc(s.descripcio)}</textarea></div>`}
@@ -616,7 +617,7 @@ function lligarServeis(cont){
         if(k === "tipus"){
           s.extra = s.extra || {};
           if(s.tipus === "vol" && !s.extra.data) s.extra.data = isoDia(s.dia_id);
-          if(s.tipus !== "hotel" && s.extra.tot_viatge){ treureTotViatge(s); pintarGenerals(); }
+          if(!IT.TOT_VIATGE.includes(s.tipus) && s.extra.tot_viatge){ treureTotViatge(s); pintarGenerals(); }
           s._obert = true; repintarLlistaSrv(s.dia_id); brut(); return;
         }
         if(k !== "opcional") resum();
@@ -682,8 +683,13 @@ function htmlHotelEd(s){
       <div><label>Tipus d'allotjament</label><select data-ex="allotjament">${opc(IT.ALLOTJAMENTS, e.allotjament || "")}</select></div>
       <div><label>Categoria</label><select data-ex="estrelles"><option value="">—</option>${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(e.estrelles) === n ? "selected" : ""}>${"★".repeat(n)}</option>`).join("")}</select></div>
       <div class="ample"><label>Règim</label><select data-ex="regim">${opc(IT.REGIMS, e.regim || "")}</select></div>
-      <div class="ample"><label class="check"><input type="checkbox" data-ex="tot_viatge" ${e.tot_viatge ? "checked" : ""}> <span>Mateix allotjament per a tot l'itinerari <span class="opc">(surt a tots els dies)</span></span></label></div>
     </div></div>`;
+}
+function htmlTotViatgeEd(s){
+  const e = s.extra || {};
+  const txt = s.tipus === "hotel" ? `Mateix allotjament per a tot l'itinerari <span class="opc">(surt a tots els dies)</span>`
+    : `És per a tot el viatge <span class="opc">(no és d'un dia concret; surt a «Serveis del viatge»)</span>`;
+  return `<div class="ample"><label class="check"><input type="checkbox" data-ex="tot_viatge" ${e.tot_viatge ? "checked" : ""}> <span>${txt}</span></label></div>`;
 }
 function treureTotViatge(s){
   const e = s.extra || {};
