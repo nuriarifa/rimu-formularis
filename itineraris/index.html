@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Itinerari · Rimu Viatges</title>
+<title>El teu itinerari de viatge</title>
 <meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Proposta de viatge personalitzada: dia a dia, serveis i preu. · Propuesta de viaje personalizada: día a día, servicios y precio.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="✈️ El teu itinerari de viatge · Tu itinerario de viaje">
+<meta property="og:description" content="Proposta personalitzada preparada per la teva agència de viatges. · Propuesta personalizada preparada por tu agencia de viajes.">
+<meta name="theme-color" content="#3D698E">
 <link rel="stylesheet" href="../estil.css">
 <link rel="stylesheet" href="it.css">
 <script src="../config.js"></script>
@@ -63,7 +68,7 @@ const T = {
 const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const { esc, text, euros } = IT;
-const token = (new URLSearchParams(location.search).get("i") || "").replace(/[^a-f0-9]/g, "");
+const token = (new URLSearchParams(location.search).get("i") || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 let D = null, t = T.ca, N = 1;
 const DIES_OBERTS = {};
 
