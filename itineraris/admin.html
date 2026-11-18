@@ -174,7 +174,9 @@
 
       <div class="targeta">
         <h2>Informació important</h2>
-        <textarea id="eNotes" placeholder="Què inclou i què no, condicions, documentació necessària, forma de pagament…" style="min-height:120px"></textarea>
+        <p class="meta" style="margin-top:-6px">Omple només els apartats que vulguis: els buits no surten al client.</p>
+        <div id="infoEd"></div>
+        <div class="avisos" id="avisosEd"></div>
       </div>
 
       <div class="targeta">
@@ -339,7 +341,7 @@ const waLink = i => "https://wa.me/?text=" + encodeURIComponent(missatgeWA(i));
 /* ================= EDITOR: obrir ================= */
 $("btnNou").onclick = () => {
   E = { nou: true, it: { id: uuid(), titol: "", client_nom: "", destinacio: "", data_inici: null, data_fi: null, num_persones: 2,
-        idioma: "ca", mostrar_preus: true, introduccio: "", notes: "", imatge_portada: null, seleccio: {} },
+        idioma: "ca", mostrar_preus: true, introduccio: "", notes: "", info: {}, imatge_portada: null, seleccio: {} },
         dies: [], serveis: [], docs: [] };
   mostrarEditor();
 };
@@ -366,8 +368,9 @@ function mostrarEditor(){
   $("eTitol").value = it.titol; $("eClient").value = it.client_nom; $("eDesti").value = it.destinacio;
   $("eInici").value = it.data_inici || ""; $("eFi").value = it.data_fi || ""; $("ePers").value = it.num_persones;
   document.querySelector(`input[name=eIdioma][value=${it.idioma}]`).checked = true;
-  $("eMostrar").checked = it.mostrar_preus; $("eIntro").value = it.introduccio; $("eNotes").value = it.notes;
-  pintarPortada(); pintarDies(); pintarGenerals(); pintarDocs(); pintarEnllacos();
+  $("eMostrar").checked = it.mostrar_preus; $("eIntro").value = it.introduccio;
+  it.info = it.info || {};
+  pintarInfo(); pintarPortada(); pintarDies(); pintarGenerals(); pintarDocs(); pintarEnllacos();
   $("activitat").classList.toggle("amagat", E.nou);
   $("btnEsborrar").classList.toggle("amagat", E.nou);
   if(!E.nou) carregarActivitat();
@@ -386,7 +389,7 @@ function pintarEnllacos(){
 }
 
 /* ---------- camps generals ---------- */
-const lligams = { eTitol: "titol", eClient: "client_nom", eDesti: "destinacio", eIntro: "introduccio", eNotes: "notes" };
+const lligams = { eTitol: "titol", eClient: "client_nom", eDesti: "destinacio", eIntro: "introduccio" };
 Object.entries(lligams).forEach(([id, k]) => $(id).addEventListener("input", () => { E.it[k] = $(id).value; brut(); }));
 $("eInici").addEventListener("change", () => {
   E.it.data_inici = $("eInici").value || null;
@@ -395,7 +398,39 @@ $("eInici").addEventListener("change", () => {
 });
 $("eFi").addEventListener("change", () => { E.it.data_fi = $("eFi").value || null; brut(); pintarDies(); });
 $("ePers").addEventListener("input", () => { E.it.num_persones = Math.max(1, Math.min(99, parseInt($("ePers").value) || 1)); brut(); });
-document.querySelectorAll("input[name=eIdioma]").forEach(r => r.onchange = () => { E.it.idioma = r.value; brut(); });
+document.querySelectorAll("input[name=eIdioma]").forEach(r => r.onchange = () => { E.it.idioma = r.value; brut(); pintarAvisos(); });
+
+/* ---------- informació important ---------- */
+const PH_INFO = {
+  inclou: "Un concepte per línia. Ex.:\nVols d'anada i tornada\n7 nits d'hotel amb esmorzar",
+  no_inclou: "Un concepte per línia. Ex.:\nTaxes turístiques locals\nÀpats no especificats",
+  documentacio: "Ex.: Passaport amb una validesa mínima de 6 mesos. Visat electrònic…",
+  pagament: "Ex.: 30% a la reserva i la resta 30 dies abans de la sortida. Transferència o targeta.",
+  cancelacio: "Ex.: Fins a 45 dies abans: 10%. De 44 a 15 dies: 50%…",
+  altres: "Qualsevol altra informació útil"
+};
+function pintarInfo(){
+  $("infoEd").innerHTML = IT.INFO.map(a => `<div class="camp">
+    <div class="cap-camp"><label>${a.ico} ${esc(a.ca)}</label>${a.k === "inclou" ? `<button type="button" class="ia" id="btnOmplirInclou">↧ Omplir amb els serveis</button>` : ""}</div>
+    <textarea data-info="${a.k}" placeholder="${esc(PH_INFO[a.k])}">${esc(IT.valorInfo(E.it, a.k))}</textarea></div>`).join("");
+  $("infoEd").querySelectorAll("[data-info]").forEach(ta => ta.addEventListener("input", () => {
+    if(ta.dataset.info === "altres") E.it.notes = ta.value; else E.it.info[ta.dataset.info] = ta.value;
+    brut();
+  }));
+  $("btnOmplirInclou").onclick = () => {
+    const ta = $("infoEd").querySelector('[data-info="inclou"]');
+    const ordre = [null, ...E.dies.map(d => d.id)];
+    const l = ordre.flatMap(did => serveisDe(did)).filter(s => s.nom.trim()).map(s => s.nom.trim() + (s.opcional ? " (opcional)" : ""));
+    if(!l.length){ toast("Encara no hi ha serveis"); return; }
+    if(ta.value.trim() && !confirm("Substituir el que ja hi ha escrit?")) return;
+    ta.value = [...new Set(l)].join("\n"); E.it.info.inclou = ta.value; brut();
+  };
+  pintarAvisos();
+}
+function pintarAvisos(){
+  $("avisosEd").innerHTML = `<strong style="font-size:12px">Surt sempre al final (no cal escriure-ho):</strong>` +
+    (IT.AVISOS[E.it.idioma] || IT.AVISOS.ca).map(x => `<p>${esc(x)}</p>`).join("");
+}
 $("eMostrar").onchange = () => { E.it.mostrar_preus = $("eMostrar").checked; brut(); };
 
 /* ---------- imatges ---------- */
@@ -631,7 +666,7 @@ async function desar(){
     const it = E.it;
     const fila = { id: it.id, titol: it.titol.trim(), client_nom: it.client_nom.trim(), destinacio: it.destinacio.trim(), data_inici: it.data_inici || null,
       data_fi: it.data_fi || null, num_persones: it.num_persones, idioma: it.idioma, mostrar_preus: it.mostrar_preus,
-      introduccio: it.introduccio, notes: it.notes, imatge_portada: it.imatge_portada };
+      introduccio: it.introduccio, notes: it.notes, info: it.info || {}, imatge_portada: it.imatge_portada };
     const r1 = await sb.from("it_itineraris").upsert(fila).select().single();
     if(r1.error) throw r1.error;
     E.it = r1.data;
