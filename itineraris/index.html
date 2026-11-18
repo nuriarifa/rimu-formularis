@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Itinerari · Rimu Viatges</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="../estil.css">
+<link rel="stylesheet" href="it.css">
+<script src="../config.js"></script>
+<script src="../logo.js"></script>
+<script src="comu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="cap">
+  <img class="logo" alt="Rimu Viatges">
+  <div class="lema" id="lema"></div>
+</header>
+
+<main class="contingut" id="app">
+  <div class="carregant" id="carregant">Carregant… · Cargando…</div>
+</main>
+
+<div class="barra-total amagat" id="barra">
+  <div class="dins">
+    <div>
+      <div class="total" id="bTotal"></div>
+      <div class="pp" id="bPP"></div>
+    </div>
+    <button class="boto" id="btnPdf"></button>
+  </div>
+</div>
+<div class="toast" id="toast" style="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 18px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20"></div>
+
+<script>
+const T = {
+  ca: {
+    lema: "EL TEU ITINERARI", persones: n => n === 1 ? "1 persona" : `${n} persones`, dia: "Dia",
+    serveisViatge: "Serveis del viatge", observacions: "Informació important", documents: "Documents",
+    total: "Total", perPersona: "per persona", pdf: "Descarregar PDF", opcional: "Opcional",
+    inclos: "Inclòs", tret: "No inclòs", perQuantes: "Per a quantes persones:",
+    noTrobat: "No hem trobat aquest itinerari. Revisa l'enllaç o contacta amb l'agència.",
+    noDesat: "No s'ha pogut desar el canvi. Torna-ho a provar.",
+    pdfAjuda: "Tria «Desa com a PDF» a la finestra que s'obrirà.",
+    resum: "Resum del preu", preuNota: "Preu calculat amb els serveis opcionals que tens marcats.",
+    locale: "ca-ES"
+  },
+  es: {
+    lema: "TU ITINERARIO", persones: n => n === 1 ? "1 persona" : `${n} personas`, dia: "Día",
+    serveisViatge: "Servicios del viaje", observacions: "Información importante", documents: "Documentos",
+    total: "Total", perPersona: "por persona", pdf: "Descargar PDF", opcional: "Opcional",
+    inclos: "Incluido", tret: "No incluido", perQuantes: "Para cuántas personas:",
+    noTrobat: "No hemos encontrado este itinerario. Revisa el enlace o contacta con la agencia.",
+    noDesat: "No se ha podido guardar el cambio. Vuelve a intentarlo.",
+    pdfAjuda: "Elige «Guardar como PDF» en la ventana que se abrirá.",
+    resum: "Resumen del precio", preuNota: "Precio calculado con los servicios opcionales que tienes marcados.",
+    locale: "es-ES"
+  }
+};
+
+const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+const { esc, text, euros } = IT;
+const token = (new URLSearchParams(location.search).get("i") || "").replace(/[^a-f0-9]/g, "");
+let D = null, t = T.ca, N = 1;
+
+function toast(x){ const e = $("toast"); e.textContent = x; e.style.opacity = 1; setTimeout(() => e.style.opacity = 0, 2600); }
+
+async function carregar(){
+  if(!token){ $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
+  const { data, error } = await sb.rpc("it_public_get", { p_token: token });
+  if(error || !data){ $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
+  D = data; t = T[D.idioma] || T.ca; N = D.num_persones || 1;
+  document.documentElement.lang = D.idioma;
+  document.title = (D.titol || "Itinerari") + " · " + ((D.agencia || {}).nom || "Rimu Viatges");
+  IT.aplicarColors(D.agencia);
+  $("lema").textContent = t.lema;
+  pintar();
+  // Registra la visita (sense bloquejar la pàgina)
+  const mobil = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const so = /iPhone|iPad/i.test(navigator.userAgent) ? "iPhone/iPad" : /Android/i.test(navigator.userAgent) ? "Android" : /Mac/i.test(navigator.userAgent) ? "Mac" : /Win/i.test(navigator.userAgent) ? "Windows" : "";
+  sb.rpc("it_public_event", { p_token: token, p_tipus: "obert", p_detall: { dispositiu: (mobil ? "Mòbil" : "Ordinador") + (so ? " · " + so : "") } });
+}
+
+function htmlServei(s){
+  const tp = IT.TIPUS[s.tipus] || IT.TIPUS.altre;
+  const e = s.opcional ? IT.estatOpcional(s, D.seleccio, N) : { actiu: true, persones: N };
+  let control = "";
+  if(s.opcional){
+    if(s.opcional_per_persones){
+      control = `<div class="control-opc"><span style="font-size:14px">${esc(t.perQuantes)}</span>
+        <span class="comptador"><button type="button" data-menys="${s.id}" ${e.persones <= 0 ? "disabled" : ""} aria-label="−">−</button>
+        <span>${e.persones}</span>
+        <button type="button" data-mes="${s.id}" ${e.persones >= N ? "disabled" : ""} aria-label="+">+</button></span></div>`;
+    } else {
+      control = `<div class="control-opc"><label class="interruptor"><input type="checkbox" data-opc="${s.id}" ${e.actiu ? "checked" : ""}>
+        <span class="pista"></span><span>${esc(e.actiu ? t.inclos : t.tret)}</span></label></div>`;
+    }
+  }
+  const persTxt = s.opcional && s.opcional_per_persones && e.actiu && e.persones < N ? ` · ${esc(t.persones(e.persones))}` : "";
+  return `<div class="servei${e.actiu ? "" : " tret"}" id="s_${s.id}">
+    <div class="ico" aria-hidden="true">${tp.ico}</div>
+    <div class="cos">
+      <div class="tipus">${esc(tp[D.idioma] || tp.ca)}${s.opcional ? `<span class="etiq opc">${esc(t.opcional)}</span>` : ""}</div>
+      <div class="nom">${esc(s.nom)}${persTxt}</div>
+      ${s.detalls ? `<div class="det">${text(s.detalls)}</div>` : ""}
+      ${s.descripcio ? `<div class="desc">${text(s.descripcio)}</div>` : ""}
+      ${s.imatge_url ? `<img class="foto" src="${esc(s.imatge_url)}" alt="" loading="lazy">` : ""}
+      ${control}
+    </div></div>`;
+}
+
+function pintar(){
+  const dates = D.data_inici ? IT.dataCurta(D.data_inici) + (D.data_fi ? " – " + IT.dataCurta(D.data_fi) : "") : "";
+  let h = "";
+  h += `<div class="targeta">
+    ${D.imatge_portada ? `<img class="portada" src="${esc(D.imatge_portada)}" alt="">` : ""}
+    <h1 class="it-titol">${esc(D.titol)}</h1>
+    <div class="it-meta">
+      ${D.client_nom ? `<span>👤 ${esc(D.client_nom)}</span>` : ""}
+      ${D.destinacio ? `<span>📍 ${esc(D.destinacio)}</span>` : ""}
+      ${dates ? `<span>📅 ${esc(dates)}</span>` : ""}
+      <span>👥 ${esc(t.persones(N))}</span>
+    </div>
+    <div class="ratlla"></div>
+    ${D.introduccio ? `<div class="it-intro">${text(D.introduccio)}</div>` : ""}
+  </div>`;
+
+  D.dies.forEach((d, i) => {
+    const serveis = D.serveis.filter(s => s.dia_id === d.id);
+    h += `<section class="dia">
+      <div class="dia-cap"><div class="dia-num"><small>${esc(t.dia)}</small><b>${i + 1}</b></div>
+        <div><div class="dia-titol">${esc(d.titol)}</div>${D.data_inici ? `<div class="dia-data">${esc(IT.dataDia(D.data_inici, i, D.idioma))}</div>` : ""}</div></div>
+      <div class="dia-cos">
+        ${d.descripcio ? `<p>${text(d.descripcio)}</p>` : ""}
+        ${serveis.map(htmlServei).join("")}
+      </div></section>`;
+  });
+
+  const generals = D.serveis.filter(s => !s.dia_id);
+  if(generals.length){
+    h += `<div class="targeta"><h2>${esc(t.serveisViatge)}</h2>${generals.map(htmlServei).join("")}</div>`;
+  }
+  if(D.mostrar_preus){
+    h += `<div class="targeta" id="resum"><h2>${esc(t.resum)}</h2><div id="resumCos"></div>
+      <div class="ajuda">${esc(t.preuNota)}</div></div>`;
+  }
+  if(D.notes){
+    h += `<div class="targeta"><h2>${esc(t.observacions)}</h2><div>${text(D.notes)}</div></div>`;
+  }
+  if(D.documents.length){
+    h += `<div class="targeta docs"><h2>${esc(t.documents)}</h2>` + D.documents.map(doc =>
+      `<a href="${RIMU.SUPABASE_URL}/functions/v1/it-document?t=${token}&d=${doc.id}" target="_blank" rel="noopener">📄 <span>${esc(doc.nom)}</span></a>`).join("") + `</div>`;
+  }
+  h += `<p class="peu">${esc((D.agencia || {}).nom || "Rimu Viatges")} · ${esc((D.agencia || {})["lema_" + D.idioma] || "")}</p>`;
+
+  $("app").innerHTML = h;
+  $("app").classList.add("amb-barra");
+  $("btnPdf").textContent = t.pdf;
+  $("barra").classList.remove("amagat");
+  lligar();
+  actualitzarTotals();
+}
+
+function actualitzarTotals(){
+  if(!D.mostrar_preus){
+    $("bTotal").textContent = ""; $("bPP").textContent = "";
+    return;
+  }
+  const { total, perPersona } = IT.totals(D.serveis, D.seleccio, N);
+  $("bTotal").textContent = euros(total, D.idioma);
+  $("bPP").textContent = `${euros(perPersona, D.idioma)} ${t.perPersona} · ${t.persones(N)}`;
+  const r = $("resumCos");
+  if(r) r.innerHTML = `<div class="resum-preu"><span>${esc(t.total)} (${esc(t.persones(N))})</span><b>${esc(euros(total, D.idioma))}</b></div>
+    <div class="resum-preu"><span>${esc(t.perPersona.charAt(0).toUpperCase() + t.perPersona.slice(1))}</span><b>${esc(euros(perPersona, D.idioma))}</b></div>`;
+}
+
+function repintarServei(id){
+  const s = D.serveis.find(x => x.id === id);
+  const el = $("s_" + id);
+  if(!s || !el) return;
+  el.outerHTML = htmlServei(s);
+  lligar();
+  actualitzarTotals();
+}
+
+async function canviar(id, valor){
+  const s = D.serveis.find(x => x.id === id);
+  const abans = D.seleccio[id];
+  D.seleccio[id] = s.opcional_per_persones ? { actiu: valor > 0, persones: valor } : { actiu: !!valor };
+  repintarServei(id);
+  const { error } = await sb.rpc("it_public_seleccio", {
+    p_token: token, p_servei: id,
+    p_actiu: s.opcional_per_persones ? null : !!valor,
+    p_persones: s.opcional_per_persones ? valor : null
+  });
+  if(error){
+    if(abans === undefined) delete D.seleccio[id]; else D.seleccio[id] = abans;
+    repintarServei(id); toast(t.noDesat);
+  }
+}
+
+function lligar(){
+  document.querySelectorAll("[data-opc]").forEach(i => i.onchange = () => canviar(i.dataset.opc, i.checked));
+  document.querySelectorAll("[data-menys]").forEach(b => b.onclick = () => {
+    const s = D.serveis.find(x => x.id === b.dataset.menys);
+    canviar(s.id, IT.estatOpcional(s, D.seleccio, N).persones - 1);
+  });
+  document.querySelectorAll("[data-mes]").forEach(b => b.onclick = () => {
+    const s = D.serveis.find(x => x.id === b.dataset.mes);
+    canviar(s.id, IT.estatOpcional(s, D.seleccio, N).persones + 1);
+  });
+}
+
+$("btnPdf").onclick = () => {
+  sb.rpc("it_public_event", { p_token: token, p_tipus: "pdf", p_detall: {} });
+  toast(t.pdfAjuda);
+  setTimeout(() => window.print(), 600);
+};
+
+carregar();
+</script>
+</body>
+</html>
