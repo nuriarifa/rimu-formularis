@@ -397,6 +397,7 @@ function htmlSrvEd(s){
         <div><label>${L("Nom", "Nombre")}${s.tipus === "vol" ? ` <span class="opc">${L("(opcional, ex.: Vol d'anada)", "(opcional, ej.: Vuelo de ida)")}</span>` : ""}</label><input data-sc="nom" value="${esc(s.nom)}" placeholder="${esc(nomPh)}"></div>
         ${s.tipus === "vol" ? htmlVolEd(s) : ""}
         ${s.tipus === "hotel" ? htmlHotelEd(s) : ""}
+        ${s.tipus === "excursio" || s.tipus === "trasllat" ? `<div><label>${s.tipus === "trasllat" ? L("Hora de recollida", "Hora de recogida") : L("Hora d'inici", "Hora de inicio")}</label><input data-ex="hora" type="time" value="${esc((s.extra || {}).hora || "")}"></div><div></div>` : ""}
         ${IT.TOT_VIATGE.includes(s.tipus) ? htmlTotViatgeEd(s) : ""}
         <div class="ample"><label>${s.tipus === "vol" ? L("Notes", "Notas") : L("Detalls", "Detalles")} <span class="opc">(${s.tipus === "vol" ? L("opcional, ex.: escala a Doha", "opcional, ej.: escala en Doha") : L("horaris, habitació… surten en petit", "horarios, habitación… salen en pequeño")})</span></label><input data-sc="detalls" value="${esc(s.detalls)}" placeholder="${s.tipus === "hotel" ? L("Ex.: 3 nits · Habitació doble", "Ej.: 3 noches · Habitación doble") : ""}"></div>
         ${s.tipus === "vol" ? "" : `<div class="ample"><div class="cap-camp"><label>${L("Descripció", "Descripción")}</label><button type="button" class="ia" data-ia-srv="${s.id}">✨ ${L("Redactar amb IA", "Redactar con IA")}</button></div>
