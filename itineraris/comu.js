@@ -113,8 +113,8 @@ window.IT = (function(){
     altre:      { ca: "Altre",      es: "Otro" }
   };
   const TXT = {
-    ca: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Tot el viatge", allotjament: "Allotjament" },
-    es: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Todo el viaje", allotjament: "Alojamiento" }
+    ca: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Tot el viatge", allotjament: "Allotjament", inici: "Hora d'inici", recollida: "Hora de recollida" },
+    es: { cabina: "Maleta de cabina", facturada: "Maleta facturada", totViatge: "Todo el viaje", allotjament: "Alojamiento", inici: "Hora de inicio", recollida: "Hora de recogida" }
   };
   const ex = s => s.extra || {};
   function rutaVol(e){ return [e.origen, e.desti].filter(Boolean).join(" → "); }
@@ -138,6 +138,9 @@ window.IT = (function(){
       if(e.cabina) mal.push(`🎒 ${L.cabina}${e.cabina_kg ? " " + esc(e.cabina_kg) + " kg" : ""}`);
       if(e.facturada) mal.push(`🧳 ${L.facturada}${e.facturada_kg ? " " + esc(e.facturada_kg) + " kg" : ""}`);
       if(mal.length) out.push(`<div class="xips-srv">${mal.map(x => `<span>${x}</span>`).join("")}</div>`);
+    }
+    if((s.tipus === "excursio" || s.tipus === "trasllat") && e.hora){
+      out.push(`<div class="det">🕑 <strong>${esc(s.tipus === "trasllat" ? L.recollida : L.inici)}: ${esc(e.hora)}</strong></div>`);
     }
     if(s.tipus === "hotel"){
       const parts = [];
