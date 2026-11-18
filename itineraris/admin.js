@@ -427,8 +427,8 @@ function htmlSrvEd(s){
       </div>
       <div class="fila-botons" style="margin-top:12px;justify-content:space-between">
         <div class="fila-botons" style="gap:4px">
-          <button class="mini" type="button" data-spuja ${i <= 0 ? "disabled" : ""}>↑</button>
-          <button class="mini" type="button" data-sbaixa ${i >= germans.length - 1 ? "disabled" : ""}>↓</button>
+          <button class="mini" type="button" data-spuja ${i <= 0 && (!s.dia_id || esAbans(s)) ? "disabled" : ""} title="${L("Pujar", "Subir")}">↑</button>
+          <button class="mini" type="button" data-sbaixa ${i >= germans.length - 1 && (!s.dia_id || !esAbans(s)) ? "disabled" : ""} title="${L("Baixar", "Bajar")}">↓</button>
           <button class="mini" type="button" data-sdup title="${L("Duplicar", "Duplicar")}">⧉</button>
           <button class="mini perill" type="button" data-sesb>🗑 ${L("Esborrar", "Borrar")}</button>
         </div>
@@ -615,6 +615,17 @@ async function buscarVol(s, boto){
 }
 function moureSrv(s, dir){
   const g = serveisDe(s.dia_id).filter(x => esAbans(x) === esAbans(s)), i = g.findIndex(x => x.id === s.id), j = i + dir;
+  // Dins d'un dia, les fletxes poden passar el servei per sobre o per sota del text del dia
+  if(s.dia_id && j < 0 && !esAbans(s)){
+    s.extra = s.extra || {}; s.extra.abans = true; s.ordre = 9999; s._obert = true;
+    renumerar(serveisDe(s.dia_id).filter(esAbans)); renumerar(serveisDe(s.dia_id).filter(x => !esAbans(x)));
+    repintarLlistaSrv(s.dia_id); brut(); toast(L("Ara surt abans del text del dia", "Ahora sale antes del texto del día")); return;
+  }
+  if(s.dia_id && j >= g.length && esAbans(s)){
+    delete s.extra.abans; s.ordre = -1; s._obert = true;
+    renumerar(serveisDe(s.dia_id).filter(esAbans)); renumerar(serveisDe(s.dia_id).filter(x => !esAbans(x)));
+    repintarLlistaSrv(s.dia_id); brut(); toast(L("Ara surt després del text del dia", "Ahora sale después del texto del día")); return;
+  }
   if(j < 0 || j >= g.length) return;
   [g[i], g[j]] = [g[j], g[i]]; renumerar(g); repintarLlistaSrv(s.dia_id); brut();
 }
