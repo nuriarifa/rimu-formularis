@@ -3,7 +3,7 @@ const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const { esc, euros } = IT;
 const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
-const urlClient = tok => BASE + "index.html?i=" + tok;
+const urlClient = tok => BASE + "?i=" + tok;
 const uuid = () => crypto.randomUUID();
 
 let LANG = "ca";
