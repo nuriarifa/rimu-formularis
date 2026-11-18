@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="it.css">
 <script src="../config.js"></script>
 <script src="comu.js"></script>
+<script src="demo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -69,13 +70,27 @@ const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const { esc, text, euros } = IT;
 // L'enllaç pot portar el nom del viatge davant del codi: ?i=japo-en-familia-k7m2p9xq4t (el codi és l'última part)
-const token = ((new URLSearchParams(location.search).get("i") || "").toLowerCase().split("-").pop() || "").replace(/[^a-z0-9]/g, "");
+const PARAMS = new URLSearchParams(location.search);
+const DEMO = PARAMS.has("demo");   // ?demo → exemple de demostració, no toca la base de dades
+const token = DEMO ? "demo" : ((PARAMS.get("i") || "").toLowerCase().split("-").pop() || "").replace(/[^a-z0-9]/g, "");
 let D = null, t = T.ca, N = 1;
 const DIES_OBERTS = {};
 
 function toast(x){ const e = $("toast"); e.textContent = x; e.style.opacity = 1; setTimeout(() => e.style.opacity = 0, 2600); }
 
 async function carregar(){
+  if(DEMO){
+    D = IT_DEMO.publica(PARAMS.get("demo"));
+    D.seleccio = D.seleccio || {};
+    t = T[D.idioma] || T.ca; N = D.num_persones || 1;
+    document.documentElement.lang = D.idioma;
+    document.title = (D.titol || "Itinerari") + " · " + D.agencia.nom;
+    IT.aplicarColors(D.agencia); IT.carregarLogo(D.agencia);
+    $("lema").textContent = t.lema;
+    pintar();
+    IT_DEMO.afegirEvent(D._id, "obert", { dispositiu: D.idioma === "es" ? "Demostración" : "Demostració" });
+    return;
+  }
   if(!token){ IT.carregarLogo(null); $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
   const { data, error } = await sb.rpc("it_public_get", { p_token: token });
   if(error || !data){ IT.carregarLogo(null); $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
@@ -124,6 +139,8 @@ function htmlServei(s){
 function pintar(){
   const dates = D.data_inici ? IT.dataCurta(D.data_inici) + (D.data_fi ? " – " + IT.dataCurta(D.data_fi) : "") : "";
   let h = "";
+  if(DEMO) h += `<div class="targeta no-print" style="background:var(--coral-clar);border:1px dashed var(--coral);padding:12px 16px;font-size:14px">
+    👀 <strong>${D.idioma === "es" ? "Ejemplo de demostración" : "Exemple de demostració"}</strong> · ${D.idioma === "es" ? "Así es como el cliente ve su itinerario. Puedes quitar y poner opcionales para ver cómo cambia el precio." : "Així és com el client veu el seu itinerari. Pots treure i posar opcionals per veure com canvia el preu."}</div>`;
   h += `<div class="targeta">
     ${D.imatge_portada ? `<img class="portada" src="${esc(D.imatge_portada)}" alt="">` : ""}
     <h1 class="it-titol">${esc(D.titol)}</h1>
@@ -178,7 +195,7 @@ function pintar(){
     `<div class="avisos">${(IT.AVISOS[D.idioma] || IT.AVISOS.ca).map(x => `<p>${esc(x)}</p>`).join("")}</div></div>`;
   if(D.documents.length){
     h += `<div class="targeta docs"><h2>${esc(t.documents)}</h2>` + D.documents.map(doc =>
-      `<a href="${RIMU.SUPABASE_URL}/functions/v1/it-document?t=${token}&d=${doc.id}" target="_blank" rel="noopener">📄 <span>${esc(doc.nom)}</span></a>`).join("") + `</div>`;
+      `<a href="${DEMO ? "#" : `${RIMU.SUPABASE_URL}/functions/v1/it-document?t=${token}&d=${doc.id}`}" ${DEMO ? "data-docdemo" : ""} target="_blank" rel="noopener">📄 <span>${esc(doc.nom)}</span></a>`).join("") + `</div>`;
   }
   h += `<p class="peu">${esc((D.agencia || {}).nom || "Rimu Viatges")} · ${esc((D.agencia || {})["lema_" + D.idioma] || "")}</p>`;
 
@@ -188,6 +205,7 @@ function pintar(){
   $("barra").classList.remove("amagat");
   lligar();
   actualitzarTotals();
+  document.querySelectorAll("[data-docdemo]").forEach(a => a.onclick = e => { e.preventDefault(); toast(D.idioma === "es" ? "En la demostración los documentos no se abren" : "A la demostració els documents no s'obren"); });
   document.querySelectorAll("details.dia").forEach(x => x.addEventListener("toggle", () => { DIES_OBERTS[x.dataset.dia] = x.open; }));
   const bp = $("btnPlegar"), bd = $("btnDesplegar");
   if(bp) bp.onclick = () => document.querySelectorAll("details.dia").forEach(x => x.open = false);
@@ -233,6 +251,7 @@ async function canviar(id, valor){
   const abans = D.seleccio[id];
   D.seleccio[id] = s.opcional_per_persones ? { actiu: valor > 0, persones: valor } : { actiu: !!valor };
   repintarServei(id);
+  if(DEMO){ IT_DEMO.desarSeleccio(D._id, D.seleccio, id, s.opcional_per_persones ? { persones: valor } : { actiu: !!valor }); return; }
   const { error } = await sb.rpc("it_public_seleccio", {
     p_token: token, p_servei: id,
     p_actiu: s.opcional_per_persones ? null : !!valor,
@@ -257,7 +276,7 @@ function lligar(){
 }
 
 $("btnPdf").onclick = () => {
-  sb.rpc("it_public_event", { p_token: token, p_tipus: "pdf", p_detall: {} });
+  if(DEMO) IT_DEMO.afegirEvent(D._id, "pdf", {}); else sb.rpc("it_public_event", { p_token: token, p_tipus: "pdf", p_detall: {} });
   toast(t.pdfAjuda);
   setTimeout(() => window.print(), 600);
 };
