@@ -8,13 +8,12 @@
 <link rel="stylesheet" href="../estil.css">
 <link rel="stylesheet" href="it.css">
 <script src="../config.js"></script>
-<script src="../logo.js"></script>
 <script src="comu.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="cap">
-  <img class="logo" alt="Rimu Viatges">
+  <img class="logo" alt="" style="visibility:hidden">
   <div class="lema" id="lema"></div>
 </header>
 
@@ -68,13 +67,14 @@ let D = null, t = T.ca, N = 1;
 function toast(x){ const e = $("toast"); e.textContent = x; e.style.opacity = 1; setTimeout(() => e.style.opacity = 0, 2600); }
 
 async function carregar(){
-  if(!token){ $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
+  if(!token){ IT.carregarLogo(null); $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
   const { data, error } = await sb.rpc("it_public_get", { p_token: token });
-  if(error || !data){ $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
+  if(error || !data){ IT.carregarLogo(null); $("app").innerHTML = `<div class="targeta centre">${esc(T.ca.noTrobat)}<br><br>${esc(T.es.noTrobat)}</div>`; return; }
   D = data; t = T[D.idioma] || T.ca; N = D.num_persones || 1;
   document.documentElement.lang = D.idioma;
   document.title = (D.titol || "Itinerari") + " · " + ((D.agencia || {}).nom || "Rimu Viatges");
   IT.aplicarColors(D.agencia);
+  IT.carregarLogo(D.agencia);
   $("lema").textContent = t.lema;
   pintar();
   // Registra la visita (sense bloquejar la pàgina)

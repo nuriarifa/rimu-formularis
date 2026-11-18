@@ -155,5 +155,22 @@ window.IT = (function(){
   // Tipus de servei que es poden marcar com a "per a tot el viatge"
   const TOT_VIATGE = ["hotel", "asseguranca", "excursio", "trasllat", "altre"];
 
-  return { TOT_VIATGE, REGIMS, ALLOTJAMENTS, TXT, nomServei, rutaVol, htmlExtra, INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
+  // Carrega el logo de l'agència (els fitxers són a la carpeta de dalt: logo.js o logo-xxx-1.js, -2.js…)
+  function carregarLogo(ag){
+    const fitxers = String((ag && ag.logo_fitxer) || "logo.js").split(",").map(f => f.trim().replace(/[^a-z0-9._-]/gi, "")).filter(Boolean);
+    window.LOGO_PARTS = [];
+    let pendents = fitxers.length;
+    const mostrar = () => {
+      const src = window.LOGO_PARTS.length ? window.LOGO_PARTS.join("") : window.RIMU_LOGO;
+      document.querySelectorAll("img.logo").forEach(i => { if(src) i.src = src; i.alt = (ag && ag.nom) || ""; i.style.visibility = "visible"; });
+    };
+    fitxers.forEach(f => {
+      const s = document.createElement("script");
+      s.src = "../" + f;
+      s.onload = s.onerror = () => { if(--pendents === 0) mostrar(); };
+      document.head.appendChild(s);
+    });
+  }
+
+  return { carregarLogo, TOT_VIATGE, REGIMS, ALLOTJAMENTS, TXT, nomServei, rutaVol, htmlExtra, INFO, AVISOS, valorInfo, llista, TIPUS, esc, text, num, euros, preuPersona, estatOpcional, importServei, totals, dataDia, dataCurta, aplicarColors };
 })();
