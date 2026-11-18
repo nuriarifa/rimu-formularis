@@ -4,7 +4,11 @@
 .it-meta{color:var(--gris);font-size:15px;display:flex;flex-wrap:wrap;gap:4px 14px}
 .it-intro{margin-top:12px;font-size:16px}
 .dia{background:#fff;border:1px solid var(--linia);border-radius:14px;margin-bottom:16px;overflow:hidden}
-.dia-cap{display:flex;gap:12px;align-items:center;padding:16px 18px;background:var(--blau-clar)}
+.dia-cap{display:flex;gap:12px;align-items:center;padding:16px 18px;background:var(--blau-clar);cursor:pointer;list-style:none}
+.dia-cap::-webkit-details-marker{display:none}
+.dia .fletxa{font-size:22px;color:var(--blau);transition:transform .2s;line-height:1}
+.dia:not([open]) .fletxa{transform:rotate(-90deg)}
+.plegar{display:flex;gap:8px;justify-content:flex-end;margin:0 0 10px;flex-wrap:wrap}
 .dia-num{background:var(--blau);color:#fff;border-radius:12px;min-width:52px;text-align:center;padding:6px 8px;line-height:1.1}
 .dia-num small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
 .dia-num b{font-size:20px}
@@ -62,7 +66,7 @@
 @media print{
   @page{margin:14mm 12mm}
   body{background:#fff;font-size:12.5px}
-  .barra-total,.control-opc,.no-print,.docs{display:none!important}
+  .barra-total,.control-opc,.no-print,.docs,.dia .fletxa{display:none!important}
   .nomes-print{display:block}
   .amb-barra{padding-bottom:0}
   .contingut{max-width:none;padding:0}
