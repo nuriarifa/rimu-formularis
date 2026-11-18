@@ -68,7 +68,8 @@ const T = {
 const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const { esc, text, euros } = IT;
-const token = (new URLSearchParams(location.search).get("i") || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+// L'enllaç pot portar el nom del viatge davant del codi: ?i=japo-en-familia-k7m2p9xq4t (el codi és l'última part)
+const token = ((new URLSearchParams(location.search).get("i") || "").toLowerCase().split("-").pop() || "").replace(/[^a-z0-9]/g, "");
 let D = null, t = T.ca, N = 1;
 const DIES_OBERTS = {};
 
