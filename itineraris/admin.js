@@ -6,7 +6,11 @@ const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
 // Enllaç del client: nom del viatge (decoratiu) + codi. Ex.: .../itineraris/?i=japo-en-familia-k7m2p9xq4t
 const slug = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/l·l/g, "ll")
   .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
-const urlClient = it => BASE + "?i=" + (slug(it.titol) ? slug(it.titol) + "-" : "") + it.token;
+const DEMO = new URLSearchParams(location.search).has("demo");   // admin.html?demo → demostració: res no es desa a la base de dades
+const urlClient = it => DEMO ? BASE + "?demo=" + it.id : BASE + "?i=" + (slug(it.titol) ? slug(it.titol) + "-" : "") + it.token;
+const urlPanell = q => "admin.html" + (DEMO ? "?demo" + (q ? "&" + q : "") : (q ? "?" + q : ""));
+let DEMO_E = null;      // dades de la demo (només al navegador)
+const nomesDemo = () => toast(L("A la demostració això no està disponible", "En la demostración esto no está disponible"));
 const uuid = () => crypto.randomUUID();
 
 let LANG = "ca";
@@ -46,6 +50,8 @@ function canviarIdioma(nou){
   LANG = nou;
   try { localStorage.setItem("it_lang", LANG); } catch(e) {}
   traduirEstatic();
+  if(DEMO && !BRUT && !E){ DEMO_E = IT_DEMO.carregar(LANG); }
+  if(DEMO) $("lnkSortir").textContent = L("Sortir de la demostració", "Salir de la demostración");
   // Torna a pintar el que hi hagi a la pantalla
   if(E){ pintarInfo(); pintarDies(); pintarGenerals(); pintarDocs(); actualitzarTotal(); if(!E.nou) carregarActivitat(); }
   else if(!$("panLlista").classList.contains("amagat") && USER) carregarLlista();
@@ -56,6 +62,7 @@ document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => canv
 /* ================= SESSIÓ ================= */
 async function iniciar(){
   traduirEstatic();
+  if(DEMO){ entrarDemo(); return; }
   const { data: { session } } = await sb.auth.getSession();
   if(session) await entrar(); else mostrarLogin();
 }
@@ -82,6 +89,21 @@ async function entrar(){
   const obrir = new URLSearchParams(location.search).get("e");
   if(obrir) obrirEditor(obrir); else carregarLlista();
 }
+function entrarDemo(){
+  DEMO_E = IT_DEMO.carregar(LANG);
+  USER = { id: "demo" }; P = { email: "demo", superadmin: false, agencia: IT_DEMO.AGENCIA };
+  IT.aplicarColors(P.agencia); IT.carregarLogo(P.agencia);
+  $("bandaDemo").classList.remove("amagat");
+  $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
+  $("lnkSortir").textContent = L("Sortir de la demostració", "Salir de la demostración");
+  const obrir = new URLSearchParams(location.search).get("e");
+  if(obrir) obrirEditor(obrir); else carregarLlista();
+}
+const desarDemo = () => { DEMO_E.tocat = true; IT_DEMO.desar(DEMO_E); };
+$("btnReiniciarDemo").onclick = () => {
+  if(!confirm(L("Tornar a l'exemple inicial? Es perden els canvis que hagis fet a la demostració.", "¿Volver al ejemplo inicial? Se pierden los cambios que hayas hecho en la demostración."))) return;
+  DEMO_E = IT_DEMO.reiniciar(LANG); net(); location.href = urlPanell("");
+};
 $("btnEntrar").onclick = async () => {
   $("lErr").classList.add("amagat"); $("lOk").classList.add("amagat");
   const { error } = await sb.auth.signInWithPassword({ email: $("lEmail").value.trim(), password: $("lPass").value });
@@ -108,7 +130,7 @@ $("lnkCrear").onclick = async e => {
   $("lOk").textContent = L("Compte creat: confirma'l des del correu i després entra.", "Cuenta creada: confírmala desde el correo y después entra.");
   $("lOk").classList.remove("amagat");
 };
-$("lnkSortir").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.href = "admin.html"; };
+$("lnkSortir").onclick = async e => { e.preventDefault(); if(!DEMO) await sb.auth.signOut(); location.href = "admin.html"; };
 
 /* ================= PESTANYES ================= */
 function pestanya(p){
@@ -119,7 +141,7 @@ function pestanya(p){
   $("panBib").classList.toggle("amagat", p !== "bib");
   $("panEditor").classList.add("amagat"); $("barraEd").classList.add("amagat");
   E = null; net();
-  history.replaceState(null, "", "admin.html");
+  history.replaceState(null, "", urlPanell(""));
   if(p === "llista") carregarLlista();
   if(p === "bib") carregarBib().then(pintarBib);
   return true;
@@ -130,10 +152,16 @@ window.addEventListener("beforeunload", e => { if(BRUT){ e.preventDefault(); e.r
 /* ================= LLISTA ================= */
 async function carregarLlista(){
   $("llista").innerHTML = `<div class="targeta centre meta">${L("Carregant…", "Cargando…")}</div>`;
-  const [{ data: its, error }, { data: evs }] = await Promise.all([
+  let its, error, evs;
+  if(DEMO){
+    its = DEMO_E.its.map(x => x.it).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+    evs = DEMO_E.events.filter(e => e.tipus === "obert").sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } else {
+  ({ 0: { data: its, error }, 1: { data: evs } } = await Promise.all([
     sb.from("it_itineraris").select("id,token,titol,client_nom,destinacio,data_inici,data_fi,num_persones,idioma,seleccio_at,updated_at").order("updated_at", { ascending: false }),
     sb.from("it_events").select("itinerari_id,tipus,created_at").eq("tipus", "obert").order("created_at", { ascending: false }).limit(5000)
-  ]);
+  ]));
+  }
   if(error){ $("llista").innerHTML = `<div class="targeta error">Error: ${esc(error.message)}</div>`; return; }
   const vistes = {};
   (evs || []).forEach(e => { const v = vistes[e.itinerari_id] ||= { n: 0, ultim: e.created_at }; v.n++; });
@@ -179,10 +207,18 @@ $("btnNou").onclick = () => {
   E = { nou: true, it: { id: uuid(), titol: "", client_nom: "", destinacio: "", data_inici: null, data_fi: null, num_persones: 2,
         idioma: P.agencia.idioma_fix || LANG, mostrar_preus: true, introduccio: "", notes: "", info: {}, imatge_portada: null, seleccio: {} },
         dies: [], serveis: [], docs: [] };
+  if(DEMO) E.it.token = "demo";
   mostrarEditor();
 };
 
 async function obrirEditor(id){
+  if(DEMO){
+    const x = DEMO_E.its.find(i => i.it.id === id);
+    if(!x){ carregarLlista(); return; }
+    const c = JSON.parse(JSON.stringify(x));
+    E = { nou: false, it: c.it, dies: c.dies, serveis: c.serveis, docs: c.docs || [] };
+    mostrarEditor(); return;
+  }
   const [a, b, c, d] = await Promise.all([
     sb.from("it_itineraris").select("*").eq("id", id).single(),
     sb.from("it_dies").select("*").eq("itinerari_id", id).order("ordre"),
@@ -199,7 +235,7 @@ function mostrarEditor(){
   $("pestanyes").classList.add("amagat");
   $("panLlista").classList.add("amagat"); $("panBib").classList.add("amagat");
   $("panEditor").classList.remove("amagat"); $("barraEd").classList.remove("amagat");
-  history.replaceState(null, "", E.nou ? "admin.html" : "admin.html?e=" + E.it.id);
+  history.replaceState(null, "", E.nou ? urlPanell("") : urlPanell("e=" + E.it.id));
   const it = E.it;
   if(P.agencia.idioma_fix) it.idioma = P.agencia.idioma_fix;
   $("eTitol").value = it.titol; $("eClient").value = it.client_nom; $("eDesti").value = it.destinacio;
@@ -273,7 +309,7 @@ function pintarAvisos(){
 
 /* ---------- imatges ---------- */
 let destiImg = null;
-function triarImatge(callback){ destiImg = callback; $("fImg").value = ""; $("fImg").click(); }
+function triarImatge(callback){ if(DEMO){ nomesDemo(); return; } destiImg = callback; $("fImg").value = ""; $("fImg").click(); }
 $("fImg").onchange = async () => {
   const f = $("fImg").files[0]; if(!f || !destiImg) return;
   toast(L("Pujant la foto…", "Subiendo la foto…"));
@@ -603,7 +639,9 @@ async function buscarVol(s, boto){
   if(!data){ toast(L("Posa la data del vol", "Pon la fecha del vuelo")); return; }
   boto.disabled = true; boto.textContent = "…";
   try{
-    const { data: r, error } = await sb.functions.invoke("it-vol", { body: { numero: e.numero, data } });
+    const { data: r, error } = DEMO
+      ? { data: { numero: e.numero, companyia: "Vueling", origen: "BCN", origen_nom: "Barcelona", desti: "FCO", desti_nom: "Roma", sortida: "07:05", arribada: "08:50" } }
+      : await sb.functions.invoke("it-vol", { body: { numero: e.numero, data } });
     if(error) throw error;
     if(r.error === "FALTA_CLAU"){ alert(L("La cerca de vols encara no està activada. Omple les dades a mà.", "La búsqueda de vuelos todavía no está activada. Rellena los datos a mano.")); return; }
     if(r.error === "NO_TROBAT"){ toast(L("No s'ha trobat aquest vol en aquesta data. Omple-ho a mà.", "No se ha encontrado este vuelo en esta fecha. Rellénalo a mano.")); return; }
@@ -653,6 +691,20 @@ function actualitzarTotal(){
 /* ---------- desar ---------- */
 async function desar(){
   if(!E.it.titol.trim()){ toast(L("Posa el títol del viatge", "Pon el título del viaje")); $("eTitol").focus(); return false; }
+  if(DEMO){
+    renumerar(E.dies); [null, ...E.dies.map(d => d.id)].forEach(did => renumerar(serveisDe(did)));
+    const c = JSON.parse(JSON.stringify({ it: { ...E.it, updated_at: new Date().toISOString() }, dies: E.dies, serveis: E.serveis.map(({ _obert, ...s }) => s), docs: E.docs }));
+    const i = DEMO_E.its.findIndex(x => x.it.id === E.it.id);
+    if(i >= 0) DEMO_E.its[i] = c; else DEMO_E.its.unshift(c);
+    desarDemo();
+    const eraNou = E.nou; E.nou = false;
+    net(); pintarEnllacos();
+    $("activitat").classList.remove("amagat"); $("btnEsborrar").classList.remove("amagat");
+    history.replaceState(null, "", urlPanell("e=" + E.it.id));
+    toast(L("Desat (només en aquesta demostració)", "Guardado (solo en esta demostración)"));
+    if(eraNou) carregarActivitat();
+    return true;
+  }
   const b = $("btnDesar"); b.disabled = true; b.textContent = L("Desant…", "Guardando…");
   try{
     const it = E.it;
@@ -686,7 +738,7 @@ async function desar(){
     const eraNou = E.nou; E.nou = false;
     net(); pintarEnllacos();
     $("activitat").classList.remove("amagat"); $("btnEsborrar").classList.remove("amagat");
-    history.replaceState(null, "", "admin.html?e=" + E.it.id);
+    history.replaceState(null, "", urlPanell("e=" + E.it.id));
     toast(eraNou ? L("Desat! Ja pots enviar l'enllaç al client", "¡Guardado! Ya puedes enviar el enlace al cliente") : L("Desat", "Guardado"));
     if(eraNou) carregarActivitat();
     return true;
@@ -703,12 +755,14 @@ function pintarDocs(){
     <button class="mini perill" type="button" data-desbdoc="${d.id}">🗑</button></span></div>`).join("")
     : `<div class="meta">${L("Cap document.", "Ningún documento.")}</div>`;
   $("docs").querySelectorAll("[data-dveure]").forEach(b => b.onclick = async () => {
+    if(DEMO){ nomesDemo(); return; }
     const d = E.docs.find(x => x.id === b.dataset.dveure);
     const w = window.open("", "_blank");
     const { data } = await sb.storage.from("it-documents").createSignedUrl(d.path, 300);
     if(data && w) w.location = data.signedUrl; else if(w) w.close();
   });
   $("docs").querySelectorAll("[data-desbdoc]").forEach(b => b.onclick = async () => {
+    if(DEMO){ nomesDemo(); return; }
     const d = E.docs.find(x => x.id === b.dataset.desbdoc);
     if(!confirm(L(`Esborrar «${d.nom}»?`, `¿Borrar «${d.nom}»?`))) return;
     await sb.storage.from("it-documents").remove([d.path]);
@@ -718,6 +772,7 @@ function pintarDocs(){
   });
 }
 $("btnDoc").onclick = async () => {
+  if(DEMO){ toast(L("A la demostració no es poden pujar documents", "En la demostración no se pueden subir documentos")); return; }
   if(E.nou || BRUT){
     if(!confirm(L("Primer cal desar l'itinerari. Vols desar-lo ara?", "Primero hay que guardar el itinerario. ¿Quieres guardarlo ahora?"))) return;
     if(!(await desar())) return;
@@ -741,10 +796,18 @@ $("fDoc").onchange = async () => {
 async function carregarActivitat(){
   if(!E || E.nou) return;
   const id = E.it.id;
+  if(DEMO){
+    DEMO_E = IT_DEMO.carregar(null);
+    const x = DEMO_E.its.find(i => i.it.id === id);
+    return pintarActivitat(id, DEMO_E.events.filter(e => e.itinerari_id === id).sort((a, b) => b.created_at.localeCompare(a.created_at)), { seleccio: x ? x.it.seleccio : {} });
+  }
   const [{ data: evs }, { data: it }] = await Promise.all([
     sb.from("it_events").select("*").eq("itinerari_id", id).order("created_at", { ascending: false }).limit(300),
     sb.from("it_itineraris").select("seleccio,seleccio_at").eq("id", id).single()
   ]);
+  pintarActivitat(id, evs, it);
+}
+function pintarActivitat(id, evs, it){
   if(!E || E.it.id !== id) return;
   const sel = (it && it.seleccio) || {};
   const oberts = (evs || []).filter(e => e.tipus === "obert");
@@ -783,12 +846,14 @@ $("btnActRefresca").onclick = carregarActivitat;
 /* ---------- esborrar / duplicar ---------- */
 $("btnEsborrar").onclick = async () => {
   if(!confirm(L("Segur que vols esborrar aquest itinerari? L'enllaç del client deixarà de funcionar. No es pot desfer.", "¿Seguro que quieres borrar este itinerario? El enlace del cliente dejará de funcionar. No se puede deshacer."))) return;
+  if(DEMO){ DEMO_E.its = DEMO_E.its.filter(x => x.it.id !== E.it.id); desarDemo(); net(); toast(L("Esborrat", "Borrado")); pestanya("llista"); return; }
   if(E.docs.length) await sb.storage.from("it-documents").remove(E.docs.map(d => d.path));
   const { error } = await sb.from("it_itineraris").delete().eq("id", E.it.id);
   if(error){ toast(L("No s'ha pogut esborrar", "No se ha podido borrar")); return; }
   net(); toast(L("Esborrat", "Borrado")); pestanya("llista");
 };
 async function duplicar(id, boto){
+  if(DEMO){ nomesDemo(); return; }
   boto.disabled = true;
   try{
     const [a, b, c] = await Promise.all([
@@ -812,6 +877,12 @@ async function duplicar(id, boto){
 
 /* ================= IA ================= */
 async function demanarIA(boto, que, context, notes){
+  if(DEMO){
+    const txt = boto.textContent; boto.disabled = true; boto.textContent = L("✨ Escrivint…", "✨ Escribiendo…");
+    await new Promise(r => setTimeout(r, 900)); boto.disabled = false; boto.textContent = txt;
+    toast(L("Text d'exemple: a la versió real l'escriu la IA", "Texto de ejemplo: en la versión real lo escribe la IA"));
+    return IT_DEMO.textIA(que, E.it.idioma, context);
+  }
   const txt = boto.textContent; boto.disabled = true; boto.textContent = L("✨ Escrivint…", "✨ Escribiendo…");
   try{
     const { data, error } = await sb.functions.invoke("it-redactar", { body: { que, idioma: E.it.idioma, context, notes } });
@@ -841,6 +912,7 @@ async function iaServei(boto, s, det){
 
 /* ================= BIBLIOTECA ================= */
 async function carregarBib(){
+  if(DEMO){ BIB = JSON.parse(JSON.stringify(DEMO_E.bib || [])).sort((a, b) => (a.tipus + a.nom).localeCompare(b.tipus + b.nom)); return; }
   const { data } = await sb.from("it_biblioteca").select("*").order("tipus").order("nom");
   BIB = (data || []).map(b => ({ ...b, preu: Number(b.preu) }));
 }
@@ -878,13 +950,18 @@ function editarBib(b){
     const fila = { tipus: $("bTipus").value, nom: $("bNom").value.trim(), detalls: $("bDet").value.trim(), descripcio: $("bDesc").value.trim(),
       preu: Math.max(0, parseFloat($("bPreu").value) || 0), preu_unitat: $("bUnitat").value, imatge_url: b.imatge_url || null };
     if(!fila.nom){ toast(L("Posa-hi un nom", "Ponle un nombre")); return; }
+    if(DEMO){
+      if(nou) DEMO_E.bib.push({ ...fila, id: uuid(), extra: {} }); else Object.assign(DEMO_E.bib.find(x => x.id === b.id), fila);
+      desarDemo(); $("dlgBibEd").close(); await carregarBib(); pintarBib(); toast(L("Desat", "Guardado")); return;
+    }
     const r = nou ? await sb.from("it_biblioteca").insert(fila) : await sb.from("it_biblioteca").update(fila).eq("id", b.id);
     if(r.error){ toast(L("No s'ha pogut desar", "No se ha podido guardar")); return; }
     $("dlgBibEd").close(); await carregarBib(); pintarBib(); toast(L("Desat", "Guardado"));
   };
   if(!nou) $("bEsb").onclick = async () => {
     if(!confirm(L("Esborrar de la biblioteca? (Els itineraris on ja el tens no canvien.)", "¿Borrar de la biblioteca? (Los itinerarios donde ya lo tienes no cambian.)"))) return;
-    await sb.from("it_biblioteca").delete().eq("id", b.id);
+    if(DEMO){ DEMO_E.bib = DEMO_E.bib.filter(x => x.id !== b.id); desarDemo(); }
+    else await sb.from("it_biblioteca").delete().eq("id", b.id);
     $("dlgBibEd").close(); await carregarBib(); pintarBib(); toast(L("Esborrat", "Borrado"));
   };
 }
@@ -893,6 +970,10 @@ $("bibEdTancar").onclick = () => $("dlgBibEd").close();
 async function desarABib(s){
   if(!IT.nomServei(s)){ toast(L("Posa-li un nom primer", "Ponle un nombre primero")); return; }
   const { tot_viatge, dia_original, data, data_arribada, ...extra } = s.extra || {};
+  if(DEMO){
+    DEMO_E.bib.push({ id: uuid(), tipus: s.tipus, nom: s.nom, detalls: s.detalls, descripcio: s.descripcio, preu: s.preu || 0, preu_unitat: s.preu_unitat, imatge_url: s.imatge_url || null, extra });
+    desarDemo(); toast(L("Desat a la biblioteca 📚", "Guardado en la biblioteca 📚")); return;
+  }
   const { error } = await sb.from("it_biblioteca").insert({ tipus: s.tipus, nom: s.nom, detalls: s.detalls, descripcio: s.descripcio,
     preu: s.preu || 0, preu_unitat: s.preu_unitat, imatge_url: s.imatge_url || null, extra });
   toast(error ? L("No s'ha pogut desar", "No se ha podido guardar") : L("Desat a la biblioteca 📚", "Guardado en la biblioteca 📚"));

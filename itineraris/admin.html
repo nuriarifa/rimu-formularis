@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="it.css">
 <script src="../config.js"></script>
 <script src="comu.js"></script>
+<script src="demo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .contingut{max-width:860px;padding-bottom:120px}
@@ -103,11 +104,17 @@
         <a href="#" id="lnkCrear" style="color:var(--blau)" data-es="¿Primera vez? Crear la contraseña">Primer cop? Crear la contrasenya</a>
       </p>
       <p class="ajuda centre" style="margin-top:10px" data-es="Es el mismo correo y contraseña que el panel de formularios.">És el mateix correu i contrasenya del panell de formularis.</p>
+      <p class="centre" style="margin:16px 0 0;font-size:14px"><a href="admin.html?demo" style="color:var(--blau)" data-es="👀 Ver una demostración (sin cuenta)">👀 Veure una demostració (sense compte)</a></p>
     </div>
   </section>
 
   <!-- APP -->
   <section id="vistaApp" class="amagat">
+    <div id="bandaDemo" class="targeta amagat" style="background:var(--coral-clar,#FBEDEC);border:1px dashed var(--coral,#E79893);padding:12px 16px;margin-bottom:14px">
+      <strong data-es="👀 Modo demostración">👀 Mode demostració</strong>
+      <p style="margin:6px 0 10px;font-size:14px" data-es="Puedes tocarlo todo para ver cómo funciona: los cambios se quedan solo en este navegador, no se crea ningún itinerario de verdad ni se envía nada a ningún cliente.">Pots tocar-ho tot per veure com funciona: els canvis es queden només en aquest navegador, no es crea cap itinerari de veritat ni s'envia res a cap client.</p>
+      <button type="button" class="boto sec petit" id="btnReiniciarDemo" data-es="↺ Volver al ejemplo inicial">↺ Tornar a l'exemple inicial</button>
+    </div>
     <div class="pestanyes" id="pestanyes">
       <button data-p="llista" class="actiu" data-es="🗺️ Itinerarios">🗺️ Itineraris</button>
       <button data-p="bib" data-es="📚 Biblioteca">📚 Biblioteca</button>
