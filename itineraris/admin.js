@@ -3,7 +3,10 @@ const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 const { esc, euros } = IT;
 const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
-const urlClient = tok => BASE + "?i=" + tok;
+// Enllaç del client: nom del viatge (decoratiu) + codi. Ex.: .../itineraris/?i=japo-en-familia-k7m2p9xq4t
+const slug = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/l·l/g, "ll")
+  .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+const urlClient = it => BASE + "?i=" + (slug(it.titol) ? slug(it.titol) + "-" : "") + it.token;
 const uuid = () => crypto.randomUUID();
 
 let LANG = "ca";
@@ -152,8 +155,8 @@ async function carregarLlista(){
       <div class="fila-botons">
         <button class="boto petit" data-ed="${i.id}">✏️ ${L("Editar", "Editar")}</button>
         <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(i)}">WhatsApp</a>
-        <button class="boto sec petit" data-cp="${esc(urlClient(i.token))}">${L("Copiar enllaç", "Copiar enlace")}</button>
-        <a class="boto sec petit" target="_blank" rel="noopener" href="${esc(urlClient(i.token))}">👁 ${L("Veure", "Ver")}</a>
+        <button class="boto sec petit" data-cp="${esc(urlClient(i))}">${L("Copiar enllaç", "Copiar enlace")}</button>
+        <a class="boto sec petit" target="_blank" rel="noopener" href="${esc(urlClient(i))}">👁 ${L("Veure", "Ver")}</a>
         <button class="boto sec petit" data-dup="${i.id}">⧉ ${L("Duplicar", "Duplicar")}</button>
       </div></div>`;
   }).join("");
@@ -166,8 +169,8 @@ $("btnRefresca").onclick = carregarLlista;
 function missatgeWA(i){
   const nom = i.client_nom ? " " + i.client_nom : "";
   if(i.idioma === "es")
-    return `¡Hola${nom}! Te paso la propuesta de viaje «${i.titol}». Puedes ver el itinerario día a día, quitar los servicios opcionales que no te interesen y descargarlo en PDF:\n${urlClient(i.token)}\n\nCualquier duda, me dices. ¡Gracias!\n${nomAgencia()}`;
-  return `Hola${nom}! Et passo la proposta de viatge «${i.titol}». Hi pots veure l'itinerari dia a dia, treure els serveis opcionals que no t'interessin i descarregar-lo en PDF:\n${urlClient(i.token)}\n\nQualsevol dubte, em dius. Gràcies!\n${nomAgencia()}`;
+    return `¡Hola${nom}! Te paso la propuesta de viaje «${i.titol}». Puedes ver el itinerario día a día, quitar los servicios opcionales que no te interesen y descargarlo en PDF:\n${urlClient(i)}\n\nCualquier duda, me dices. ¡Gracias!\n${nomAgencia()}`;
+  return `Hola${nom}! Et passo la proposta de viatge «${i.titol}». Hi pots veure l'itinerari dia a dia, treure els serveis opcionals que no t'interessin i descarregar-lo en PDF:\n${urlClient(i)}\n\nQualsevol dubte, em dius. Gràcies!\n${nomAgencia()}`;
 }
 const waLink = i => "https://wa.me/?text=" + encodeURIComponent(missatgeWA(i));
 
@@ -217,9 +220,9 @@ function pintarEnllacos(){
   const ok = !E.nou && E.it.token;
   ["lnkVeure", "lnkWA", "btnCopiar"].forEach(x => $(x).classList.toggle("amagat", !ok));
   if(!ok) return;
-  $("lnkVeure").href = urlClient(E.it.token);
+  $("lnkVeure").href = urlClient(E.it);
   $("lnkWA").href = waLink(E.it);
-  $("btnCopiar").onclick = () => copiar(urlClient(E.it.token));
+  $("btnCopiar").onclick = () => copiar(urlClient(E.it));
 }
 
 /* ---------- camps generals ---------- */
