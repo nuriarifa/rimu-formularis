@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anonta · Panell de l'agència</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#3D698E">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../estil.css">
+<link rel="stylesheet" href="anonta.css">
+<script src="../config.js"></script>
+<script src="../logo.js"></script>
+<script src="comu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="cap">
+  <img class="logo" alt="">
+  <div class="lema">ANONTA · PANELL DE L'AGÈNCIA</div>
+  <div class="menu amagat" id="menu"><button type="button" id="bSortir">Sortir</button></div>
+</header>
+
+<main class="contingut">
+
+  <!-- ENTRADA -->
+  <section id="vLogin" class="amagat">
+    <form class="targeta" id="fLogin" autocomplete="on">
+      <h2>Entra al panell</h2>
+      <div class="camp"><label for="lEmail">Correu</label><input id="lEmail" type="email" autocomplete="username" required></div>
+      <div class="camp"><label for="lPass">Contrasenya</label><input id="lPass" type="password" autocomplete="current-password" required></div>
+      <button class="boto ample" type="submit">Entra</button>
+      <div class="error" id="lErr"></div>
+      <p class="ajuda">Fes servir el mateix usuari que als formularis i als itineraris.</p>
+    </form>
+  </section>
+
+  <section id="vNoPermis" class="amagat">
+    <div class="targeta centre">
+      <p>Aquest usuari no té accés al panell d'Anonta.</p>
+      <button class="boto sec" type="button" onclick="sortir()">Sortir</button>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="vApp" class="amagat">
+    <nav class="pestanyes grans" id="navPrincipal">
+      <button type="button" data-vista="viatges">🧳 Viatges</button>
+      <button type="button" data-vista="clients">👤 Clients</button>
+    </nav>
+    <div id="pantalla"></div>
+  </section>
+
+</main>
+
+<script src="admin.js"></script>
+</body>
+</html>

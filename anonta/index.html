@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Els meus viatges</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#3D698E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAAwFBMVEU8aI39/v7qmZNAao9pdY9NdZaSgZEvXoZniqbN2OG2xtR4lrDm6/CIo7qlusvb4+qXrsJcgaCcssW7jJLYlJLE0d2Nf5CCnrbGj5LAztpbgJ8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADLt4/kAAAAQHRSTlP///////////////////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJgZR/AAAAkJJREFUeNrt22tzqjAQh/FACBelUqv2cr7/Bz2XKtlgLNA5U3Znnt8rp2NnlrjsH4I6BwAAAAAAAAAAAAAAAAAA8J/5Vgg2Sm6eCuHQeBNld7Lo3kbNoUjsnTfQHS9p0TtnYa2HtOjCwqnYTmountSfir45TIvuDEy8flq0+v7wbj8u8O726ll5f3gXSx2be7AzpFsfX1qJ8N43OytR3sVMcW9Govwo0lu0iuYoFxH+b3EvNqJ8jPBd4+U1ajAR4ft0lOiNcjEvrqfexUCU+/R+xUJ/iAi/xUnsD61R7t3H2B13oT7oj/BrBGbWXvFdePvwOPRG+JC56FMa5cf7VZX9oTHK5V14m+tznVHeZyaF6A+VozpG+Es852R/6ItyEeFFaLIfQKd6M6xL6L0rl23wkL4ov8wXPSjfKs1rNW+kP6ItyrslRSuL8mOxiKYoz2yV5umK8rhVegjtxPFN56gWG+lpHE6fDeiJchnh3X0DyObpVA7p7FK2+vrDN/u5ogaFUR4j/CN/VM/6ojzMDuJf2qI8ifAwG5haorybCw95XEqivF0Q00FXlCcRHpZ8Ghr6QzztfFjPor7fqDu+mAyh19UfYfTlXFz2NgAAvhtInjX4EVVdV8bWOryXf5wrUzWXV9VGV3u+WuOzxvdb0eVGHVKVa/jJv9TbLPWqos9/vwLi6viHk4GVNlm0lvbw9Qqvn98BOZdxfNhJlrjQm11ErJBWXTtT/OvpVFcOP/Ek3cTPSAAAAAAAAAAAAAAAADT6DZIHFUg+0WRKAAAAAElFTkSuQmCC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viatges">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="../estil.css">
+<link rel="stylesheet" href="anonta.css">
+<script src="../config.js"></script>
+<script src="../logo.js"></script>
+<script src="comu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  .cap{padding-top:calc(14px + env(safe-area-inset-top))}
+  .cap .menu{top:calc(12px + env(safe-area-inset-top))}
+  .cap .idiomes{position:absolute;left:12px;top:calc(12px + env(safe-area-inset-top));display:flex;gap:4px}
+  .cap .idiomes button{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--linia);background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--gris)}
+  .cap .idiomes button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .targeta-viatge{padding:0;overflow:hidden;cursor:pointer}
+  .targeta-viatge .img{height:150px;background:var(--blau-clar) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:44px}
+  .targeta-viatge .cos{padding:14px 16px}
+</style>
+</head>
+<body>
+<header class="cap">
+  <div class="idiomes" id="idiomes"><button type="button" data-l="ca">CA</button><button type="button" data-l="es">ES</button></div>
+  <img class="logo" alt="">
+  <div class="lema" id="lema"></div>
+  <div class="menu amagat" id="menu"><button type="button" id="bCompte" aria-label="Compte">👤</button></div>
+</header>
+<main class="contingut" id="main"><p class="meta centre">…</p></main>
+<script src="app.js"></script>
+</body>
+</html>
