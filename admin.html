@@ -176,7 +176,7 @@ const D = {
     rebutsN: "rebuts", ambPass: "Amb passaport", sensePass: "Sense passaport", creatEl: "creat el",
     rebutEl: "Rebut el", esperant: "Esperant resposta", estRebut: "✓ Rebut", estPendent: "Pendent",
     veureDades: "Veure dades", esborrar: "Esborrar", copiarDades: "Copiar totes les dades",
-    fotoDni: "Foto DNI", fotoPass: "Foto passaport", veureFoto: "👁 Veure foto", jaLaTenies: "Ja la tenies",
+    fotoDni: "Foto DNI", fotoPass: "Foto passaport", veureFoto: "👁 Veure foto", baixarFoto: "⬇ Descarregar", jaLaTenies: "Ja la tenies",
     confirmEsb: "Segur que vols esborrar aquest formulari i les seves dades (també les fotos)? No es pot desfer.",
     reobrir: "↺ Reobrir", reobert: "Reobert", noReobert: "No s'ha pogut reobrir",
     confirmReobrir: "El client podrà tornar a veure i corregir les seves dades amb el mateix enllaç fins que les torni a enviar. Vols reobrir-lo?",
@@ -202,7 +202,7 @@ const D = {
     rebutsN: "recibidos", ambPass: "Con pasaporte", sensePass: "Sin pasaporte", creatEl: "creado el",
     rebutEl: "Recibido el", esperant: "Esperando respuesta", estRebut: "✓ Recibido", estPendent: "Pendiente",
     veureDades: "Ver datos", esborrar: "Borrar", copiarDades: "Copiar todos los datos",
-    fotoDni: "Foto DNI", fotoPass: "Foto pasaporte", veureFoto: "👁 Ver foto", jaLaTenies: "Ya la tenías",
+    fotoDni: "Foto DNI", fotoPass: "Foto pasaporte", veureFoto: "👁 Ver foto", baixarFoto: "⬇ Descargar", jaLaTenies: "Ya la tenías",
     confirmEsb: "¿Seguro que quieres borrar este formulario y sus datos (también las fotos)? No se puede deshacer.",
     reobrir: "↺ Reabrir", reobert: "Reabierto", noReobert: "No se ha podido reabrir",
     confirmReobrir: "El cliente podrá volver a ver y corregir sus datos con el mismo enlace hasta que los vuelva a enviar. ¿Quieres reabrirlo?",
@@ -467,18 +467,51 @@ function filaFoto(f, v, tipus, nom){
   if(tipus==="passaport" && f.passaport_obligatori===false) return "";
   const ruta = v["foto_"+tipus];
   let cel;
-  if(ruta) cel = `<button class="boto sec petit" data-foto="${esc(ruta)}">${esc(t.veureFoto)}</button>`;
+  const nomArxiu = [v.nom, v.cognoms, tipus].filter(Boolean).join("_").replace(/\s+/g, "_");
+  if(ruta) cel = `<div class="fila-botons"><button class="boto sec petit" data-foto="${esc(ruta)}">${esc(t.veureFoto)}</button>
+    <button class="boto sec petit" data-baixa="${esc(ruta)}" data-nom="${esc(nomArxiu)}">${esc(t.baixarFoto)}</button></div>`;
   else if(v["te_foto_"+tipus]) cel = `<span class="meta">${esc(t.jaLaTenies)}</span>`;
   else cel = `<span class="meta">—</span>`;
   return `<tr><td>${esc(nom)}</td><td>${cel}</td></tr>`;
 }
+// Les fotos HEIC (iPhone) es converteixen a JPEG abans de mostrar-les o descarregar-les
+const esHeic = ruta => /\.(heic|heif)$/i.test(ruta);
+let heicCarregat = null;
+function carregarHeic(){
+  if(!heicCarregat) heicCarregat = new Promise((ok, ko) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
+    s.onload = ok; s.onerror = ko; document.head.appendChild(s);
+  });
+  return heicCarregat;
+}
+async function blobFoto(ruta){
+  const { data, error } = await sb.storage.from("documents").download(ruta);
+  if(error || !data) throw error || new Error("buit");
+  if(!esHeic(ruta)) return data;
+  await carregarHeic();
+  const r = await heic2any({ blob: data, toType: "image/jpeg", quality: 0.9 });
+  return Array.isArray(r) ? r[0] : r;
+}
 async function obrirFoto(ruta, boto){
   const w = window.open("", "_blank");
   boto.disabled = true;
-  const { data, error } = await sb.storage.from("documents").createSignedUrl(ruta, 600);
-  boto.disabled = false;
-  if(error || !data){ if(w) w.close(); toast(t.noFoto); return; }
-  if(w) w.location = data.signedUrl; else location.href = data.signedUrl;
+  try{
+    const url = URL.createObjectURL(await blobFoto(ruta));
+    if(w) w.location = url; else location.href = url;
+  }catch(e){ if(w) w.close(); toast(t.noFoto); }
+  finally{ boto.disabled = false; }
+}
+async function baixarFoto(ruta, nom, boto){
+  boto.disabled = true;
+  try{
+    const blob = await blobFoto(ruta);
+    const ext = blob.type === "application/pdf" ? "pdf" : blob.type === "image/png" ? "png" : "jpg";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = (nom || "foto") + "." + ext;
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){ toast(t.noFoto); }
+  finally{ boto.disabled = false; }
 }
 function veure(id){
   const box = $("det_"+id);
@@ -495,6 +528,7 @@ function veure(id){
   box.innerHTML = html; box.classList.remove("amagat");
   box.querySelector("[data-copiadades]").onclick = () => copiar(textDades(f));
   box.querySelectorAll("[data-foto]").forEach(b => b.onclick = () => obrirFoto(b.dataset.foto, b));
+  box.querySelectorAll("[data-baixa]").forEach(b => b.onclick = () => baixarFoto(b.dataset.baixa, b.dataset.nom, b));
 }
 async function esborrar(id){
   if(!confirm(t.confirmEsb)) return;
