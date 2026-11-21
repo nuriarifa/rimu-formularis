@@ -160,6 +160,22 @@ window.IT = (function(){
 
   // Carrega el logo de l'agència (els fitxers són a la carpeta de dalt: logo.js o logo-xxx-1.js, -2.js…)
   function carregarLogo(ag){
+    // Agència sense logo: es mostra el nom en lletres
+    if(ag && ag.logo_fitxer === "" && !ag.logo_url){
+      document.querySelectorAll("img.logo").forEach(i => {
+        i.style.display = "none";
+        let t = i.nextElementSibling;
+        if(!t || !t.classList.contains("logo-text")){ t = document.createElement("div"); t.className = "logo-text"; t.style.cssText = "font-size:24px;font-weight:800;color:var(--blau);padding:6px 0;text-align:center"; i.after(t); }
+        t.textContent = ag.nom || "";
+      });
+      return;
+    }
+    // Logo pujat des del panell d'agències (una imatge normal)
+    if(ag && ag.logo_url){
+      document.querySelectorAll("img.logo").forEach(i => { i.src = ag.logo_url; i.alt = ag.nom || ""; i.style.visibility = "visible"; i.style.display = "";
+        const t = i.nextElementSibling; if(t && t.classList.contains("logo-text")) t.remove(); });
+      return;
+    }
     const fitxers = String((ag && ag.logo_fitxer) || "logo.js").split(",").map(f => f.trim().replace(/[^a-z0-9._-]/gi, "")).filter(Boolean);
     window.LOGO_PARTS = [];
     let pendents = fitxers.length;
