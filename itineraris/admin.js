@@ -73,10 +73,10 @@ function mostrarLogin(){
 }
 async function entrar(){
   const { data: { user } } = await sb.auth.getUser();
-  const { data: perfil } = await sb.rpc("perfil_actual");
+  const { data: perfil } = await sb.rpc("perfil_actual", { p_app: "itineraris" });
   if(!user || !perfil){
     await sb.auth.signOut(); mostrarLogin();
-    $("lErr").textContent = L("Aquest compte no té accés als itineraris.", "Esta cuenta no tiene acceso a los itinerarios.");
+    $("lErr").textContent = L("Aquest compte no té accés als itineraris (o la seva agència no els té activats).", "Esta cuenta no tiene acceso a los itinerarios (o su agencia no los tiene activados).");
     $("lErr").classList.remove("amagat"); return;
   }
   USER = user; P = perfil;
@@ -1036,6 +1036,7 @@ function pintarAgencies(){
       <div class="n">${esc(a.nom)}</div>
       <div class="meta">${a.usuaris.length} ${a.usuaris.length === 1 ? L("usuari", "usuario") : L("usuaris", "usuarios")} · ${a.num_itineraris} ${L("itineraris", "itinerarios")}
         · ${a.idioma_fix === "es" ? L("només castellà", "solo castellano") : a.idioma_fix === "ca" ? L("només català", "solo catalán") : L("català i castellà", "catalán y castellano")}</div>
+      <div class="stats" style="margin:6px 0 0">${a.app_itineraris ? `<span class="xip verd">🗺️ ${L("Itineraris", "Itinerarios")}</span>` : ""}${a.app_formularis ? `<span class="xip verd">📝 ${L("Formularis", "Formularios")}</span>` : ""}${!a.app_itineraris && !a.app_formularis ? `<span class="xip coral">${L("Sense cap app", "Sin ninguna app")}</span>` : ""}</div>
     </div>
     <button class="boto sec petit" type="button" data-ag="${esc(a.id)}">✏️ ${L("Editar", "Editar")}</button></div>`).join("")
     || `<div class="buit">${L("Encara no hi ha agències.", "Todavía no hay agencias.")}</div>`;
@@ -1046,11 +1047,14 @@ $("agEdTancar").onclick = () => $("dlgAg").close();
 
 function editarAgencia(a){
   const nova = !a;
-  const x = a ? { ...a } : { nom: "", email_avis: "", idioma_fix: "", color: "#3D698E", accent: "#E79893", lema_ca: "", lema_es: "", logo_url: null, logo_fitxer: null, usuaris: [] };
+  const x = a ? { ...a } : { nom: "", email_avis: "", idioma_fix: "", color: "#3D698E", accent: "#E79893", lema_ca: "", lema_es: "", logo_url: null, logo_fitxer: null, app_itineraris: true, app_formularis: true, usuaris: [] };
   $("agEdTitol").textContent = nova ? L("Nova agència", "Nueva agencia") : x.nom;
   const pintar = () => {
     $("agEdCos").innerHTML = `
       <div class="camp"><label>${L("Nom de l'agència", "Nombre de la agencia")}</label><input id="agNom" value="${esc(x.nom)}" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
+      <div class="camp"><label>${L("Apps que pot fer servir", "Apps que puede usar")}</label>
+        <div class="opcions"><label><input type="checkbox" id="agAppIt" ${x.app_itineraris ? "checked" : ""}> 🗺️ ${L("Itineraris", "Itinerarios")}</label>
+        <label><input type="checkbox" id="agAppForm" ${x.app_formularis ? "checked" : ""}> 📝 ${L("Formularis de viatgers", "Formularios de viajeros")}</label></div></div>
       <div class="camp"><label>${L("Idioma del panell i dels clients", "Idioma del panel y de los clientes")}</label>
         <select id="agIdioma">
           <option value="" ${!x.idioma_fix ? "selected" : ""}>${L("Català i castellà (es tria en cada itinerari)", "Catalán y castellano (se elige en cada itinerario)")}</option>
@@ -1077,10 +1081,11 @@ function editarAgencia(a){
       <div>${x.usuaris.map(u => `<div class="usu"><span>${esc(u.email)}${u.superadmin ? ` <span class="xip">admin</span>` : ""}</span>
         ${u.superadmin ? "" : `<button class="mini perill" type="button" data-treu="${esc(u.email)}">${L("Treure", "Quitar")}</button>`}</div>`).join("") || `<div class="meta">${L("Encara cap.", "Todavía ninguno.")}</div>`}</div>
       <div style="display:flex;gap:6px;margin-top:10px;align-items:center"><input id="agNouEmail" type="email" style="flex:1;min-width:0" placeholder="${L("correu@agencia.com", "correo@agencia.com")}"><button class="boto sec petit" type="button" id="agAfegeix" style="white-space:nowrap">➕ ${L("Afegir", "Añadir")}</button></div>
-      <p class="ajuda" style="margin-top:8px">${L("La persona entra al panell amb aquest correu i, el primer cop, prem «Primer cop? Crear la contrasenya». Serveix per als itineraris i per als formularis.",
-        "La persona entra en el panel con este correo y, la primera vez, pulsa «¿Primera vez? Crear la contraseña». Sirve para los itinerarios y para los formularios.")}</p>`}`;
+      <p class="ajuda" style="margin-top:8px">${L("La persona entra al panell amb aquest correu i, el primer cop, prem «Primer cop? Crear la contrasenya». Serveix per a les apps marcades a dalt.",
+        "La persona entra en el panel con este correo y, la primera vez, pulsa «¿Primera vez? Crear la contraseña». Sirve para las apps marcadas arriba.")}</p>`}`;
     const llegir = () => { x.nom = $("agNom").value; x.idioma_fix = $("agIdioma").value; x.email_avis = $("agEmail").value;
-      x.lema_ca = $("agLemaCa").value; x.lema_es = $("agLemaEs").value; x.color = $("agColor").value.toUpperCase(); x.accent = $("agAccent").value.toUpperCase(); };
+      x.lema_ca = $("agLemaCa").value; x.lema_es = $("agLemaEs").value; x.color = $("agColor").value.toUpperCase(); x.accent = $("agAccent").value.toUpperCase();
+      x.app_itineraris = $("agAppIt").checked; x.app_formularis = $("agAppForm").checked; };
     $("agLogo").onclick = () => { llegir(); triarLogo(u => { x.logo_url = u; pintar(); }); };
     const tl = $("agTreureLogo"); if(tl) tl.onclick = () => { llegir(); x.logo_url = null; pintar(); };
     $("agDesa").onclick = async () => {
@@ -1089,7 +1094,8 @@ function editarAgencia(a){
       const id = nova ? slugAg(x.nom) : x.id;
       const p = { id, nou: nova, nom: x.nom, email_avis: x.email_avis, idioma_fix: x.idioma_fix || "", lema_ca: x.lema_ca, lema_es: x.lema_es,
         color: x.color, color_fosc: barreja(x.color, "#000000", 0.25), color_clar: barreja(x.color, "#FFFFFF", 0.9),
-        accent: x.accent, accent_clar: barreja(x.accent, "#FFFFFF", 0.85), logo_url: x.logo_url || "" };
+        accent: x.accent, accent_clar: barreja(x.accent, "#FFFFFF", 0.85), logo_url: x.logo_url || "",
+        app_itineraris: !!x.app_itineraris, app_formularis: !!x.app_formularis };
       const { error } = await sb.rpc("admin_agencia_desar", { p });
       if(error){ toast(errAg(error)); return; }
       toast(L("Agència desada", "Agencia guardada"));
