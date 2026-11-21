@@ -56,6 +56,7 @@ function canviarIdioma(nou){
   if(E){ pintarInfo(); pintarDies(); pintarGenerals(); pintarDocs(); actualitzarTotal(); if(!E.nou) carregarActivitat(); }
   else if(!$("panLlista").classList.contains("amagat") && USER) carregarLlista();
   else if(!$("panBib").classList.contains("amagat")) pintarBib();
+  else if(!$("panAg").classList.contains("amagat")) pintarAgencies();
 }
 document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => canviarIdioma(b.dataset.lang));
 
@@ -85,6 +86,7 @@ async function entrar(){
   if(!triat && P.agencia.idioma_fix && P.agencia.idioma_fix !== LANG){ LANG = P.agencia.idioma_fix; }
   traduirEstatic();
   $("blocIdioma").classList.toggle("amagat", !!P.agencia.idioma_fix);
+  $("tabAg").classList.toggle("amagat", !P.superadmin);
   $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
   const obrir = new URLSearchParams(location.search).get("e");
   if(obrir) obrirEditor(obrir); else carregarLlista();
@@ -139,11 +141,13 @@ function pestanya(p){
   $("pestanyes").classList.remove("amagat");
   $("panLlista").classList.toggle("amagat", p !== "llista");
   $("panBib").classList.toggle("amagat", p !== "bib");
+  $("panAg").classList.toggle("amagat", p !== "ag");
   $("panEditor").classList.add("amagat"); $("barraEd").classList.add("amagat");
   E = null; net();
   history.replaceState(null, "", urlPanell(""));
   if(p === "llista") carregarLlista();
   if(p === "bib") carregarBib().then(pintarBib);
+  if(p === "ag") carregarAgencies();
   return true;
 }
 document.querySelectorAll("#pestanyes button").forEach(b => b.onclick = () => pestanya(b.dataset.p));
@@ -233,7 +237,7 @@ async function obrirEditor(id){
 
 function mostrarEditor(){
   $("pestanyes").classList.add("amagat");
-  $("panLlista").classList.add("amagat"); $("panBib").classList.add("amagat");
+  $("panLlista").classList.add("amagat"); $("panBib").classList.add("amagat"); $("panAg").classList.add("amagat");
   $("panEditor").classList.remove("amagat"); $("barraEd").classList.remove("amagat");
   history.replaceState(null, "", E.nou ? urlPanell("") : urlPanell("e=" + E.it.id));
   const it = E.it;
@@ -997,5 +1001,147 @@ function pintarDlg(){
 }
 $("dlgCerca").oninput = pintarDlg;
 $("dlgTancar").onclick = () => $("dlgBib").close();
+
+/* ================= AGÈNCIES (només superadmin) ================= */
+let AGS = [];
+const ERR_AG = {
+  NO_PERMIS: ["No tens permís per gestionar agències.", "No tienes permiso para gestionar agencias."],
+  ID_JA_EXISTEIX: ["Ja hi ha una agència amb aquest nom. Canvia-li una mica el nom.", "Ya hay una agencia con este nombre. Cámbiale un poco el nombre."],
+  ID_INVALID: ["El nom de l'agència ha de tenir com a mínim dues lletres o números.", "El nombre de la agencia debe tener al menos dos letras o números."],
+  FALTA_NOM: ["Posa el nom de l'agència.", "Pon el nombre de la agencia."],
+  COLOR_INVALID: ["Algun color no és vàlid.", "Algún color no es válido."],
+  EMAIL_INVALID: ["El correu no és vàlid.", "El correo no es válido."],
+  EMAIL_JA_EXISTEIX: ["Aquest correu ja té accés (potser en una altra agència).", "Este correo ya tiene acceso (quizá en otra agencia)."],
+  NO_A_TU_MATEIX: ["No et pots treure a tu mateixa.", "No te puedes quitar a ti misma."]
+};
+const errAg = e => { const m = String((e && e.message) || e); const k = Object.keys(ERR_AG).find(x => m.includes(x)); return k ? L(...ERR_AG[k]) : L("Error: ", "Error: ") + m; };
+// Barreja un color amb blanc o negre (per fer les versions clara i fosca)
+function barreja(hex, amb, t){
+  const a = parseInt(hex.slice(1), 16), b = parseInt(amb.slice(1), 16);
+  const c = [16, 8, 0].map(sh => Math.round(((a >> sh) & 255) * (1 - t) + ((b >> sh) & 255) * t));
+  return "#" + c.map(x => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+const slugAg = t => slug(t).slice(0, 30).replace(/-+$/, "");
+
+async function carregarAgencies(){
+  $("agLlista").innerHTML = `<div class="meta">${L("Carregant…", "Cargando…")}</div>`;
+  const { data, error } = await sb.rpc("admin_agencies");
+  if(error){ $("agLlista").innerHTML = `<div class="error">${esc(errAg(error))}</div>`; return; }
+  AGS = data || []; pintarAgencies();
+}
+function pintarAgencies(){
+  $("agLlista").innerHTML = AGS.map(a => `<div class="ag-fila">
+    ${a.logo_url ? `<img src="${esc(a.logo_url)}" alt="">` : `<span class="mostra" style="width:52px;height:52px;border-radius:8px;background:${esc(a.color)}"></span>`}
+    <div style="flex:1;min-width:0">
+      <div class="n">${esc(a.nom)}</div>
+      <div class="meta">${a.usuaris.length} ${a.usuaris.length === 1 ? L("usuari", "usuario") : L("usuaris", "usuarios")} · ${a.num_itineraris} ${L("itineraris", "itinerarios")}
+        · ${a.idioma_fix === "es" ? L("només castellà", "solo castellano") : a.idioma_fix === "ca" ? L("només català", "solo catalán") : L("català i castellà", "catalán y castellano")}</div>
+    </div>
+    <button class="boto sec petit" type="button" data-ag="${esc(a.id)}">✏️ ${L("Editar", "Editar")}</button></div>`).join("")
+    || `<div class="buit">${L("Encara no hi ha agències.", "Todavía no hay agencias.")}</div>`;
+  $("agLlista").querySelectorAll("[data-ag]").forEach(b => b.onclick = () => editarAgencia(AGS.find(a => a.id === b.dataset.ag)));
+}
+$("btnAgNova").onclick = () => editarAgencia(null);
+$("agEdTancar").onclick = () => $("dlgAg").close();
+
+function editarAgencia(a){
+  const nova = !a;
+  const x = a ? { ...a } : { nom: "", email_avis: "", idioma_fix: "", color: "#3D698E", accent: "#E79893", lema_ca: "", lema_es: "", logo_url: null, logo_fitxer: null, usuaris: [] };
+  $("agEdTitol").textContent = nova ? L("Nova agència", "Nueva agencia") : x.nom;
+  const pintar = () => {
+    $("agEdCos").innerHTML = `
+      <div class="camp"><label>${L("Nom de l'agència", "Nombre de la agencia")}</label><input id="agNom" value="${esc(x.nom)}" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
+      <div class="camp"><label>${L("Idioma del panell i dels clients", "Idioma del panel y de los clientes")}</label>
+        <select id="agIdioma">
+          <option value="" ${!x.idioma_fix ? "selected" : ""}>${L("Català i castellà (es tria en cada itinerari)", "Catalán y castellano (se elige en cada itinerario)")}</option>
+          <option value="ca" ${x.idioma_fix === "ca" ? "selected" : ""}>${L("Només català", "Solo catalán")}</option>
+          <option value="es" ${x.idioma_fix === "es" ? "selected" : ""}>${L("Només castellà", "Solo castellano")}</option></select></div>
+      <div class="camp"><label>${L("Correu per als avisos", "Correo para los avisos")} <span class="opc">(${L("quan un client omple un formulari", "cuando un cliente rellena un formulario")})</span></label><input id="agEmail" type="email" value="${esc(x.email_avis || "")}"></div>
+      <div class="graella">
+        <div><label>${L("Lema en català", "Lema en catalán")} <span class="opc">(${L("opcional", "opcional")})</span></label><input id="agLemaCa" value="${esc(x.lema_ca || "")}"></div>
+        <div><label>${L("Lema en castellà", "Lema en castellano")} <span class="opc">(${L("opcional", "opcional")})</span></label><input id="agLemaEs" value="${esc(x.lema_es || "")}"></div>
+      </div>
+      <div class="camp" style="margin-top:10px"><label>${L("Colors", "Colores")}</label>
+        <div class="colors"><label><input type="color" id="agColor" value="${esc(x.color)}"> ${L("Principal", "Principal")}</label>
+        <label><input type="color" id="agAccent" value="${esc(x.accent)}"> ${L("Detalls", "Detalles")}</label></div></div>
+      <div class="camp"><label>Logo</label>
+        <div class="fila-botons" style="align-items:center">
+          ${x.logo_url ? `<img src="${esc(x.logo_url)}" alt="" style="height:60px;max-width:160px;object-fit:contain;border-radius:8px;background:var(--fons)">`
+            : x.logo_fitxer ? `<span class="meta">${L("Logo actual configurat a part", "Logo actual configurado aparte")}</span>` : ""}
+          <button class="boto sec petit" type="button" id="agLogo">📷 ${x.logo_url || x.logo_fitxer ? L("Canviar logo", "Cambiar logo") : L("Pujar logo", "Subir logo")}</button>
+          ${x.logo_url ? `<button class="boto perill petit" type="button" id="agTreureLogo">${L("Treure", "Quitar")}</button>` : ""}
+        </div></div>
+      <div class="fila-botons" style="justify-content:flex-end;margin-top:6px"><button class="boto" type="button" id="agDesa">${L("Desar l'agència", "Guardar la agencia")}</button></div>
+      ${nova ? `<p class="meta" style="margin-top:12px">${L("Quan l'hagis desat, podràs afegir-hi els usuaris.", "Cuando la hayas guardado, podrás añadir los usuarios.")}</p>` : `
+      <h3 style="margin-top:20px">${L("Usuaris que hi poden entrar", "Usuarios que pueden entrar")}</h3>
+      <div>${x.usuaris.map(u => `<div class="usu"><span>${esc(u.email)}${u.superadmin ? ` <span class="xip">admin</span>` : ""}</span>
+        ${u.superadmin ? "" : `<button class="mini perill" type="button" data-treu="${esc(u.email)}">${L("Treure", "Quitar")}</button>`}</div>`).join("") || `<div class="meta">${L("Encara cap.", "Todavía ninguno.")}</div>`}</div>
+      <div style="display:flex;gap:6px;margin-top:10px;align-items:center"><input id="agNouEmail" type="email" style="flex:1;min-width:0" placeholder="${L("correu@agencia.com", "correo@agencia.com")}"><button class="boto sec petit" type="button" id="agAfegeix" style="white-space:nowrap">➕ ${L("Afegir", "Añadir")}</button></div>
+      <p class="ajuda" style="margin-top:8px">${L("La persona entra al panell amb aquest correu i, el primer cop, prem «Primer cop? Crear la contrasenya». Serveix per als itineraris i per als formularis.",
+        "La persona entra en el panel con este correo y, la primera vez, pulsa «¿Primera vez? Crear la contraseña». Sirve para los itinerarios y para los formularios.")}</p>`}`;
+    const llegir = () => { x.nom = $("agNom").value; x.idioma_fix = $("agIdioma").value; x.email_avis = $("agEmail").value;
+      x.lema_ca = $("agLemaCa").value; x.lema_es = $("agLemaEs").value; x.color = $("agColor").value.toUpperCase(); x.accent = $("agAccent").value.toUpperCase(); };
+    $("agLogo").onclick = () => { llegir(); triarLogo(u => { x.logo_url = u; pintar(); }); };
+    const tl = $("agTreureLogo"); if(tl) tl.onclick = () => { llegir(); x.logo_url = null; pintar(); };
+    $("agDesa").onclick = async () => {
+      llegir();
+      if(!x.nom.trim()){ toast(L(...ERR_AG.FALTA_NOM)); return; }
+      const id = nova ? slugAg(x.nom) : x.id;
+      const p = { id, nou: nova, nom: x.nom, email_avis: x.email_avis, idioma_fix: x.idioma_fix || "", lema_ca: x.lema_ca, lema_es: x.lema_es,
+        color: x.color, color_fosc: barreja(x.color, "#000000", 0.25), color_clar: barreja(x.color, "#FFFFFF", 0.9),
+        accent: x.accent, accent_clar: barreja(x.accent, "#FFFFFF", 0.85), logo_url: x.logo_url || "" };
+      const { error } = await sb.rpc("admin_agencia_desar", { p });
+      if(error){ toast(errAg(error)); return; }
+      toast(L("Agència desada", "Agencia guardada"));
+      await carregarAgencies();
+      const nou = AGS.find(z => z.id === id);
+      if(P.agencia.id === id){ P.agencia = { ...P.agencia, ...nou }; IT.aplicarColors(P.agencia); IT.carregarLogo(P.agencia); }
+      if(nova && nou) editarAgencia(nou); else $("dlgAg").close();
+    };
+    if(nova) return;
+    $("agAfegeix").onclick = async () => {
+      llegir();
+      const email = $("agNouEmail").value.trim(); if(!email) return;
+      const { error } = await sb.rpc("admin_usuari_afegir", { p_email: email, p_agencia: x.id });
+      if(error){ toast(errAg(error)); return; }
+      toast(L("Usuari afegit", "Usuario añadido"));
+      await carregarAgencies(); const n = AGS.find(z => z.id === x.id); if(n) x.usuaris = n.usuaris; pintar();
+    };
+    $("agEdCos").querySelectorAll("[data-treu]").forEach(b => b.onclick = async () => {
+      if(!confirm(L(`Treure l'accés a ${b.dataset.treu}?`, `¿Quitar el acceso a ${b.dataset.treu}?`))) return;
+      llegir();
+      const { error } = await sb.rpc("admin_usuari_treure", { p_email: b.dataset.treu });
+      if(error){ toast(errAg(error)); return; }
+      await carregarAgencies(); const n = AGS.find(z => z.id === x.id); if(n) x.usuaris = n.usuaris; pintar();
+    });
+  };
+  pintar();
+  if(!$("dlgAg").open) $("dlgAg").showModal();
+}
+// Puja el logo (es converteix a PNG i es redueix si és molt gran; es manté la transparència)
+let destiLogo = null;
+function triarLogo(cb){ destiLogo = cb; $("fLogo").value = ""; $("fLogo").click(); }
+$("fLogo").onchange = async () => {
+  const f = $("fLogo").files[0]; if(!f || !destiLogo) return;
+  if(f.size > 5 * 1024 * 1024){ toast(L("El logo és massa gran (màxim 5 MB)", "El logo es demasiado grande (máximo 5 MB)")); return; }
+  toast(L("Pujant el logo…", "Subiendo el logo…"));
+  try{
+    const blob = await new Promise((ok, ko) => {
+        const img = new Image();
+        img.onload = () => {
+          const r = Math.min(1, 600 / Math.max(img.width, img.height));
+          const c = document.createElement("canvas"); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          c.toBlob(b => b ? ok(b) : ko(), "image/png"); URL.revokeObjectURL(img.src);
+        };
+        img.onerror = ko; img.src = URL.createObjectURL(f);
+      });
+    const ruta = `${USER.id}/logo-${uuid()}.png`;
+    const { error } = await sb.storage.from("it-imatges").upload(ruta, blob, { contentType: "image/png" });
+    if(error) throw error;
+    destiLogo(sb.storage.from("it-imatges").getPublicUrl(ruta).data.publicUrl);
+    toast(L("Logo pujat. Recorda desar l'agència.", "Logo subido. Recuerda guardar la agencia."));
+  }catch(e){ toast(L("No s'ha pogut pujar el logo", "No se ha podido subir el logo")); }
+};
 
 iniciar();

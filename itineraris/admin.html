@@ -72,6 +72,14 @@
   .doc-fila{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--linia)}
   .doc-fila:first-child{border-top:0}
   .buit{border:2px dashed var(--linia);border-radius:12px;padding:16px;text-align:center;color:var(--gris);font-size:14px}
+  .ag-fila{border:1px solid var(--linia);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
+  .ag-fila img{width:52px;height:52px;object-fit:contain;border-radius:8px;background:var(--fons)}
+  .ag-fila .n{font-weight:700;color:var(--blau)}
+  .mostra{display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle;border:1px solid var(--linia)}
+  .colors{display:flex;gap:10px;flex-wrap:wrap}
+  .colors label{display:flex;align-items:center;gap:8px;font-weight:500;margin:0}
+  .colors input[type=color]{width:46px;height:36px;padding:2px;border-radius:8px}
+  .usu{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--linia);font-size:14px}
   .idiomes{position:absolute;top:10px;right:12px;display:flex;border:1px solid var(--linia);border-radius:8px;overflow:hidden}
   .idiomes button{font:inherit;font-size:12px;font-weight:700;border:0;background:#fff;color:var(--gris);padding:5px 9px;cursor:pointer}
   .idiomes button.actiu{background:var(--blau);color:#fff}
@@ -118,6 +126,7 @@
     <div class="pestanyes" id="pestanyes">
       <button data-p="llista" class="actiu" data-es="🗺️ Itinerarios">🗺️ Itineraris</button>
       <button data-p="bib" data-es="📚 Biblioteca">📚 Biblioteca</button>
+      <button data-p="ag" id="tabAg" class="amagat" data-es="🏢 Agencias">🏢 Agències</button>
     </div>
 
     <!-- LLISTA -->
@@ -137,6 +146,16 @@
         <input id="bibCerca" placeholder="Cerca…" data-es-ph="Buscar…" style="margin-bottom:10px">
         <div id="bibLlista"></div>
         <button class="boto sec" id="btnBibNou" style="margin-top:6px" data-es="➕ Añadir a la biblioteca">➕ Afegir a la biblioteca</button>
+      </div>
+    </div>
+
+    <!-- AGÈNCIES (només superadmin) -->
+    <div id="panAg" class="amagat">
+      <div class="targeta">
+        <h2 data-es="Agencias">Agències</h2>
+        <p class="meta" style="margin-top:-6px" data-es="Las agencias y usuarios que añadas aquí sirven tanto para los itinerarios como para los formularios de viajeros. Cada agencia solo ve sus propios itinerarios.">Les agències i usuaris que afegeixis aquí serveixen tant per als itineraris com per als formularis de viatgers. Cada agència només veu els seus propis itineraris.</p>
+        <div id="agLlista"></div>
+        <button class="boto" type="button" id="btnAgNova" style="margin-top:6px" data-es="➕ Nueva agencia">➕ Nova agència</button>
       </div>
     </div>
 
@@ -245,7 +264,13 @@
   <div class="dlg-cos" id="bibEdCos"></div>
 </dialog>
 
+<dialog id="dlgAg">
+  <div class="dlg-cap"><strong id="agEdTitol"></strong><button class="mini" type="button" id="agEdTancar">✕</button></div>
+  <div class="dlg-cos" id="agEdCos"></div>
+</dialog>
+
 <input type="file" id="fImg" class="amagat" accept="image/*">
+<input type="file" id="fLogo" class="amagat" accept="image/png,image/jpeg,image/webp">
 <div class="toast" id="toast"></div>
 
 <script src="admin.js"></script>
