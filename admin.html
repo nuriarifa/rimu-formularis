@@ -220,6 +220,7 @@ const CAMPS = [
   ["nom","text"],["cognoms","text"],["naixement","date"],["dni","text"],["passaport","text"],["caducitat","date"],
   ["carrer","text"],["poblacio","text"],["cp","text"],["provincia","text"],["telefon","tel"],["email","email"]
 ];
+const NOMES_PRINCIPAL = ["carrer","poblacio","cp","provincia","email"];
 const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
 const urlForm = id => BASE + "index.html?f=" + id;
 let filtre = "tots", filtreAg = "totes", dadesLlista = [], P = null, t = D.ca, AGENCIES = {};
@@ -338,7 +339,7 @@ function pintarPrefills(){
     const v = vells[i] || {};
     html += `<details class="viatger" ${i===0?"open":""}><summary>${esc(t.viatger)} ${i+1}</summary><div class="graella">`;
     CAMPS.forEach(([k, tp]) => {
-      const amagat = !ambPass && (k==="passaport" || k==="caducitat");
+      const amagat = (!ambPass && (k==="passaport" || k==="caducitat")) || (i > 0 && NOMES_PRINCIPAL.includes(k));
       html += `<div class="${k==="carrer"?"ample":""}${amagat?" amagat":""}"><label>${esc(t.camps[k])}</label><input data-k="${k}" type="${tp}" value="${esc(v[k]||"")}"></div>`;
     });
     html += `<div class="ample"><h3 style="margin-top:6px">${esc(t.fotosQueTens)}</h3>
@@ -367,7 +368,12 @@ $("btnCrear").onclick = async () => {
   const idioma = P.agencia.idioma_fix || document.querySelector("input[name=idioma]:checked").value;
   const n = numViatgers();
   const mode = n > 1 ? document.querySelector("input[name=mode]:checked").value : "un";
-  const viatgers = [...$("prefills").querySelectorAll("details")].map(llegirViatger);
+  // El primer viatger és el principal; la resta són acompanyants (sense adreça ni correu)
+  const viatgers = [...$("prefills").querySelectorAll("details")].map(llegirViatger).map((v, i) => {
+    if(i === 0) return v;
+    NOMES_PRINCIPAL.forEach(k => delete v[k]);
+    return { ...v, secundari: true };
+  });
   const grup_id = crypto.randomUUID();
   const base = { grup_id, titol, idioma, agencia: P.agencia.id, passaport_obligatori: $("nPass").checked,
                  data_inici: $("nInici").value || null, data_fi: $("nFi").value || null };
@@ -458,10 +464,11 @@ async function reobrir(id){
   const f = dadesLlista.find(x => x.id === id); if(f) f.estat = "pendent";
   pintarLlista(); toast(t.reobert);
 }
-const campsDe = f => CAMPS.filter(([k]) => f.passaport_obligatori !== false || (k!=="passaport" && k!=="caducitat"));
+const campsDe = (f, v, i) => CAMPS.filter(([k]) => (f.passaport_obligatori !== false || (k!=="passaport" && k!=="caducitat"))
+  && !((i > 0 || (v && v.secundari)) && NOMES_PRINCIPAL.includes(k)));
 function textDades(f){
   return f.viatgers.map((v,i) => (f.viatgers.length>1?`${t.viatger.toUpperCase()} ${i+1}\n`:"") +
-    campsDe(f).map(([k,tp]) => `${t.camps[k]}: ${tp==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
+    campsDe(f, v, i).map(([k,tp]) => `${t.camps[k]}: ${tp==="date"?dataCurta(v[k]):(v[k]||"")}`).join("\n")).join("\n\n");
 }
 function filaFoto(f, v, tipus, nom){
   if(tipus==="passaport" && f.passaport_obligatori===false) return "";
@@ -520,7 +527,7 @@ function veure(id){
   let html = "";
   f.viatgers.forEach((v,i) => {
     if(f.viatgers.length>1) html += `<div class="sub-viatger">${esc(t.viatger)} ${i+1}</div>`;
-    html += `<table class="dades">` + campsDe(f).map(([k,tp]) =>
+    html += `<table class="dades">` + campsDe(f, v, i).map(([k,tp]) =>
       `<tr><td>${esc(t.camps[k])}</td><td>${esc(tp==="date"?dataCurta(v[k]):v[k]) || '<span class="meta">—</span>'}</td></tr>`).join("")
       + filaFoto(f, v, "dni", t.fotoDni) + filaFoto(f, v, "passaport", t.fotoPass) + `</table>`;
   });
