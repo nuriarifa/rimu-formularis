@@ -220,7 +220,7 @@ const CAMPS = [
   ["nom","text"],["cognoms","text"],["naixement","date"],["dni","text"],["passaport","text"],["caducitat","date"],
   ["carrer","text"],["poblacio","text"],["cp","text"],["provincia","text"],["telefon","tel"],["email","email"]
 ];
-const NOMES_PRINCIPAL = ["carrer","poblacio","cp","provincia","email"];
+const NOMES_PRINCIPAL = ["carrer","poblacio","cp","provincia","email","telefon"];
 const BASE = location.href.replace(/admin\.html.*$/, "").replace(/[?#].*$/, "");
 const urlForm = id => BASE + "index.html?f=" + id;
 let filtre = "tots", filtreAg = "totes", dadesLlista = [], P = null, t = D.ca, AGENCIES = {};
@@ -368,7 +368,7 @@ $("btnCrear").onclick = async () => {
   const idioma = P.agencia.idioma_fix || document.querySelector("input[name=idioma]:checked").value;
   const n = numViatgers();
   const mode = n > 1 ? document.querySelector("input[name=mode]:checked").value : "un";
-  // El primer viatger és el principal; la resta són acompanyants (sense adreça ni correu)
+  // El primer viatger és el principal; la resta són acompanyants (sense adreça, correu ni telèfon)
   const viatgers = [...$("prefills").querySelectorAll("details")].map(llegirViatger).map((v, i) => {
     if(i === 0) return v;
     NOMES_PRINCIPAL.forEach(k => delete v[k]);
