@@ -264,11 +264,11 @@ async function subViatgers(cont, v){
           <div class="n"><b>${esc(nomComplet(x.an_clients))}</b>
             <span class="meta">${esc(x.an_clients.email || "sense correu")}</span>
             ${x.an_clients.user_id ? `<span class="xip verd">Té accés a l'app</span>` : `<span class="xip coral">Sense accés</span>`}</div>
-          <label class="check" style="white-space:nowrap"><input type="radio" name="titular" value="${x.client_id}"${x.titular ? " checked" : ""}> Titular</label>
+          <label class="check" style="white-space:nowrap"><input type="checkbox" name="titular" value="${x.client_id}"${x.titular ? " checked" : ""}> Titular</label>
           <button class="mini" type="button" data-fitxa="${x.client_id}">Fitxa</button>
           <button class="mini perill" type="button" data-treu="${x.client_id}" title="Treure del viatge">✕</button>
         </div>`).join("") : `<p class="meta">Encara no hi ha cap viatger en aquest viatge.</p>`}
-      <p class="ajuda">El <b>titular</b> és qui veu els pagaments. Tots els viatgers veuen la resta del viatge.</p>
+      <p class="ajuda">Hi pots marcar més d'un <b>titular</b>. Els titulars són els que veuen els pagaments; tots els viatgers veuen la resta del viatge.</p>
     </div>
     <div class="targeta">
       <h2>Afegir un viatger</h2>
@@ -278,10 +278,9 @@ async function subViatgers(cont, v){
       <p style="margin:12px 0 0"><button class="boto sec petit" type="button" id="bNouClientV">+ Crear un client nou i afegir-lo</button></p>
     </div>`;
   cont.querySelectorAll("input[name=titular]").forEach(r => r.onchange = async () => {
-    await sb.from("an_viatge_clients").update({ titular: false }).eq("viatge_id", v.id);
-    const { error } = await sb.from("an_viatge_clients").update({ titular: true }).eq("viatge_id", v.id).eq("client_id", r.value);
-    if(error) return avis(errMsg(error), true);
-    avis("Titular canviat ✓");
+    const { error } = await sb.from("an_viatge_clients").update({ titular: r.checked }).eq("viatge_id", v.id).eq("client_id", r.value);
+    if(error){ r.checked = !r.checked; return avis(errMsg(error), true); }
+    avis(r.checked ? "Marcat com a titular ✓" : "Ja no és titular");
   });
   cont.querySelectorAll("[data-fitxa]").forEach(b => b.onclick = () => ir("#client/" + b.dataset.fitxa));
   cont.querySelectorAll("[data-treu]").forEach(b => b.onclick = async () => {
