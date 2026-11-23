@@ -305,7 +305,82 @@
       ["transport", "Japan Rail Pass", "Recordad activarlo en la primera estación y reservar asiento en los trenes bala.", ""]
     ]
   };
+  // traduccions al castellà dels textos d'exemple (a la demo no es fa servir la IA)
+  const ES = {
+    "Japó en família": "Japón en familia",
+    "Tòquio, Kyoto i Osaka": "Tokio, Kioto y Osaka",
+    "Japó": "Japón",
+    "Deu dies per descobrir el Japó amb calma: la Tòquio més moderna, els temples de Kyoto i el menjar d'Osaka. Ho tenim tot a punt perquè només us hàgiu de preocupar de gaudir-ne!": "Diez días para descubrir Japón con calma: el Tokio más moderno, los templos de Kioto y la comida de Osaka. ¡Lo tenemos todo a punto para que solo os tengáis que preocupar de disfrutarlo!",
+    "Setmana a Menorca": "Semana en Menorca",
+    "Espanya": "España",
+    "Una setmana de cales i bon menjar.": "Una semana de calas y buena comida.",
+    "Escapada a Roma": "Escapada a Roma",
+    "Itàlia": "Italia",
+    "Vol Barcelona → Tòquio (Haneda)": "Vuelo Barcelona → Tokio (Haneda)",
+    "Escala a Doha. Una maleta de 23 kg per persona. Us aconsellem ser a l'aeroport 3 hores abans.": "Escala en Doha. Una maleta de 23 kg por persona. Os aconsejamos estar en el aeropuerto 3 horas antes.",
+    "Trasllat aeroport → hotel": "Traslado aeropuerto → hotel",
+    "Us esperaran a la sortida amb un cartell amb el vostre nom.": "Os esperarán a la salida con un cartel con vuestro nombre.",
+    "Hotel a Tòquio (Shinjuku)": "Hotel en Tokio (Shinjuku)",
+    "Habitació triple amb esmorzar.": "Habitación triple con desayuno.",
+    "Japan Rail Pass 7 dies": "Japan Rail Pass 7 días",
+    "Inclou els trens bala entre Tòquio, Kyoto i Osaka. S'activa a la primera estació.": "Incluye los trenes bala entre Tokio, Kioto y Osaka. Se activa en la primera estación.",
+    "Ryokan tradicional a Kyoto": "Ryokan tradicional en Kioto",
+    "Sopar kaiseki inclòs la primera nit.": "Cena kaiseki incluida la primera noche.",
+    "Assegurança de viatge completa": "Seguro de viaje completo",
+    "Cobertura mèdica, cancel·lació i equipatge.": "Cobertura médica, cancelación y equipaje.",
+    "Bitllets d'avió": "Billetes de avión",
+    "Bo de l'hotel de Tòquio": "Bono del hotel de Tokio",
+    "Pòlissa de l'assegurança": "Póliza del seguro",
+    "Condicions del viatge combinat": "Condiciones del viaje combinado",
+    "Paga i senyal": "Paga y señal",
+    "Segon pagament": "Segundo pago",
+    "Pagament final": "Pago final",
+    "Moneda i pagaments": "Moneda y pagos",
+    "La moneda és el ien. Molts llocs petits només accepten efectiu: porteu-ne sempre una mica. Als caixers de les botigues 7-Eleven podeu treure diners amb targeta.": "La moneda es el yen. Muchos sitios pequeños solo aceptan efectivo: llevad siempre un poco. En los cajeros de las tiendas 7-Eleven podéis sacar dinero con tarjeta.",
+    "Endolls": "Enchufes",
+    "Els endolls són de tipus A (dues clavilles planes). Porteu un adaptador.": "Los enchufes son de tipo A (dos clavijas planas). Llevad un adaptador.",
+    "Propines": "Propinas",
+    "Al Japó no es deixa propina: fins i tot pot semblar de mala educació.": "En Japón no se deja propina: incluso puede parecer de mala educación.",
+    "Santuari Fushimi Inari": "Santuario Fushimi Inari",
+    "Els milers de portes vermelles que pugen per la muntanya. Aneu-hi d'hora al matí per evitar la gent.": "Las miles de puertas rojas que suben por la montaña. Id temprano por la mañana para evitar a la gente.",
+    "Ramen a Tòquio": "Ramen en Tokio",
+    "Proveu un bol de ramen en un local petit de barri: es demana a la màquina de l'entrada.": "Probad un bol de ramen en un local pequeño de barrio: se pide en la máquina de la entrada.",
+    "Targeta Suica": "Tarjeta Suica",
+    "Recarregable per al metro i els autobusos de Tòquio. També serveix per pagar a moltes botigues.": "Recargable para el metro y los autobuses de Tokio. También sirve para pagar en muchas tiendas.",
+    "Sortida de Barcelona": "Salida de Barcelona",
+    "Vol cap a Tòquio amb escala a Doha.": "Vuelo hacia Tokio con escala en Doha.",
+    "Sortida del vol": "Salida del vuelo",
+    "Arribada a Tòquio": "Llegada a Tokio",
+    "Trasllat a l'hotel i primer passeig per Shinjuku.": "Traslado al hotel y primer paseo por Shinjuku.",
+    "Trasllat a l'hotel": "Traslado al hotel",
+    "Vistes des de l'ajuntament de Tòquio": "Vistas desde el ayuntamiento de Tokio",
+    "Tòquio tradicional i modern": "Tokio tradicional y moderno",
+    "Asakusa al matí i Shibuya a la tarda.": "Asakusa por la mañana y Shibuya por la tarde.",
+    "Temple Senso-ji": "Templo Senso-ji",
+    "Encreuament de Shibuya": "Cruce de Shibuya",
+    "Tren bala cap a Kyoto": "Tren bala hacia Kioto",
+    "Arribada al ryokan i sopar tradicional.": "Llegada al ryokan y cena tradicional.",
+    "Shinkansen Tòquio → Kyoto": "Shinkansen Tokio → Kioto",
+    "Sopar kaiseki al ryokan": "Cena kaiseki en el ryokan",
+    "Aeroport de Barcelona, T1": "Aeropuerto de Barcelona, T1",
+    "Sortida de l'aeroport de Haneda": "Salida del aeropuerto de Haneda",
+    "Estació de Tòquio": "Estación de Tokio"
+    };
+  const CAMPS_TR = { an_viatges: ["titol", "desti", "pais", "descripcio"], an_serveis: ["titol", "descripcio"], an_documents: ["nom"],
+    an_pagaments: ["concepte"], an_dies: ["titol", "descripcio"], an_activitats: ["nom", "lloc", "descripcio"], an_desti: ["titol", "descripcio"] };
   const funcions = { async invoke(nom, { body } = {}){
+    if(nom === "anonta-traduir"){
+      await espera(250);
+      const t = {};
+      if(body.idioma === "es"){
+        const ids = new Set(body.viatges || []);
+        const dies = new Set(ST.db.an_dies.filter(d => ids.has(d.viatge_id)).map(d => d.id));
+        Object.entries(CAMPS_TR).forEach(([taula, camps]) => ST.db[taula]
+          .filter(r => visible(taula, r) && (taula === "an_viatges" ? ids.has(r.id) : taula === "an_activitats" ? dies.has(r.dia_id) : ids.has(r.viatge_id)))
+          .forEach(r => camps.forEach(c => { if(r[c] && ES[r[c]]) t[`${taula}:${r.id}:${c}`] = ES[r[c]]; })));
+      }
+      return { data: { t }, error: null };
+    }
     await espera(nom === "anonta-desti" ? 1500 : 400);
     if(ROL !== "admin") return { data: null, error: { message: "permission denied" } };
     if(nom === "anonta-comptes"){
@@ -358,7 +433,10 @@
     document.addEventListener("DOMContentLoaded", () => {
       const b = document.createElement("div");
       b.style.cssText = "background:#22313F;color:#fff;text-align:center;font-size:13.5px;padding:9px 14px";
-      b.innerHTML = `👀 <strong style="color:#FFD58A">Mode demostració</strong> · Els canvis només es guarden en aquest navegador. <a href="demo.html" style="color:#fff;font-weight:700">Veure la demo completa</a>`;
+      const es = (localStorage.getItem("anonta-idioma") || navigator.language || "").startsWith("es");
+      b.innerHTML = es
+        ? `👀 <strong style="color:#FFD58A">Modo demostración</strong> · Los cambios solo se guardan en este navegador. <a href="demo.html" style="color:#fff;font-weight:700">Ver la demo completa</a>`
+        : `👀 <strong style="color:#FFD58A">Mode demostració</strong> · Els canvis només es guarden en aquest navegador. <a href="demo.html" style="color:#fff;font-weight:700">Veure la demo completa</a>`;
       document.body.prepend(b);
     });
   }
