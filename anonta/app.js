@@ -2,7 +2,22 @@
 const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY, { auth: { storageKey: "anonta-client" } });
 const { esc, text, euros } = AN;
 const main = document.getElementById("main");
-const S = { idioma: null, client: null, viatges: [], agencies: {} };
+const S = { idioma: null, client: null, viatges: [], agencies: {}, tr: {}, trCache: {} };
+
+// Textos del viatge traduïts a l'idioma triat (si no hi ha traducció, el text original)
+const tr = (taula, fila, camp) => (fila && S.tr[`${taula}:${fila.id}:${camp}`]) ?? fila?.[camp];
+async function carregarTraduccions(){
+  const idioma = S.idioma, ids = S.viatges.map(v => v.id);
+  if(!ids.length){ S.tr = {}; return false; }
+  if(S.trCache[idioma]){ S.tr = S.trCache[idioma]; return true; }
+  try{
+    const { data, error } = await sb.functions.invoke("anonta-traduir", { body: { viatges: ids, idioma } });
+    if(error || !data?.t) return false;
+    S.trCache[idioma] = data.t;
+    if(S.idioma === idioma) S.tr = data.t;
+    return S.idioma === idioma;
+  }catch{ return false; }
+}
 
 // ---------- textos ----------
 const T = {
@@ -55,9 +70,16 @@ function posarIdioma(l){
   try{ localStorage.setItem("anonta-idioma", S.idioma); }catch{}
   document.documentElement.lang = S.idioma;
   document.getElementById("lema").textContent = t("lema");
+  document.title = "Rimu Viatges · " + (S.idioma === "es" ? "Mis viajes" : "Els meus viatges");
   document.querySelectorAll("#idiomes button").forEach(b => b.classList.toggle("actiu", b.dataset.l === S.idioma));
 }
-document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => { posarIdioma(b.dataset.l); route(); });
+document.querySelectorAll("#idiomes button").forEach(b => b.onclick = async () => {
+  if(b.dataset.l === S.idioma) return;
+  posarIdioma(b.dataset.l);
+  S.tr = S.trCache[S.idioma] || {};
+  route(true);
+  if(await carregarTraduccions()) route(true);
+});
 (function(){
   let l = null;
   try{ l = localStorage.getItem("anonta-idioma"); }catch{}
@@ -126,6 +148,7 @@ async function inici(){
   document.getElementById("menu").classList.remove("amagat");
   if(!location.hash && S.viatges.length === 1) location.replace("#viatge/" + S.viatges[0].id);
   route();
+  if(await carregarTraduccions()) route(true);
 }
 document.querySelectorAll("#idiomes button").forEach(b => b.addEventListener("click", () => { try{ localStorage.setItem("anonta-idioma-triat", "1"); }catch{} }));
 
@@ -153,14 +176,14 @@ function pantallaLogin(){
   };
 }
 
-window.addEventListener("hashchange", route);
-function route(){
+window.addEventListener("hashchange", () => route());
+function route(mantenirScroll){
   if(document.getElementById("menu").classList.contains("amagat")){
     if(document.getElementById("fLogin")) pantallaLogin();
     return;
   }
   const [v, id, tab] = location.hash.replace(/^#/, "").split("/");
-  window.scrollTo(0, 0);
+  if(!mantenirScroll) window.scrollTo(0, 0);
   if(v === "viatge" && S.viatges.find(x => x.id === id)) return pantallaViatge(id, tab || "resum");
   pantallaLlista();
 }
@@ -175,6 +198,8 @@ function fase(v){
   if(!v.data_fi || avui <= v.data_fi) return { txt: t("enCurs"), cls: "verd" };
   return { txt: t("acabat"), cls: "" };
 }
+const majuscula = x => x ? x.charAt(0).toUpperCase() + x.slice(1) : x;
+const llocViatge = v => [tr("an_viatges", v, "desti"), tr("an_viatges", v, "pais")].filter(Boolean).join(", ");
 const datesViatge = v => v.data_inici ? AN.dataMitja(v.data_inici, S.idioma) + (v.data_fi ? " – " + AN.dataMitja(v.data_fi, S.idioma) : "") : t("senseDates");
 
 // ---------- llista ----------
@@ -186,8 +211,8 @@ function pantallaLlista(){
     const f = fase(v);
     return `<div class="targeta targeta-viatge" data-id="${v.id}" role="button" tabindex="0">
       <div class="img" ${v._portada ? `style="background-image:url('${v._portada}')"` : ""}>${v._portada ? "" : "🧳"}</div>
-      <div class="cos"><div class="viatge-titol" style="font-size:20px">${esc(v.titol)}</div>
-        <div class="viatge-dates">${esc([v.desti, v.pais].filter(Boolean).join(", "))}</div>
+      <div class="cos"><div class="viatge-titol" style="font-size:20px">${esc(tr("an_viatges", v, "titol"))}</div>
+        <div class="viatge-dates">${esc(llocViatge(v))}</div>
         <div class="viatge-dates">${esc(datesViatge(v))}</div>
         <div style="margin-top:8px"><span class="xip ${f.cls}">${esc(f.txt)}</span></div></div>
     </div>`;
@@ -218,8 +243,8 @@ async function pantallaViatge(id, tab){
   if(!tabs.includes(tab)) tab = "resum";
   main.innerHTML = `
     ${S.viatges.length > 1 ? `<button class="tornar" type="button" onclick="location.hash=''">${esc(t("tornar"))}</button>` : ""}
-    <div class="viatge-titol">${esc(v.titol)}</div>
-    <div class="viatge-dates">${esc([v.desti, v.pais].filter(Boolean).join(", "))} · ${esc(datesViatge(v))}</div>
+    <div class="viatge-titol">${esc(tr("an_viatges", v, "titol"))}</div>
+    <div class="viatge-dates">${esc(llocViatge(v))} · ${esc(datesViatge(v))}</div>
     <div class="ratlla"></div>
     <nav class="pestanyes">${tabs.map(k => `<button type="button" data-t="${k}" class="${k === tab ? "actiu" : ""}">${esc(t(k))}</button>`).join("")}</nav>
     <div id="cos"></div>`;
@@ -263,9 +288,9 @@ function tabResum(cos, v, d){
     <div class="targeta">
       ${v._portada ? `<div class="portada" style="background-image:url('${v._portada}')"></div>` : ""}
       <div class="compte">${esc(f.txt)}</div>
-      ${v.descripcio ? `<p>${text(v.descripcio)}</p>` : ""}
+      ${v.descripcio ? `<p>${text(tr("an_viatges", v, "descripcio"))}</p>` : ""}
       <dl class="kv" style="margin-top:14px">
-        ${v.desti || v.pais ? `<div><dt>${esc(t("destinacio"))}</dt><dd>${esc([v.desti, v.pais].filter(Boolean).join(", "))}</dd></div>` : ""}
+        ${v.desti || v.pais ? `<div><dt>${esc(t("destinacio"))}</dt><dd>${esc(llocViatge(v))}</dd></div>` : ""}
         <div><dt>${esc(t("dates"))}</dt><dd>${esc(datesViatge(v))}</dd></div>
         ${v.referencia ? `<div><dt>${esc(t("referencia"))}</dt><dd>${esc(v.referencia)}</dd></div>` : ""}
         ${d.companys.length ? `<div><dt>${esc(t("viatgers"))}</dt><dd>${d.companys.map(c => esc(AN.nomComplet(c)) + (c.titular && d.companys.length > 1 ? ` <span class="meta">(${t("titular")})</span>` : "")).join("<br>")}</dd></div>` : ""}
@@ -280,10 +305,10 @@ function tabServeis(cos, v, d){
     const fi = s.data_fi && (s.data_fi !== s.data_inici || s.hora_fi) ? AN.dataMitja(s.data_fi, S.idioma) + (s.hora_fi ? " · " + s.hora_fi : "") : (s.hora_fi ? s.hora_fi : "");
     return `<div class="servei"><div class="ico">${ti.ico}</div><div style="flex:1;min-width:0">
       <div class="meta">${esc(ti[S.idioma])}${s.proveidor ? " · " + esc(s.proveidor) : ""}</div>
-      <div class="nom">${esc(s.titol)}</div>
+      <div class="nom">${esc(tr("an_serveis", s, "titol"))}</div>
       ${ini ? `<div class="meta">📅 ${esc(ini)}${fi ? " → " + esc(fi) : ""}</div>` : ""}
       ${s.localitzador ? `<div style="margin-top:4px">${esc(t("localitzador"))}: <span class="loc">${esc(s.localitzador)}</span></div>` : ""}
-      ${s.descripcio ? `<div style="margin-top:6px;font-size:15px">${text(s.descripcio)}</div>` : ""}
+      ${s.descripcio ? `<div style="margin-top:6px;font-size:15px">${text(tr("an_serveis", s, "descripcio"))}</div>` : ""}
     </div></div>`;
   }).join("")}</div>`;
 }
@@ -293,7 +318,7 @@ function tabDocuments(cos, v, d){
   d.docs.forEach(x => (grups[x.categoria] = grups[x.categoria] || []).push(x));
   cos.innerHTML = Object.keys(AN.CATEGORIA_DOC).filter(k => grups[k]).map(k => `
     <div class="targeta"><h2>${AN.CATEGORIA_DOC[k].ico} ${esc(nomCat(AN.CATEGORIA_DOC, k))}</h2>
-      ${grups[k].map(x => `<div class="doc"><div class="n"><b>${esc(x.nom)}</b><span class="meta">${AN.mida(x.mida)}</span></div>
+      ${grups[k].map(x => `<div class="doc"><div class="n"><b>${esc(tr("an_documents", x, "nom"))}</b><span class="meta">${AN.mida(x.mida)}</span></div>
         <button class="boto petit sec" type="button" data-p="${esc(x.path)}">${esc(t("obre"))}</button></div>`).join("")}
     </div>`).join("");
   cos.querySelectorAll("[data-p]").forEach(b => b.onclick = async () => {
@@ -320,19 +345,19 @@ function tabPagaments(cos, v, d){
       </dl>
       ${total ? `<div class="barra"><div style="width:${pct}%"></div></div><div class="meta">${pct}%</div>` : ""}
     </div>
-    ${pend.length ? `<div class="targeta"><h2>⏳ ${esc(t("propers"))}</h2>${pend.map(p => `<div class="pag"><span>${esc(p.concepte)}${p.data_venciment ? `<br><span class="meta">${esc(t("venc")(dc(p.data_venciment)))}</span>` : ""}</span><b>${euros(p.import, S.idioma)}</b></div>`).join("")}</div>` : ""}
-    ${fets.length ? `<div class="targeta"><h2>✅ ${esc(t("fets"))}</h2>${fets.map(p => `<div class="pag"><span>${esc(p.concepte)}<br><span class="meta">${esc(t("pagatEl")(dc(p.data_pagament)))}</span></span><b>${euros(p.import, S.idioma)}</b></div>`).join("")}</div>` : ""}`;
+    ${pend.length ? `<div class="targeta"><h2>⏳ ${esc(t("propers"))}</h2>${pend.map(p => `<div class="pag"><span>${esc(tr("an_pagaments", p, "concepte"))}${p.data_venciment ? `<br><span class="meta">${esc(t("venc")(dc(p.data_venciment)))}</span>` : ""}</span><b>${euros(p.import, S.idioma)}</b></div>`).join("")}</div>` : ""}
+    ${fets.length ? `<div class="targeta"><h2>✅ ${esc(t("fets"))}</h2>${fets.map(p => `<div class="pag"><span>${esc(tr("an_pagaments", p, "concepte"))}<br><span class="meta">${esc(t("pagatEl")(dc(p.data_pagament)))}</span></span><b>${euros(p.import, S.idioma)}</b></div>`).join("")}</div>` : ""}`;
 }
 
 function tabItinerari(cos, v, d){
   cos.innerHTML = d.dies.map((x, i) => `
     <div class="targeta dia">
-      <div class="meta" style="text-transform:capitalize">${x.data ? esc(AN.dataLlarga(x.data, S.idioma)) : (S.idioma === "es" ? "Día " : "Dia ") + (i + 1)}</div>
-      <h2>${esc(x.titol)}</h2>
+      <div class="meta">${x.data ? esc(majuscula(AN.dataLlarga(x.data, S.idioma))) : (S.idioma === "es" ? "Día " : "Dia ") + (i + 1)}</div>
+      <h2>${esc(tr("an_dies", x, "titol"))}</h2>
       ${x.foto && d.fotos[x.foto] ? `<img class="foto" src="${d.fotos[x.foto]}" alt="" loading="lazy">` : ""}
-      ${x.descripcio ? `<p style="margin:6px 0 10px">${text(x.descripcio)}</p>` : ""}
-      ${x.an_activitats.map(a => `<div class="act">${a.hora ? `<span class="hora">${esc(a.hora)}</span>` : ""}<b>${esc(a.nom)}</b>
-        ${a.lloc ? `<div class="meta">📍 ${esc(a.lloc)}</div>` : ""}${a.descripcio ? `<div style="font-size:15px">${text(a.descripcio)}</div>` : ""}</div>`).join("")}
+      ${x.descripcio ? `<p style="margin:6px 0 10px">${text(tr("an_dies", x, "descripcio"))}</p>` : ""}
+      ${x.an_activitats.map(a => `<div class="act">${a.hora ? `<span class="hora">${esc(a.hora)}</span>` : ""}<b>${esc(tr("an_activitats", a, "nom"))}</b>
+        ${a.lloc ? `<div class="meta">📍 ${esc(tr("an_activitats", a, "lloc"))}</div>` : ""}${a.descripcio ? `<div style="font-size:15px">${text(tr("an_activitats", a, "descripcio"))}</div>` : ""}</div>`).join("")}
     </div>`).join("");
 }
 
@@ -343,8 +368,8 @@ function tabDesti(cos, v, d){
     <div class="targeta"><h2>${AN.CATEGORIA_DESTI[k].ico} ${esc(nomCat(AN.CATEGORIA_DESTI, k))}</h2>
       ${grups[k].map(r => `<div class="rec">
         ${r.foto && d.fotos[r.foto] ? `<img src="${d.fotos[r.foto]}" alt="" loading="lazy">` : ""}
-        <div style="flex:1;min-width:0"><b>${esc(r.titol)}</b>
-          ${r.descripcio ? `<div style="font-size:15px;margin-top:2px">${text(r.descripcio)}</div>` : ""}
+        <div style="flex:1;min-width:0"><b>${esc(tr("an_desti", r, "titol"))}</b>
+          ${r.descripcio ? `<div style="font-size:15px;margin-top:2px">${text(tr("an_desti", r, "descripcio"))}</div>` : ""}
           ${r.adreca ? `<div class="meta" style="margin-top:4px">📍 ${esc(r.adreca)}</div>` : ""}
           <div class="fila" style="margin-top:6px">
             ${r.adreca ? `<a class="mini" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.adreca)}">🗺️ ${esc(t("mapa"))}</a>` : ""}
