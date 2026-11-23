@@ -21,7 +21,10 @@ const T = {
     mapa: "Com arribar-hi", web: "Web", compte: "El meu compte", canviaPass: "Canvia la contrasenya", passNova: "Contrasenya nova (mínim 8 caràcters)",
     desa: "Desa", tanca: "Tanca", sortir: "Tanca la sessió", passOk: "Contrasenya canviada ✓", passCurta: "Ha de tenir 8 caràcters o més.",
     instal: "Afegeix l'app a la pantalla d'inici per tenir-la sempre a mà.", instalBoto: "Instal·la", ios: "Toca ⎋ Compartir i després «Afegeix a la pantalla d'inici».",
-    err: "No s'ha pogut carregar. Comprova la connexió.", errDoc: "No s'ha pogut obrir el document.", de: "de"
+    err: "No s'ha pogut carregar. Comprova la connexió.", errDoc: "No s'ha pogut obrir el document.", de: "de",
+    mostra: "Mostra la contrasenya", amaga: "Amaga la contrasenya",
+    guardar: "Quan entris, el mòbil o el navegador t'oferirà guardar la contrasenya. Digues que sí i la propera vegada s'omplirà sola.",
+    sessio: "No caldrà que tornis a entrar cada vegada: l'app recorda la sessió fins que la tanquis."
   },
   es: {
     lema: "MIS VIAJES", entra: "Entrar", correu: "Correo", contrasenya: "Contraseña",
@@ -38,7 +41,10 @@ const T = {
     mapa: "Cómo llegar", web: "Web", compte: "Mi cuenta", canviaPass: "Cambiar la contraseña", passNova: "Contraseña nueva (mínimo 8 caracteres)",
     desa: "Guardar", tanca: "Cerrar", sortir: "Cerrar sesión", passOk: "Contraseña cambiada ✓", passCurta: "Debe tener 8 caracteres o más.",
     instal: "Añade la app a la pantalla de inicio para tenerla siempre a mano.", instalBoto: "Instalar", ios: "Toca ⎋ Compartir y después «Añadir a pantalla de inicio».",
-    err: "No se ha podido cargar. Comprueba la conexión.", errDoc: "No se ha podido abrir el documento.", de: "de"
+    err: "No se ha podido cargar. Comprueba la conexión.", errDoc: "No se ha podido abrir el documento.", de: "de",
+    mostra: "Mostrar la contraseña", amaga: "Ocultar la contraseña",
+    guardar: "Al entrar, el móvil o el navegador te ofrecerá guardar la contraseña. Di que sí y la próxima vez se rellenará sola.",
+    sessio: "No hará falta que vuelvas a entrar cada vez: la app recuerda la sesión hasta que la cierres."
   }
 };
 const t = k => T[S.idioma][k];
@@ -60,6 +66,26 @@ document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => { po
 })();
 AN.posarLogo(null);
 
+// Camp de contrasenya amb el botó d'ull per veure-la
+function campPass(id, nom, label, autocompletar){
+  return `<div class="camp"><label for="${id}">${esc(label)}</label>
+    <div style="position:relative">
+      <input id="${id}" name="${nom}" type="password" autocomplete="${autocompletar}" required minlength="${nom === "password" ? 1 : 8}" style="padding-right:52px">
+      <button type="button" data-ull="${id}" aria-label="${esc(t("mostra"))}" title="${esc(t("mostra"))}"
+        style="position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:20px;line-height:1;cursor:pointer;padding:8px">👁️</button>
+    </div></div>`;
+}
+function activarUlls(arrel){
+  arrel.querySelectorAll("[data-ull]").forEach(b => b.onclick = () => {
+    const inp = document.getElementById(b.dataset.ull);
+    const veure = inp.type === "password";
+    inp.type = veure ? "text" : "password";
+    b.textContent = veure ? "🙈" : "👁️";
+    b.title = b.ariaLabel = t(veure ? "amaga" : "mostra");
+    inp.focus();
+  });
+}
+
 function avis(msg, err){
   const d = document.createElement("div");
   d.className = "toast" + (err ? " err" : "");
@@ -79,6 +105,7 @@ async function inici(){
     ]);
     if(error) throw error;
     S.client = cl;
+    S.email = session.user.email || "";
     S.viatges = vs || [];
     let triat = null;
     try{ triat = localStorage.getItem("anonta-idioma-triat"); }catch{}
@@ -105,14 +132,17 @@ document.querySelectorAll("#idiomes button").forEach(b => b.addEventListener("cl
 function pantallaLogin(){
   document.getElementById("menu").classList.add("amagat");
   main.innerHTML = `
-    <form class="targeta" id="fLogin">
+    <form class="targeta" id="fLogin" method="post" action="#">
       <p style="margin-top:0">${esc(t("benvinguda"))}</p>
-      <div class="camp"><label for="lEmail">${esc(t("correu"))}</label><input id="lEmail" type="email" autocomplete="username" required></div>
-      <div class="camp"><label for="lPass">${esc(t("contrasenya"))}</label><input id="lPass" type="password" autocomplete="current-password" required></div>
+      <div class="camp"><label for="lEmail">${esc(t("correu"))}</label><input id="lEmail" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required></div>
+      ${campPass("lPass", "password", t("contrasenya"), "current-password")}
       <button class="boto ample" type="submit">${esc(t("entra"))}</button>
       <div class="error" id="lErr"></div>
+      <p class="ajuda">🔑 ${esc(t("guardar"))}</p>
+      <p class="ajuda">${esc(t("sessio"))}</p>
       <p class="ajuda">${esc(t("oblidada"))}</p>
     </form>`;
+  activarUlls(main);
   document.getElementById("fLogin").onsubmit = async e => {
     e.preventDefault();
     const b = e.target.querySelector("button"); b.disabled = true;
@@ -329,13 +359,16 @@ document.getElementById("bCompte").onclick = () => {
   f.className = "modal-fons";
   f.innerHTML = `<div class="modal">
     <h2>${esc(t("compte"))}</h2>
-    <form id="fPass"><div class="camp"><label>${esc(t("passNova"))}</label><input type="password" id="pNova" autocomplete="new-password" minlength="8" required></div>
-    <button class="boto" type="submit">${esc(t("canviaPass"))}</button></form>
+    <form id="fPass" method="post" action="#">
+      <input type="email" name="email" autocomplete="username" value="${esc(S.email || "")}" style="display:none" readonly>
+      ${campPass("pNova", "new-password", t("passNova"), "new-password")}
+      <button class="boto" type="submit">${esc(t("canviaPass"))}</button></form>
     <hr style="border:0;border-top:1px solid var(--linia);margin:18px 0">
     <div class="fila entre"><button class="boto sec" type="button" id="bSortir">${esc(t("sortir"))}</button>
       <button class="boto sec" type="button" data-tanca>${esc(t("tanca"))}</button></div></div>`;
   f.addEventListener("click", e => { if(e.target === f || e.target.hasAttribute("data-tanca")) f.remove(); });
   document.body.appendChild(f);
+  activarUlls(f);
   f.querySelector("#fPass").onsubmit = async e => {
     e.preventDefault();
     const p = f.querySelector("#pNova").value;
