@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo · App de viatges per a clients</title>
+<meta name="description" content="Prova com funciona l'app de viatges: el panell de l'agència i l'app que veu el client. Sense registrar-te.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="✈️ Demo · App de viatges per a clients">
+<meta property="og:description" content="Serveis, documents, pagaments, itinerari i recomanacions del destí, tot en una app per al client. Prova-ho sense registrar-te.">
+<meta name="theme-color" content="#3D698E">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../estil.css">
+<style>
+  body{margin:0}
+  .banda-demo{background:#22313F;color:#fff;text-align:center;font-size:13.5px;padding:9px 14px}
+  .banda-demo strong{color:#FFD58A}
+  .banda-demo button{font:inherit;font-size:13px;margin-left:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;border-radius:8px;padding:3px 9px;cursor:pointer}
+  .cap-demo{max-width:1100px;margin:0 auto;padding:18px 16px 6px;text-align:center}
+  .cap-demo h1{color:var(--blau);font-size:24px;margin:0 0 6px}
+  .cap-demo p{color:var(--gris);margin:0 auto;max-width:640px;font-size:15px}
+  .passos{display:flex;gap:8px;max-width:640px;margin:16px auto 14px;padding:0 16px}
+  .passos button{flex:1;font:inherit;font-weight:600;font-size:14.5px;padding:12px 8px;border-radius:12px;border:1px solid var(--linia);background:#fff;color:var(--gris);cursor:pointer;line-height:1.25}
+  .passos button .n{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+  .passos button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .explica{max-width:640px;margin:0 auto 12px;padding:0 16px;color:var(--gris);font-size:14px;text-align:center}
+  .vista{display:none;padding:0 12px 24px}
+  .vista.actiu{display:block}
+  #fAdmin{display:block;width:100%;max-width:1000px;margin:0 auto;height:calc(100vh - 210px);min-height:560px;border:1px solid var(--linia);border-radius:14px;background:#fff}
+  .mobil{width:390px;max-width:100%;margin:0 auto;border:10px solid #22313F;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  #fClient{display:block;width:100%;height:min(760px, calc(100vh - 210px));min-height:560px;border:0}
+  @media (max-width:560px){ .mobil{border:0;border-radius:0;box-shadow:none} #fAdmin{border-radius:0;border-left:0;border-right:0} .vista{padding:0 0 16px} }
+</style>
+</head>
+<body>
+<div class="banda-demo">👀 <strong>Versió de demostració</strong> · Pots tocar-ho tot: els canvis només es guarden en aquest navegador. <button type="button" id="bReinicia">↺ Tornar a l'exemple inicial</button></div>
+
+<div class="cap-demo">
+  <h1>App de viatges per als teus clients</h1>
+  <p>L'agència prepara el viatge des del seu panell i el client ho té tot al mòbil: serveis, documents, pagaments, itinerari i recomanacions del destí.</p>
+</div>
+
+<div class="passos">
+  <button type="button" data-v="admin" class="actiu"><span class="n">Pas 1</span>🧑‍💼 Panell de l'agència</button>
+  <button type="button" data-v="client"><span class="n">Pas 2</span>📱 App del client</button>
+</div>
+
+<section class="vista actiu" id="vAdmin">
+  <p class="explica">Obre el viatge «Japó en família» i mira-hi les pestanyes. Prova de canviar alguna cosa (per exemple, marcar un pagament com a pagat) i després mira l'app del client.</p>
+  <iframe id="fAdmin" title="Panell de l'agència" src="admin.html?demo#viatges"></iframe>
+</section>
+
+<section class="vista" id="vClient">
+  <p class="explica">Així ho veu la Marta, la clienta, al seu mòbil. Toca el viatge per veure'n els serveis, els documents, els pagaments, l'itinerari i el destí.</p>
+  <div class="mobil"><iframe id="fClient" title="App del client" src="about:blank"></iframe></div>
+</section>
+
+<script>
+  const fClient = document.getElementById("fClient"), fAdmin = document.getElementById("fAdmin");
+  function anar(v){
+    document.querySelectorAll(".passos button").forEach(b => b.classList.toggle("actiu", b.dataset.v === v));
+    document.getElementById("vAdmin").classList.toggle("actiu", v === "admin");
+    document.getElementById("vClient").classList.toggle("actiu", v === "client");
+    // l'app del client es torna a carregar perquè es vegin els canvis fets al panell
+    if(v === "client") fClient.src = "index.html?demo&t=" + Date.now();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll(".passos button").forEach(b => b.onclick = () => anar(b.dataset.v));
+  document.getElementById("bReinicia").onclick = () => {
+    if(!confirm("Tornar a l'exemple inicial? Es perden els canvis que hagis fet a la demostració.")) return;
+    try{ localStorage.removeItem("anonta_demo_v1"); localStorage.removeItem("anonta_demo_fitxers_v1"); }catch(e){}
+    fAdmin.src = "admin.html?demo&t=" + Date.now() + "#viatges";
+    anar("admin");
+  };
+</script>
+</body>
+</html>
