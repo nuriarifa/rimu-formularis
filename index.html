@@ -212,9 +212,9 @@ function pintar(){
   let html = "";
   F.viatgers.forEach((v, i) => {
     html += `<div class="targeta"><h2><span class="num">${i+1}</span>${esc(L.viatger)}${F.viatgers.length>1?" "+(i+1):""}</h2>`;
-    // Els acompanyants (no el viatger principal) no han de posar adreça ni correu
+    // Els acompanyants (no el viatger principal) no han de posar adreça, correu ni telèfon
     const secundari = i > 0 || v.secundari === true;
-    seccions.map(([sec, camps]) => [sec, secundari ? (sec === "adreca" ? [] : camps.filter(([k]) => k !== "email")) : camps])
+    seccions.map(([sec, camps]) => [sec, secundari ? (sec === "adreca" ? [] : camps.filter(([k]) => k !== "email" && k !== "telefon")) : camps])
       .forEach(([sec, camps]) => {
       const fotos = sec === "document" ? [
         !v.te_foto_dni ? ["dni", L.fotoDni, false] : null,
