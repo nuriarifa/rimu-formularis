@@ -2,7 +2,7 @@
 const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY, { auth: { storageKey: "anonta-client" } });
 const { esc, text, euros } = AN;
 const main = document.getElementById("main");
-const S = { idioma: null, client: null, viatges: [], agencies: {}, tr: {}, trCache: {} };
+const S = { idioma: null, client: null, viatges: [], marca: undefined, tr: {}, trCache: {} };
 
 // Textos del viatge traduïts a l'idioma triat (si no hi ha traducció, el text original)
 const tr = (taula, fila, camp) => (fila && S.tr[`${taula}:${fila.id}:${camp}`]) ?? fila?.[camp];
@@ -45,7 +45,7 @@ const T = {
     lema: "MIS VIAJES", entra: "Entrar", correu: "Correo", contrasenya: "Contraseña",
     benvinguda: "Aquí encontrarás toda la información de tus viajes: servicios, documentos, itinerario y recomendaciones.",
     errLogin: "Correo o contraseña incorrectos.", oblidada: "¿Has olvidado la contraseña? Escribe a tu agencia y te pondrá una nueva.",
-    hola: "Hola", elsMeus: "Tus viajes", capViatge: "Todavía no tienes ningún viaje disponible. Cuando la agencia lo publique, lo verás aquí.",
+    hola: "¡Hola", elsMeus: "Tus viajes", capViatge: "Todavía no tienes ningún viaje disponible. Cuando la agencia lo publique, lo verás aquí.",
     passats: "Viajes anteriores", tornar: "← Mis viajes",
     resum: "Resumen", serveis: "Servicios", documents: "Documentos", pagaments: "Pagos", itinerari: "Itinerario", desti: "Destino",
     falten: n => n === 1 ? "Falta 1 día" : `Faltan ${n} días`, avui: "¡Hoy empieza el viaje!", enCurs: "¡Buen viaje! 🌍", acabat: "Viaje finalizado",
@@ -70,7 +70,7 @@ function posarIdioma(l){
   try{ localStorage.setItem("anonta-idioma", S.idioma); }catch{}
   document.documentElement.lang = S.idioma;
   document.getElementById("lema").textContent = t("lema");
-  document.title = "Rimu Viatges · " + (S.idioma === "es" ? "Mis viajes" : "Els meus viatges");
+  posarTitol();
   document.querySelectorAll("#idiomes button").forEach(b => b.classList.toggle("actiu", b.dataset.l === S.idioma));
 }
 document.querySelectorAll("#idiomes button").forEach(b => b.onclick = async () => {
@@ -86,7 +86,74 @@ document.querySelectorAll("#idiomes button").forEach(b => b.onclick = async () =
   if(!l) l = /^es/i.test(navigator.language || "") ? "es" : "ca";
   posarIdioma(l);
 })();
-AN.posarLogo(null);
+
+// ---------- marca de l'agència (logo, colors, nom i icona per instal·lar l'app) ----------
+function posarTitol(){
+  const app = S.idioma === "es" ? "Mis viajes" : "Els meus viatges";
+  const m = S.marca, propia = m && m.propia !== false;
+  document.title = propia ? `${m.nom} · ${app}` : app;
+}
+function agenciaGuardada(){
+  const q = new URLSearchParams(location.search).get("a");
+  if(q){ try{ localStorage.setItem("anonta-agencia", q); }catch{} return q; }
+  try{ return localStorage.getItem("anonta-agencia"); }catch{ return null; }
+}
+async function carregarMarca(id){
+  if(!id){ aplicarMarca(null); return; }
+  if(S.marca && S.marca.id === id) return;
+  try{ localStorage.setItem("anonta-agencia", id); }catch{}
+  let m = null;
+  try{ const { data } = await sb.rpc("an_marca", { p_agencia: id }); m = data || null; }catch{}
+  aplicarMarca(m);
+}
+// Icona quadrada a partir d'un logo (per a la pantalla d'inici del mòbil)
+function iconaDelLogo(src, mida, marge){
+  return new Promise(ok => {
+    const img = new Image();
+    if(!/^data:/.test(src)) img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try{
+        const c = document.createElement("canvas"); c.width = c.height = mida;
+        const x = c.getContext("2d");
+        x.fillStyle = "#fff"; x.fillRect(0, 0, mida, mida);
+        const m = mida * marge, max = mida - m * 2, r = Math.min(max / (img.naturalWidth || img.width), max / (img.naturalHeight || img.height));
+        const w = (img.naturalWidth || img.width) * r, h = (img.naturalHeight || img.height) * r;
+        x.drawImage(img, (mida - w) / 2, (mida - h) / 2, w, h);
+        ok(c.toDataURL("image/png"));
+      }catch{ ok(null); }
+    };
+    img.onerror = () => ok(null);
+    img.src = src;
+  });
+}
+function posarLink(rel, href){
+  let l = document.querySelector(`link[rel="${rel}"]`);
+  if(!l){ l = document.createElement("link"); l.rel = rel; document.head.appendChild(l); }
+  l.href = href;
+}
+// Nom, icona i fitxa d'instal·lació de l'app amb la marca que toca
+async function aplicarMarca(m){
+  S.marca = m;
+  AN.posarMarca(m);
+  posarTitol();
+  const propia = !!(m && m.propia !== false);
+  const curt = propia ? m.nom : "Anonta";
+  document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute("content", curt);
+  const anonta = new URL("icona-anonta.svg", location.href).href;
+  const src = !propia ? anonta : (m.id === "rimu" && window.RIMU_LOGO) ? window.RIMU_LOGO : (m.logo_url || anonta);
+  const marge = src === anonta ? 0 : .1;
+  const [i180, i192, i512] = await Promise.all([180, 192, 512].map(n => iconaDelLogo(src, n, marge)));
+  if(S.marca !== m) return;
+  if(i180) posarLink("apple-touch-icon", i180);
+  const base = new URL("./", location.href).href;
+  const man = { name: `${curt} · ${S.idioma === "es" ? "Mis viajes" : "Els meus viatges"}`, short_name: curt.slice(0, 20),
+    start_url: base + (m?.id ? "?a=" + encodeURIComponent(m.id) : ""), scope: base, display: "standalone",
+    background_color: "#FFFFFF", theme_color: (propia && m.color) || AN.ANONTA.color,
+    icons: i192 ? [{ src: i192, sizes: "192x192", type: "image/png" }, { src: i512, sizes: "512x512", type: "image/png" }]
+                : [{ src: anonta, sizes: "any", type: "image/svg+xml" }] };
+  posarLink("manifest", "data:application/manifest+json;charset=utf-8," + encodeURIComponent(JSON.stringify(man)));
+}
+carregarMarca(agenciaGuardada());
 
 // Camp de contrasenya amb el botó d'ull per veure-la
 function campPass(id, nom, label, autocompletar){
@@ -122,7 +189,7 @@ async function inici(){
   if(!session) return pantallaLogin();
   try{
     const [{ data: cl }, { data: vs, error }] = await Promise.all([
-      sb.from("an_clients").select("nom, cognoms, idioma").eq("user_id", session.user.id).maybeSingle(),
+      sb.from("an_clients").select("nom, cognoms, idioma, agencia_id").eq("user_id", session.user.id).maybeSingle(),
       sb.from("an_viatges").select("*").order("data_inici", { ascending: true, nullsFirst: false })
     ]);
     if(error) throw error;
@@ -132,13 +199,7 @@ async function inici(){
     let triat = null;
     try{ triat = localStorage.getItem("anonta-idioma-triat"); }catch{}
     if(cl && !triat) posarIdioma(cl.idioma);
-    const ags = [...new Set(S.viatges.map(v => v.agencia_id))];
-    if(ags.length){
-      const { data: a } = await sb.from("agencies").select("id, nom, color, color_fosc, color_clar, accent, accent_clar, logo_url").in("id", ags);
-      (a || []).forEach(x => S.agencies[x.id] = x);
-      const ag = S.agencies[ags[0]];
-      if(ag){ AN.aplicarColors(ag); AN.posarLogo(ag); }
-    }
+    await carregarMarca(cl?.agencia_id || S.viatges[0]?.agencia_id || agenciaGuardada());
     const urls = await AN.urlsSignades(sb, S.viatges.map(v => v.portada));
     S.viatges.forEach(v => v._portada = urls[v.portada] || null);
   }catch(e){
