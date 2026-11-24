@@ -392,7 +392,8 @@ async function carregarSollicituds(){
     <div class="grup"><div class="grup-cap" style="align-items:center">
       <div style="display:flex;gap:12px;align-items:center">
         ${s.logo_path ? `<img src="${esc(URL_LOGOS + s.logo_path)}" crossorigin="anonymous" alt="" style="width:64px;height:64px;object-fit:contain;border:1px solid var(--linia);border-radius:10px;background:#fff">` : ""}
-        <div><div class="grup-titol">${esc(s.nom)}</div><div class="meta">${esc(s.email)} · ${new Date(s.created_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"})}</div></div>
+        <div><div class="grup-titol">${esc(s.nom)}</div><div class="meta">${esc(s.email)} · ${new Date(s.created_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"})}</div>
+          <div class="meta" style="margin-top:4px;font-weight:700">${s.app === "itineraris" ? "🗺️ Itineraris" : "📝 Formularis"}</div></div>
       </div></div>
       <div class="fila-botons" style="margin-top:12px">
         <button class="boto petit" data-aprova="${s.id}">✓ Aprovar (30 dies de prova)</button>
@@ -463,18 +464,25 @@ function colorsDelLogo(src){
 }
 async function aprovar(id, boto){
   const s = dadesSol.find(x => x.id === id); if(!s) return;
-  if(!confirm(`Crear l'agència «${s.nom}» amb 30 dies de prova?`)) return;
+  if(!confirm(`Aprovar «${s.nom}» (${s.app === "itineraris" ? "itineraris" : "formularis"}) amb 30 dies de prova? Si ja és clienta, se li afegeix l'app.`)) return;
   boto.disabled = true; boto.textContent = "Creant…";
+  const { data: totes } = await sb.rpc("admin_agencies");
+  const jaClienta = (totes || []).some(a => (a.usuaris || []).some(u => u.email.toLowerCase() === s.email.toLowerCase()));
   const colors = s.logo_path ? await colorsDelLogo(URL_LOGOS + s.logo_path) : {};
   const { data: agId, error } = await sb.rpc("aprovar_sollicitud", { p_id: id, p_colors: colors });
   if(error){ toast("No s'ha pogut aprovar: " + error.message); boto.disabled = false; boto.textContent = "✓ Aprovar (30 dies de prova)"; return; }
-  mostrarBenvinguda(s);
+  mostrarBenvinguda(s, agId, jaClienta);
   carregarSollicituds();
 }
-function mostrarBenvinguda(s){
+function mostrarBenvinguda(s, agId, jaClienta){
   const fins = new Date(); fins.setDate(fins.getDate() + 30);
-  const text = `¡Hola! Ya tienes listo tu espacio de ${s.nom} para el formulario de datos de viajeros.\n\n`
-    + `1. Entra en: ${BASE}admin.html\n`
+  const itin = s.app === "itineraris", url = itin ? BASE + "itineraris/admin.html" : BASE + "admin.html";
+  const text = jaClienta
+    ? `¡Hola! Ya tienes activado en ${s.nom} ${itin ? "el panel para crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros"}.\n\n`
+      + `Entra en: ${url}\ncon el mismo correo (${s.email}) y la misma contraseña que ya usas.\n\n`
+      + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`
+    : `¡Hola! Ya tienes listo tu espacio de ${s.nom} para ${itin ? "crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros"}.\n\n`
+    + `1. Entra en: ${url}\n`
     + `2. Escribe tu correo (${s.email}) y la contraseña que quieras, y pulsa «¿Primera vez? Crear la contraseña».\n`
     + `3. Confirma tu cuenta desde el correo que te llegará y vuelve a entrar.\n\n`
     + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`;
