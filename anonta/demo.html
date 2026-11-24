@@ -1,24 +1,35 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Demo · App de viatges per a clients</title>
-<meta name="description" content="Prova com funciona l'app de viatges: el panell de l'agència i l'app que veu el client. Sense registrar-te.">
+<title>Demo · Anonta, la app de viaje para tus clientes</title>
+<meta name="description" content="Prueba Anonta: el panel de la agencia y la app que ve el cliente en su móvil. Sin registrarte. Y si te gusta, un mes de prueba gratis con tu logo.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="✈️ Demo · App de viatges per a clients">
-<meta property="og:description" content="Serveis, documents, pagaments, itinerari i recomanacions del destí, tot en una app per al client. Prova-ho sense registrar-te.">
-<meta name="theme-color" content="#3D698E">
-<link rel="icon" href="icona.svg" type="image/svg+xml">
+<meta property="og:title" content="✈️ Demo · Anonta, la app de viaje para tus clientes">
+<meta property="og:description" content="Servicios, documentos, pagos, itinerario y recomendaciones del destino, todo en una app para el cliente. Pruébalo sin registrarte.">
+<meta name="theme-color" content="#1F3A5F">
+<link rel="icon" href="icona-anonta.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../estil.css">
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+  :root{--blau:#1F3A5F;--blau-fosc:#152A45;--blau-clar:#E8EEF6;--coral:#F2A65A;--coral-clar:#FDF1E4}
   body{margin:0}
   .banda-demo{background:#22313F;color:#fff;text-align:center;font-size:13.5px;padding:9px 14px}
   .banda-demo strong{color:#FFD58A}
   .banda-demo button{font:inherit;font-size:13px;margin-left:8px;border:1px solid rgba(255,255,255,.5);background:none;color:#fff;border-radius:8px;padding:3px 9px;cursor:pointer}
-  .cap-demo{max-width:1100px;margin:0 auto;padding:18px 16px 6px;text-align:center}
+  .cap-demo{max-width:1100px;margin:0 auto;padding:18px 16px 6px;text-align:center;position:relative}
+  .cap-demo img{height:54px;width:auto;margin-bottom:6px}
   .cap-demo h1{color:var(--blau);font-size:24px;margin:0 0 6px}
   .cap-demo p{color:var(--gris);margin:0 auto;max-width:640px;font-size:15px}
+  .idiomes{position:absolute;right:16px;top:14px;display:flex;gap:4px}
+  .idiomes button{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--linia);background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--gris)}
+  .idiomes button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .crida{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font:inherit;font-weight:700;font-size:16px;border:0;border-radius:999px;
+    padding:13px 24px;background:var(--coral);color:#3A2410;cursor:pointer;box-shadow:0 6px 18px rgba(242,166,90,.35)}
+  .crida:hover{filter:brightness(.96)}
+  .crida-sub{display:block;font-size:12.5px;color:var(--gris);margin-top:6px}
   .passos{display:flex;gap:8px;max-width:640px;margin:16px auto 14px;padding:0 16px}
   .passos button{flex:1;font:inherit;font-weight:600;font-size:14.5px;padding:12px 8px;border-radius:12px;border:1px solid var(--linia);background:#fff;color:var(--gris);cursor:pointer;line-height:1.25}
   .passos button .n{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
@@ -29,49 +40,227 @@
   #fAdmin{display:block;width:100%;max-width:1000px;margin:0 auto;height:calc(100vh - 210px);min-height:560px;border:1px solid var(--linia);border-radius:14px;background:#fff}
   .mobil{width:390px;max-width:100%;margin:0 auto;border:10px solid #22313F;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   #fClient{display:block;width:100%;height:min(760px, calc(100vh - 210px));min-height:560px;border:0}
-  @media (max-width:560px){ .mobil{border:0;border-radius:0;box-shadow:none} #fAdmin{border-radius:0;border-left:0;border-right:0} .vista{padding:0 0 16px} }
+  .peu-prova{max-width:640px;margin:8px auto 30px;padding:0 16px;text-align:center}
+  dialog{border:0;border-radius:16px;padding:0;width:min(480px, calc(100vw - 24px));max-height:calc(100vh - 24px);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  dialog::backdrop{background:rgba(20,30,45,.55)}
+  .dlg-cap{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0}
+  .dlg-cap h2{margin:0}
+  .dlg-cap button{border:0;background:none;font-size:22px;cursor:pointer;color:var(--gris);line-height:1}
+  .dlg-cos{padding:12px 18px 18px}
+  .ventatges{margin:0 0 14px;padding-left:20px;font-size:14px}
+  .ventatges li{margin-bottom:3px}
+  @media (max-width:560px){ .mobil{border:0;border-radius:0;box-shadow:none} #fAdmin{border-radius:0;border-left:0;border-right:0} .vista{padding:0 0 16px}
+    .idiomes{position:static;justify-content:center;margin-bottom:8px} }
 </style>
 </head>
 <body>
-<div class="banda-demo">👀 <strong>Versió de demostració</strong> · Pots tocar-ho tot: els canvis només es guarden en aquest navegador. <button type="button" id="bReinicia">↺ Tornar a l'exemple inicial</button></div>
+<div class="banda-demo"><span id="tBanda"></span> <button type="button" id="bReinicia"></button></div>
 
 <div class="cap-demo">
-  <h1>App de viatges per als teus clients</h1>
-  <p>L'agència prepara el viatge des del seu panell i el client ho té tot al mòbil: serveis, documents, pagaments, itinerari i recomanacions del destí.</p>
+  <div class="idiomes" id="idiomes"><button type="button" data-l="ca">CA</button><button type="button" data-l="es">ES</button></div>
+  <img src="logo-anonta.svg" alt="Anonta">
+  <h1 id="tTitol"></h1>
+  <p id="tSubtitol"></p>
+  <button class="crida" type="button" id="bProva"></button>
+  <span class="crida-sub" id="tProvaSub"></span>
 </div>
 
 <div class="passos">
-  <button type="button" data-v="admin" class="actiu"><span class="n">Pas 1</span>🧑‍💼 Panell de l'agència</button>
-  <button type="button" data-v="client"><span class="n">Pas 2</span>📱 App del client</button>
+  <button type="button" data-v="admin" class="actiu"><span class="n" id="tPas1"></span><span id="tPas1b"></span></button>
+  <button type="button" data-v="client"><span class="n" id="tPas2"></span><span id="tPas2b"></span></button>
 </div>
 
 <section class="vista actiu" id="vAdmin">
-  <p class="explica">Obre el viatge «Japó en família» i mira-hi les pestanyes. Prova de canviar alguna cosa (per exemple, marcar un pagament com a pagat) i després mira l'app del client.</p>
-  <iframe id="fAdmin" title="Panell de l'agència" src="admin.html?demo#viatges"></iframe>
+  <p class="explica" id="tExplicaAdmin"></p>
+  <iframe id="fAdmin" title="Panel" src="about:blank"></iframe>
 </section>
 
 <section class="vista" id="vClient">
-  <p class="explica">Així ho veu la Marta, la clienta, al seu mòbil. Toca el viatge per veure'n els serveis, els documents, els pagaments, l'itinerari i el destí.</p>
-  <div class="mobil"><iframe id="fClient" title="App del client" src="about:blank"></iframe></div>
+  <p class="explica" id="tExplicaClient"></p>
+  <div class="mobil"><iframe id="fClient" title="App" src="about:blank"></iframe></div>
 </section>
 
+<div class="peu-prova"><button class="crida" type="button" id="bProva2"></button></div>
+
+<dialog id="dlgProva">
+  <div class="dlg-cap"><h2 id="pTitol"></h2><button type="button" id="pTancar" aria-label="×">×</button></div>
+  <div class="dlg-cos" id="pCos"></div>
+</dialog>
+
 <script>
-  const fClient = document.getElementById("fClient"), fAdmin = document.getElementById("fAdmin");
-  function anar(v){
-    document.querySelectorAll(".passos button").forEach(b => b.classList.toggle("actiu", b.dataset.v === v));
-    document.getElementById("vAdmin").classList.toggle("actiu", v === "admin");
-    document.getElementById("vClient").classList.toggle("actiu", v === "client");
-    // l'app del client es torna a carregar perquè es vegin els canvis fets al panell
-    if(v === "client") fClient.src = "index.html?demo&t=" + Date.now();
-    window.scrollTo(0, 0);
-  }
-  document.querySelectorAll(".passos button").forEach(b => b.onclick = () => anar(b.dataset.v));
-  document.getElementById("bReinicia").onclick = () => {
-    if(!confirm("Tornar a l'exemple inicial? Es perden els canvis que hagis fet a la demostració.")) return;
-    try{ localStorage.removeItem("anonta_demo_v1"); localStorage.removeItem("anonta_demo_fitxers_v1"); }catch(e){}
+const $ = id => document.getElementById(id);
+const fClient = $("fClient"), fAdmin = $("fAdmin");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let LANG = (() => {
+  const q = new URLSearchParams(location.search).get("lang");
+  if(q === "ca" || q === "es") return q;
+  try{ return localStorage.getItem("anonta-demo-idioma") || "es"; }catch{ return "es"; }
+})();
+const L = (ca, es) => LANG === "es" ? es : ca;
+
+function posarIdioma(l, recarregar){
+  LANG = l === "ca" ? "ca" : "es";
+  try{
+    localStorage.setItem("anonta-demo-idioma", LANG);
+    localStorage.setItem("anonta-idioma-panell", LANG);
+    localStorage.setItem("anonta-idioma", LANG);
+    localStorage.setItem("anonta-idioma-triat", "1");
+  }catch{}
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("#idiomes button").forEach(b => b.classList.toggle("actiu", b.dataset.l === LANG));
+  document.title = L("Demo · Anonta, l'app de viatge per als teus clients", "Demo · Anonta, la app de viaje para tus clientes");
+  $("tBanda").innerHTML = L("👀 <strong>Versió de demostració</strong> · Pots tocar-ho tot: els canvis només es guarden en aquest navegador.",
+    "👀 <strong>Versión de demostración</strong> · Puedes tocarlo todo: los cambios solo se guardan en este navegador.");
+  $("bReinicia").textContent = L("↺ Tornar a l'exemple inicial", "↺ Volver al ejemplo inicial");
+  $("tTitol").textContent = L("L'app de viatge per als teus clients", "La app de viaje para tus clientes");
+  $("tSubtitol").textContent = L("L'agència prepara el viatge des del seu panell i el client ho té tot al mòbil: serveis, documents, pagaments, itinerari i recomanacions del destí. I s'hi pot instal·lar l'app.",
+    "La agencia prepara el viaje desde su panel y el cliente lo tiene todo en el móvil: servicios, documentos, pagos, itinerario y recomendaciones del destino. Y puede instalarse la app.");
+  $("bProva").textContent = $("bProva2").textContent = L("🎁 Comença el teu mes de prova gratis", "🎁 Empieza tu mes de prueba gratis");
+  $("tProvaSub").textContent = L("30 dies amb el logo i els colors de la teva agència · Sense targeta · Sense compromís",
+    "30 días con el logo y los colores de tu agencia · Sin tarjeta · Sin compromiso");
+  $("tPas1").textContent = L("Pas 1", "Paso 1"); $("tPas1b").textContent = L("🧑‍💼 Panell de l'agència", "🧑‍💼 Panel de la agencia");
+  $("tPas2").textContent = L("Pas 2", "Paso 2"); $("tPas2b").textContent = L("📱 App del client", "📱 App del cliente");
+  $("tExplicaAdmin").textContent = L("Obre el viatge «Japó en família» i mira-hi les pestanyes. Prova de canviar alguna cosa (per exemple, marcar un pagament com a pagat) i després mira l'app del client.",
+    "Abre el viaje «Japón en familia» y mira sus pestañas. Prueba a cambiar algo (por ejemplo, marcar un pago como pagado) y después mira la app del cliente.");
+  $("tExplicaClient").textContent = L("Així ho veu la Marta, la clienta, al seu mòbil. Toca el viatge per veure'n els serveis, els documents, els pagaments, l'itinerari i el destí.",
+    "Así lo ve Marta, la clienta, en su móvil. Toca el viaje para ver sus servicios, documentos, pagos, itinerario y destino.");
+  fAdmin.title = L("Panell de l'agència", "Panel de la agencia"); fClient.title = L("App del client", "App del cliente");
+  if(recarregar){
     fAdmin.src = "admin.html?demo&t=" + Date.now() + "#viatges";
-    anar("admin");
+    if($("vClient").classList.contains("actiu")) fClient.src = "index.html?demo&t=" + Date.now();
+  }
+}
+document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => { if(b.dataset.l !== LANG) posarIdioma(b.dataset.l, true); });
+
+function anar(v){
+  document.querySelectorAll(".passos button").forEach(b => b.classList.toggle("actiu", b.dataset.v === v));
+  $("vAdmin").classList.toggle("actiu", v === "admin");
+  $("vClient").classList.toggle("actiu", v === "client");
+  // l'app del client es torna a carregar perquè es vegin els canvis fets al panell
+  if(v === "client") fClient.src = "index.html?demo&t=" + Date.now();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".passos button").forEach(b => b.onclick = () => anar(b.dataset.v));
+$("bReinicia").onclick = () => {
+  if(!confirm(L("Tornar a l'exemple inicial? Es perden els canvis que hagis fet a la demostració.", "¿Volver al ejemplo inicial? Se pierden los cambios que hayas hecho en la demostración."))) return;
+  try{ localStorage.removeItem("anonta_demo_v1"); localStorage.removeItem("anonta_demo_fitxers_v1"); }catch(e){}
+  fAdmin.src = "admin.html?demo&t=" + Date.now() + "#viatges";
+  anar("admin");
+};
+
+/* ---- Sol·licitud del mes de prova ---- */
+const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY, { auth: { persistSession: false, storageKey: "anonta-demo-prova" } });
+let logoProva = null;
+const MSG = {
+  JA_SOLLICITAT: ["Ja tenim una sol·licitud amb aquest correu. T'escriurem molt aviat.", "Ya tenemos una solicitud con este correo. Te escribiremos muy pronto."],
+  JA_CLIENT: ["Aquest correu ja té Anonta activat. Entra al teu panell amb ell.", "Este correo ya tiene Anonta activado. Entra en tu panel con él."],
+  EMAIL_INVALID: ["Revisa el correu electrònic.", "Revisa el correo electrónico."],
+  NOM_INVALID: ["Escriu el nom de la teva agència.", "Escribe el nombre de tu agencia."],
+  LOGO_INVALID: ["No hem pogut desar el logo. Prova amb un altre fitxer.", "No hemos podido guardar el logo. Prueba con otro archivo."],
+  MASSA: ["Ara mateix hi ha moltes sol·licituds. Torna-ho a provar d'aquí a una estona.", "Ahora mismo hay muchas solicitudes. Vuelve a intentarlo en un rato."]
+};
+const errGeneric = () => L("No s'ha pogut enviar la sol·licitud. Torna-ho a provar.", "No se ha podido enviar la solicitud. Vuelve a intentarlo.");
+function obrirProva(){
+  logoProva = null;
+  $("pTitol").textContent = L("Comença el teu mes de prova", "Empieza tu mes de prueba");
+  $("pCos").innerHTML = `
+    <ul class="ventatges">
+      <li>${L("30 dies gratis, sense targeta i sense compromís.", "30 días gratis, sin tarjeta y sin compromiso.")}</li>
+      <li>${L("La teva app amb el <b>logo i els colors</b> de la teva agència.", "Tu app con el <b>logo y los colores</b> de tu agencia.")}</li>
+      <li>${L("Clients i viatges il·limitats durant la prova.", "Clientes y viajes ilimitados durante la prueba.")}</li>
+    </ul>
+    <div class="camp"><label for="pNom">${L("Nom de la teva agència", "Nombre de tu agencia")}</label><input id="pNom" maxlength="80" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
+    <div class="camp"><label for="pEmail">${L("El teu correu", "Tu correo")}</label><input id="pEmail" type="email" maxlength="120" autocomplete="email" placeholder="tu@agencia.com">
+      <div class="ajuda">${L("El faràs servir per entrar al teu panell.", "Lo usarás para entrar en tu panel.")}</div></div>
+    <div class="camp"><label>${L("Logo de la teva agència", "Logo de tu agencia")}</label>
+      <label class="foto-boto" for="pLogo" id="pLogoBoto"><span id="pLogoTxt">🖼️ ${L("Triar imatge (PNG o JPG)", "Elegir imagen (PNG o JPG)")}</span><img class="img-prev amagat" id="pLogoMini" alt="" style="max-height:40px;margin:0"></label>
+      <input class="amagat" type="file" id="pLogo" accept="image/png,image/jpeg,image/webp">
+      <div class="ajuda">${L("En traurem els colors de la teva app.", "Sacaremos de él los colores de tu app.")}</div></div>
+    <label class="consentiment"><input type="checkbox" id="pAccepto"> <span>${L("Accepto les", "Acepto las")} <a href="#" id="pVeureCond" style="color:var(--blau)">${L("condicions de la prova", "condiciones de la prueba")}</a>.</span></label>
+    <div id="pCond" class="amagat" style="font-size:13px;color:var(--gris);background:var(--fons);border-radius:10px;padding:10px 12px;margin-top:8px"><ul style="margin:0;padding-left:18px">
+      <li>${L("La prova és gratuïta durant 30 dies, sense targeta i sense compromís.", "La prueba es gratuita durante 30 días, sin tarjeta y sin compromiso.")}</li>
+      <li>${L("Quan s'acabi, podràs continuar veient els teus viatges i els teus clients els seguiran veient, però no en podràs crear de nous fins que contractis el servei.", "Al terminar, podrás seguir viendo tus viajes y tus clientes los seguirán viendo, pero no podrás crear nuevos hasta contratar el servicio.")}</li>
+      <li>${L("Les dades es guarden en servidors de la Unió Europea i només la teva agència i els teus clients les poden veure. Rimu Viatges les tracta únicament per prestar-te el servei, com a encarregat del tractament.", "Los datos se guardan en servidores de la Unión Europea y solo tu agencia y tus clientes pueden verlos. Rimu Viatges los trata únicamente para prestarte el servicio, como encargado del tratamiento.")}</li>
+      <li>${L("Pots demanar la baixa i l'esborrat de les teves dades en qualsevol moment escrivint a admin@rimuviatges.com.", "Puedes pedir la baja y el borrado de tus datos en cualquier momento escribiendo a admin@rimuviatges.com.")}</li></ul></div>
+    <div id="pErr" class="error amagat"></div>
+    <div style="margin-top:16px"><button class="boto ample" type="button" id="pEnviar">${L("Sol·licitar el meu mes de prova", "Solicitar mi mes de prueba")}</button></div>`;
+  $("pVeureCond").onclick = e => { e.preventDefault(); $("pCond").classList.toggle("amagat"); };
+  $("pLogo").onchange = async () => {
+    const f = $("pLogo").files[0]; if(!f) return;
+    $("pErr").classList.add("amagat");
+    try{
+      const r = await prepararLogo(f);
+      if(r.blob.size > 2 * 1024 * 1024) throw 0;
+      logoProva = r;
+      $("pLogoMini").src = URL.createObjectURL(r.blob); $("pLogoMini").classList.remove("amagat");
+      $("pLogoTxt").textContent = "✓ " + f.name; $("pLogoBoto").classList.add("feta"); $("pLogoBoto").classList.remove("malament");
+    }catch(e){ logoProva = null; errProva(L("No hem pogut llegir la imatge. Prova amb un altre fitxer PNG o JPG.", "No hemos podido leer la imagen. Prueba con otro archivo PNG o JPG.")); }
   };
+  $("pEnviar").onclick = enviarProva;
+  if(!$("dlgProva").open) $("dlgProva").showModal();
+  setTimeout(() => $("pNom").focus(), 50);
+}
+window.obrirProva = obrirProva;
+$("pTancar").onclick = () => $("dlgProva").close();
+$("bProva").onclick = $("bProva2").onclick = obrirProva;
+function errProva(t){ $("pErr").textContent = t; $("pErr").classList.remove("amagat"); }
+// Redueix el logo (màx. 600 px) i en conserva la transparència si és PNG
+function prepararLogo(file){
+  return new Promise((ok, ko) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * r)); c.height = Math.max(1, Math.round(img.height * r));
+      const png = file.type !== "image/jpeg", x = c.getContext("2d");
+      if(!png){ x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); }
+      x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      c.toBlob(b => b ? ok({ blob: b, ext: png ? "png" : "jpg" }) : ko(), png ? "image/png" : "image/jpeg", 0.9);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(); };
+    img.src = url;
+  });
+}
+function uuid(){ return crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); }); }
+async function enviarProva(){
+  $("pErr").classList.add("amagat");
+  const nom = $("pNom").value.trim(), email = $("pEmail").value.trim();
+  if(nom.length < 2){ errProva(L(...MSG.NOM_INVALID)); $("pNom").focus(); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ errProva(L(...MSG.EMAIL_INVALID)); $("pEmail").focus(); return; }
+  if(!logoProva){ $("pLogoBoto").classList.add("malament"); errProva(L("Afegeix el logo de la teva agència.", "Añade el logo de tu agencia.")); return; }
+  if(!$("pAccepto").checked){ errProva(L("Per continuar, accepta les condicions de la prova.", "Para continuar, acepta las condiciones de la prueba.")); return; }
+  const b = $("pEnviar"), txt = b.textContent; b.disabled = true; b.textContent = L("Enviant…", "Enviando…");
+  try{
+    const ruta = `sollicituds/${uuid()}.${logoProva.ext}`;
+    const up = await sb.storage.from("logos-agencies").upload(ruta, logoProva.blob, { contentType: logoProva.ext === "png" ? "image/png" : "image/jpeg", upsert: false });
+    if(up.error) throw up.error;
+    const { error } = await sb.rpc("an_sollicitar_prova", { p_nom: nom, p_email: email, p_logo: ruta, p_idioma: LANG });
+    if(error){
+      const k = Object.keys(MSG).find(x => (error.message || "").includes(x));
+      errProva(k ? L(...MSG[k]) : errGeneric());
+      b.disabled = false; b.textContent = txt; return;
+    }
+    fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", {
+      method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ _subject: "Nova sol·licitud de prova (Anonta): " + nom, _template: "table", _captcha: "false",
+        "App": "Anonta", "Agència": nom, "Correu": email, "Idioma": LANG === "es" ? "Castellà" : "Català",
+        "Aprova-la al panell (pestanya Agències)": new URL("admin.html#agencies", location.href).href })
+    }).catch(() => {});
+    $("pCos").innerHTML = `<div class="centre"><div style="font-size:44px">🎉</div>
+      <h2 style="justify-content:center">${L("Sol·licitud rebuda!", "¡Solicitud recibida!")}</h2>
+      <p>${L(`Estem preparant el teu espai amb el logo i els colors de <strong>${esc(nom)}</strong>. T'escriurem a <strong>${esc(email)}</strong> quan estigui llest, normalment en menys de 24 hores.`,
+        `Estamos preparando tu espacio con el logo y los colores de <strong>${esc(nom)}</strong>. Te escribiremos a <strong>${esc(email)}</strong> en cuanto esté listo, normalmente en menos de 24 horas.`)}</p>
+      <button class="boto sec" type="button" id="pOkTancar">${L("Continuar veient la demo", "Seguir viendo la demo")}</button></div>`;
+    $("pOkTancar").onclick = () => $("dlgProva").close();
+  }catch(e){
+    errProva(errGeneric());
+    b.disabled = false; b.textContent = txt;
+  }
+}
+
+posarIdioma(LANG, false);
+fAdmin.src = "admin.html?demo#viatges";
+if(location.hash === "#prova") obrirProva();
 </script>
 </body>
 </html>
