@@ -3,6 +3,16 @@
   const base = subDesti;
 
   subDesti = async function(cont, v){
+    if(!teIA()){
+      cont.innerHTML = `
+        <div class="targeta" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+          <div><b>✨ ${L("Omplir amb IA", "Rellenar con IA")}</b><div class="meta">${L(`Inclòs al pla <b>Prèmium</b> (${PREU.premium} €/mes + IVA). Escriu-nos a admin@rimuviatges.com per canviar de pla.`,
+            `Incluido en el plan <b>Prémium</b> (${PREU.premium} €/mes + IVA). Escríbenos a admin@rimuviatges.com para cambiar de plan.`)}</div></div>
+        </div>
+        <div id="destiLlista"></div>`;
+      base($("destiLlista"), v);
+      return;
+    }
     cont.innerHTML = `
       <div class="targeta" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
         <div><b>✨ ${L("Omplir amb IA", "Rellenar con IA")}</b><div class="meta">${L("Et proposa informació pràctica, consells, llocs, on menjar… Tu tries què afegeixes.", "Te propone información práctica, consejos, lugares, dónde comer… Tú eliges qué añades.")}</div></div>
@@ -79,6 +89,7 @@
     const MSG = {
       FALTA_CLAU: L("La IA no està configurada. Avisa'ns a admin@rimuviatges.com.", "La IA no está configurada. Avísanos en admin@rimuviatges.com."),
       NO_PERMIS: L("No tens permís. Torna a entrar al panell.", "No tienes permiso. Vuelve a entrar en el panel."),
+      SENSE_IA: L(`La IA només és al pla Prèmium (${PREU.premium} €/mes + IVA).`, `La IA solo está en el plan Prémium (${PREU.premium} €/mes + IVA).`),
       ERROR_IA: L("La IA no ha pogut respondre ara. Torna-ho a provar d'aquí a una estona.", "La IA no ha podido responder ahora. Vuelve a intentarlo dentro de un rato.")
     };
     try{

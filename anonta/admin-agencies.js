@@ -2,9 +2,9 @@
 (function(){
   const URL_LOGOS = RIMU.SUPABASE_URL + "/storage/v1/object/public/logos-agencies/";
   const PLANS = () => ({
-    prova:   [L("Mes de prova", "Mes de prueba"), L("logo i colors de l'agència", "logo y colores de la agencia")],
-    basic:   [L("Bàsic", "Básico"), L("marca Anonta", "marca Anonta")],
-    premium: [L("Prèmium", "Prémium"), L("logo i colors de l'agència", "logo y colores de la agencia")],
+    prova:   [L("Mes de prova", "Mes de prueba"), L("gratis · logo propi i IA", "gratis · logo propio e IA")],
+    basic:   [L("Bàsic", "Básico"), L(`20 €/mes · logo Anonta, sense IA`, `20 €/mes · logo Anonta, sin IA`)],
+    premium: [L("Prèmium", "Prémium"), L(`25 €/mes · logo propi i IA`, `25 €/mes · logo propio e IA`)],
     cap:     [L("Donar de baixa", "Dar de baja"), L("ja no hi pot entrar", "ya no puede entrar")]
   });
   let SOLS = [], AGS = [];
@@ -33,8 +33,8 @@
       <div class="targeta">
         <h2>🏢 ${L("Agències amb Anonta", "Agencias con Anonta")}</h2>
         <div id="agLlista"></div>
-        <p class="ajuda">${L("El pla decideix la marca que veuen els clients: <b>Mes de prova</b> i <b>Prèmium</b> amb el logo i els colors de l'agència; <b>Bàsic</b> amb la marca Anonta. Quan una prova s'acaba, l'agència pot mirar però no crear viatges nous.",
-          "El plan decide la marca que ven los clientes: <b>Mes de prueba</b> y <b>Prémium</b> con el logo y los colores de la agencia; <b>Básico</b> con la marca Anonta. Cuando una prueba termina, la agencia puede mirar pero no crear viajes nuevos.")}</p>
+        <p class="ajuda">${L("El pla decideix la marca que veuen els clients: <b>Mes de prova</b> i <b>Prèmium</b> amb el logo i els colors de l'agència; <b>Bàsic</b> amb la marca Anonta. La IA només és al Prèmium i a la prova. Preus sense IVA. Quan una prova s'acaba, l'agència pot mirar però no crear viatges nous.",
+          "El plan decide la marca que ven los clientes: <b>Mes de prueba</b> y <b>Prémium</b> con el logo y los colores de la agencia; <b>Básico</b> con la marca Anonta. La IA solo está en el Prémium y en la prueba. Precios sin IVA. Cuando una prueba termina, la agencia puede mirar pero no crear viajes nuevos.")}</p>
       </div>`;
     pintaSols(); pintaAgs();
   };
