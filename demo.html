@@ -6,6 +6,8 @@
 <title>Demo · Formulario de datos de viajeros</title>
 <meta name="description" content="Prueba cómo funciona el formulario de datos de viajeros para agencias de viajes.">
 <link rel="stylesheet" href="estil.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .banda-demo{background:#22313F;color:#fff;text-align:center;font-size:13.5px;padding:9px 14px}
   .banda-demo strong{color:#FFD58A}
@@ -71,6 +73,9 @@
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#fff;
     padding:10px 18px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
   .toast.vist{opacity:1}
+  .modal{position:fixed;inset:0;background:rgba(34,49,63,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .modal-caixa{background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:92vh;overflow-y:auto;padding:22px;position:relative}
+  .modal-tancar{position:absolute;top:8px;right:10px;border:0;background:none;font-size:28px;line-height:1;color:var(--gris);cursor:pointer}
 </style>
 </head>
 <body>
@@ -89,6 +94,8 @@
   <div class="intro">
     <h1>Formulario de datos de viajeros</h1>
     <p>Recoge el DNI, el pasaporte y los datos de tus clientes sin perseguirlos por WhatsApp. Pruébalo en tres pasos.</p>
+    <p style="margin-top:14px"><button class="boto" data-prova>🎁 Empieza tu mes de prueba</button>
+      <span class="meta" style="display:block;margin-top:6px">30 días gratis · Sin tarjeta · Sin compromiso</span></p>
   </div>
 
   <div class="passos">
@@ -206,13 +213,54 @@
       </div>
     </div>
 
-    <div class="cta">
-      <h2>¿Lo quieres para tu agencia?</h2>
-      <p>Con tu logo, tus colores y en catalán o castellano.</p>
-      <a class="boto" href="mailto:admin@rimuviatges.com?subject=Formulario%20de%20viajeros%20para%20mi%20agencia">Pedir información</a>
-    </div>
   </section>
+
+  <div class="cta">
+    <h2>¿Te imaginas usarlo con tus clientes?</h2>
+    <p>Pruébalo gratis durante un mes, con tu logo y tus colores. Sin tarjeta y sin compromiso.</p>
+    <button class="boto" data-prova>🎁 Empieza tu mes de prueba</button>
+  </div>
 </main>
+
+<!-- SOL·LICITUD DE PROVA -->
+<div class="modal amagat" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitol">
+  <div class="modal-caixa">
+    <button class="modal-tancar" id="mTancar" aria-label="Cerrar">×</button>
+    <div id="mForm">
+      <h2 id="mTitol" style="margin-bottom:4px">Empieza tu mes de prueba</h2>
+      <p class="meta" style="margin:0 0 14px">Te preparamos tu espacio con el logo de tu agencia. En cuanto esté listo, te avisamos por correo.</p>
+      <label for="pNom">Nombre de tu agencia</label>
+      <input id="pNom" maxlength="80" placeholder="Ej.: Viajes Mediterráneo">
+      <div style="height:12px"></div>
+      <label for="pEmail">Tu correo</label>
+      <input id="pEmail" type="email" maxlength="120" autocomplete="email" placeholder="tu@agencia.com">
+      <div class="ajuda">Lo usarás para entrar en tu panel.</div>
+      <div style="height:12px"></div>
+      <label>Logo de tu agencia</label>
+      <label class="foto-boto" for="pLogo" id="pLogoBoto"><span id="pLogoTxt">🖼️ Elegir imagen (PNG o JPG)</span><img class="foto-mini amagat" id="pLogoMini" alt=""></label>
+      <input class="amagat" type="file" id="pLogo" accept="image/png,image/jpeg,image/webp">
+      <div style="height:14px"></div>
+      <label class="consentiment"><input type="checkbox" id="pAccepto">
+        <span>Acepto las <a href="#" id="pVeureCond" style="color:var(--blau)">condiciones de la prueba</a>.</span></label>
+      <div id="pCond" class="amagat" style="font-size:13px;color:var(--gris);background:var(--fons);border-radius:10px;padding:10px 12px;margin-top:8px">
+        <ul style="margin:0;padding-left:18px">
+          <li>La prueba es gratuita durante 30 días, sin tarjeta y sin compromiso.</li>
+          <li>Al terminar, podrás seguir viendo tus formularios, pero no crear nuevos hasta contratar el servicio.</li>
+          <li>Los datos de tus clientes se guardan en servidores de la Unión Europea y solo tu agencia puede verlos. Rimu Viatges los trata únicamente para prestarte el servicio, como encargado del tratamiento.</li>
+          <li>Puedes pedir la baja y el borrado de tus datos en cualquier momento escribiendo a admin@rimuviatges.com.</li>
+        </ul>
+      </div>
+      <div id="pErr" class="error amagat"></div>
+      <div style="margin-top:16px"><button class="boto ample" id="pEnviar">Solicitar mi mes de prueba</button></div>
+    </div>
+    <div id="mOk" class="amagat centre">
+      <div style="font-size:44px">🎉</div>
+      <h2 style="justify-content:center">¡Solicitud recibida!</h2>
+      <p>Estamos preparando tu espacio. Te escribiremos a <strong id="mOkEmail"></strong> en cuanto esté listo, normalmente en menos de 24 horas.</p>
+      <button class="boto sec" id="mOkTancar">Seguir viendo la demo</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -409,6 +457,90 @@ function pintarRebut(){
     try{ await navigator.clipboard.writeText(txt); toast("¡Copiado!"); }catch(e){ toast("Copiado (demo)"); }
   };
 }
+
+/* ---- sol·licitud del mes de prova ---- */
+const sbProva = (window.supabase && window.RIMU) ? supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY) : null;
+let logoBlob = null, logoExt = "png";
+function obrirModal(){ $("modal").classList.remove("amagat"); document.body.style.overflow = "hidden"; setTimeout(() => $("pNom").focus(), 50); }
+function tancarModal(){ $("modal").classList.add("amagat"); document.body.style.overflow = ""; }
+document.querySelectorAll("[data-prova]").forEach(b => b.onclick = obrirModal);
+$("mTancar").onclick = tancarModal; $("mOkTancar").onclick = tancarModal;
+$("modal").addEventListener("click", e => { if(e.target.id === "modal") tancarModal(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") tancarModal(); });
+$("pVeureCond").onclick = e => { e.preventDefault(); $("pCond").classList.toggle("amagat"); };
+
+// Redueix el logo (màx. 600 px) i en conserva la transparència si és PNG
+function prepararLogo(file){
+  return new Promise((ok, ko) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * r)); c.height = Math.max(1, Math.round(img.height * r));
+      const png = file.type !== "image/jpeg";
+      const x = c.getContext("2d");
+      if(!png){ x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); }
+      x.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? ok({ blob: b, ext: png ? "png" : "jpg" }) : ko(), png ? "image/png" : "image/jpeg", 0.9);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(); };
+    img.src = url;
+  });
+}
+$("pLogo").addEventListener("change", async () => {
+  const f = $("pLogo").files[0]; if(!f) return;
+  $("pErr").classList.add("amagat");
+  try{
+    const r = await prepararLogo(f);
+    if(r.blob.size > 2 * 1024 * 1024) throw 0;
+    logoBlob = r.blob; logoExt = r.ext;
+    $("pLogoMini").src = URL.createObjectURL(logoBlob); $("pLogoMini").classList.remove("amagat");
+    $("pLogoTxt").textContent = "✓ " + f.name; $("pLogoBoto").classList.add("feta"); $("pLogoBoto").classList.remove("malament");
+  }catch(e){
+    logoBlob = null; errorProva("No hemos podido leer la imagen. Prueba con otro archivo PNG o JPG.");
+  }
+});
+function errorProva(t){ $("pErr").textContent = t; $("pErr").classList.remove("amagat"); }
+const MISSATGES = {
+  JA_SOLLICITAT: "Ya tenemos una solicitud con este correo. Te escribiremos muy pronto.",
+  JA_CLIENT: "Este correo ya tiene una cuenta. Entra en tu panel con él.",
+  EMAIL_INVALID: "Revisa el correo electrónico.",
+  NOM_INVALID: "Escribe el nombre de tu agencia.",
+  MASSA: "Ahora mismo hay muchas solicitudes. Vuelve a intentarlo en un rato."
+};
+$("pEnviar").onclick = async () => {
+  $("pErr").classList.add("amagat");
+  const nom = $("pNom").value.trim(), email = $("pEmail").value.trim();
+  if(nom.length < 2){ errorProva(MISSATGES.NOM_INVALID); $("pNom").focus(); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ errorProva(MISSATGES.EMAIL_INVALID); $("pEmail").focus(); return; }
+  if(!logoBlob){ $("pLogoBoto").classList.add("malament"); errorProva("Añade el logo de tu agencia."); return; }
+  if(!$("pAccepto").checked){ errorProva("Para continuar, acepta las condiciones de la prueba."); return; }
+  if(!sbProva){ errorProva("No se ha podido conectar. Vuelve a intentarlo en un rato."); return; }
+  const b = $("pEnviar"); b.disabled = true; b.textContent = "Enviando…";
+  try{
+    const ruta = `sollicituds/${crypto.randomUUID()}.${logoExt}`;
+    const up = await sbProva.storage.from("logos-agencies").upload(ruta, logoBlob, { contentType: logoExt === "png" ? "image/png" : "image/jpeg", upsert: false });
+    if(up.error) throw up.error;
+    const { error } = await sbProva.rpc("sollicitar_prova", { p_nom: nom, p_email: email, p_logo: ruta });
+    if(error){
+      const codi = Object.keys(MISSATGES).find(k => (error.message || "").includes(k));
+      errorProva(codi ? MISSATGES[codi] : "No se ha podido enviar la solicitud. Vuelve a intentarlo.");
+      b.disabled = false; b.textContent = "Solicitar mi mes de prueba"; return;
+    }
+    // Avís a Rimu Viatges
+    fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", {
+      method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ _subject: "Nueva solicitud de prueba: " + nom, _template: "table", _captcha: "false",
+        "Agencia": nom, "Correo": email, "Aprobar en el panel": location.href.replace(/demo\.html.*$/, "") + "admin.html" })
+    }).catch(() => {});
+    $("mOkEmail").textContent = email;
+    $("mForm").classList.add("amagat"); $("mOk").classList.remove("amagat");
+  }catch(e){
+    errorProva("No se ha podido enviar la solicitud. Vuelve a intentarlo.");
+    b.disabled = false; b.textContent = "Solicitar mi mes de prueba";
+  }
+};
 </script>
 </body>
 </html>
