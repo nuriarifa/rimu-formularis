@@ -41,6 +41,20 @@
   .mobil{width:390px;max-width:100%;margin:0 auto;border:10px solid #22313F;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   #fClient{display:block;width:100%;height:min(760px, calc(100vh - 210px));min-height:560px;border:0}
   .peu-prova{max-width:640px;margin:8px auto 30px;padding:0 16px;text-align:center}
+  .tarifes{max-width:760px;margin:10px auto 8px;padding:0 16px}
+  .tarifes h2{justify-content:center;text-align:center;margin-bottom:12px}
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pla{background:#fff;border:1px solid var(--linia);border-radius:16px;padding:18px;text-align:left;position:relative}
+  .pla.destacat{border:2px solid var(--coral)}
+  .pla .etiqueta{position:absolute;top:-11px;right:14px;background:var(--coral);color:#3A2410;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px}
+  .pla h3{margin:0 0 4px;color:var(--blau);font-size:19px}
+  .pla .preu{font-size:30px;font-weight:800;color:var(--blau)}
+  .pla .preu small{font-size:14px;font-weight:600;color:var(--gris)}
+  .pla ul{margin:10px 0 0;padding-left:0;list-style:none;font-size:14.5px}
+  .pla li{margin-bottom:4px}
+  .pla li.no{color:var(--gris)}
+  .tarifes .nota{text-align:center;font-size:13px;color:var(--gris);margin-top:10px}
+  @media (max-width:560px){ .plans{grid-template-columns:1fr} }
   dialog{border:0;border-radius:16px;padding:0;width:min(480px, calc(100vw - 24px));max-height:calc(100vh - 24px);box-shadow:0 20px 50px rgba(0,0,0,.25)}
   dialog::backdrop{background:rgba(20,30,45,.55)}
   .dlg-cap{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0}
@@ -78,6 +92,15 @@
 <section class="vista" id="vClient">
   <p class="explica" id="tExplicaClient"></p>
   <div class="mobil"><iframe id="fClient" title="App" src="about:blank"></iframe></div>
+</section>
+
+<section class="tarifes">
+  <h2 id="tTarifes"></h2>
+  <div class="plans">
+    <div class="pla"><h3 id="tBasic"></h3><div class="preu">20 € <small id="tMes1"></small></div><ul id="lBasic"></ul></div>
+    <div class="pla destacat"><span class="etiqueta" id="tRecomanat"></span><h3 id="tPremium"></h3><div class="preu">25 € <small id="tMes2"></small></div><ul id="lPremium"></ul></div>
+  </div>
+  <p class="nota" id="tNotaTarifes"></p>
 </section>
 
 <div class="peu-prova"><button class="crida" type="button" id="bProva2"></button></div>
@@ -125,6 +148,17 @@ function posarIdioma(l, recarregar){
   $("tExplicaClient").textContent = L("Així ho veu la Marta, la clienta, al seu mòbil. Toca el viatge per veure'n els serveis, els documents, els pagaments, l'itinerari i el destí.",
     "Así lo ve Marta, la clienta, en su móvil. Toca el viaje para ver sus servicios, documentos, pagos, itinerario y destino.");
   fAdmin.title = L("Panell de l'agència", "Panel de la agencia"); fClient.title = L("App del client", "App del cliente");
+  $("tTarifes").textContent = L("Tarifes", "Tarifas");
+  $("tBasic").textContent = L("Bàsic", "Básico"); $("tPremium").textContent = L("Prèmium", "Prémium");
+  $("tMes1").textContent = $("tMes2").textContent = L("/mes + IVA", "/mes + IVA");
+  $("tRecomanat").textContent = L("El més complet", "El más completo");
+  const comu = [L("Clients i viatges il·limitats", "Clientes y viajes ilimitados"), L("Serveis, documents, pagaments, itinerari i destí", "Servicios, documentos, pagos, itinerario y destino"),
+    L("App per al client, instal·lable al mòbil", "App para el cliente, instalable en el móvil"), L("En català i castellà", "En catalán y castellano")];
+  const li = (t, no) => `<li${no ? ' class="no"' : ""}>${no ? "✕" : "✓"} ${t}</li>`;
+  $("lBasic").innerHTML = comu.map(t => li(t)).join("") + li(L("Amb el logo d'Anonta", "Con el logo de Anonta")) + li(L("Sense IA", "Sin IA"), true);
+  $("lPremium").innerHTML = comu.map(t => li(t)).join("") + li(L("<b>Amb el logo i els colors de la teva agència</b>", "<b>Con el logo y los colores de tu agencia</b>"))
+    + li(L("<b>IA per omplir les recomanacions del destí</b>", "<b>IA para rellenar las recomendaciones del destino</b>"));
+  $("tNotaTarifes").textContent = L("El mes de prova és gratis i inclou tot el pla Prèmium. Sense permanència.", "El mes de prueba es gratis e incluye todo el plan Prémium. Sin permanencia.");
   if(recarregar){
     fAdmin.src = "admin.html?demo&t=" + Date.now() + "#viatges";
     if($("vClient").classList.contains("actiu")) fClient.src = "index.html?demo&t=" + Date.now();
@@ -167,7 +201,8 @@ function obrirProva(){
     <ul class="ventatges">
       <li>${L("30 dies gratis, sense targeta i sense compromís.", "30 días gratis, sin tarjeta y sin compromiso.")}</li>
       <li>${L("La teva app amb el <b>logo i els colors</b> de la teva agència.", "Tu app con el <b>logo y los colores</b> de tu agencia.")}</li>
-      <li>${L("Clients i viatges il·limitats durant la prova.", "Clientes y viajes ilimitados durante la prueba.")}</li>
+      <li>${L("Clients i viatges il·limitats i IA durant la prova.", "Clientes y viajes ilimitados e IA durante la prueba.")}</li>
+      <li>${L("Després tries: Bàsic 20 €/mes o Prèmium 25 €/mes (+IVA).", "Después eliges: Básico 20 €/mes o Prémium 25 €/mes (+IVA).")}</li>
     </ul>
     <div class="camp"><label for="pNom">${L("Nom de la teva agència", "Nombre de tu agencia")}</label><input id="pNom" maxlength="80" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
     <div class="camp"><label for="pEmail">${L("El teu correu", "Tu correo")}</label><input id="pEmail" type="email" maxlength="120" autocomplete="email" placeholder="tu@agencia.com">
@@ -179,6 +214,7 @@ function obrirProva(){
     <label class="consentiment"><input type="checkbox" id="pAccepto"> <span>${L("Accepto les", "Acepto las")} <a href="#" id="pVeureCond" style="color:var(--blau)">${L("condicions de la prova", "condiciones de la prueba")}</a>.</span></label>
     <div id="pCond" class="amagat" style="font-size:13px;color:var(--gris);background:var(--fons);border-radius:10px;padding:10px 12px;margin-top:8px"><ul style="margin:0;padding-left:18px">
       <li>${L("La prova és gratuïta durant 30 dies, sense targeta i sense compromís.", "La prueba es gratuita durante 30 días, sin tarjeta y sin compromiso.")}</li>
+      <li>${L("Després, si vols continuar: pla Bàsic 20 €/mes (logo d'Anonta, sense IA) o Prèmium 25 €/mes (el teu logo i IA). Preus sense IVA.", "Después, si quieres continuar: plan Básico 20 €/mes (logo de Anonta, sin IA) o Prémium 25 €/mes (tu logo e IA). Precios sin IVA.")}</li>
       <li>${L("Quan s'acabi, podràs continuar veient els teus viatges i els teus clients els seguiran veient, però no en podràs crear de nous fins que contractis el servei.", "Al terminar, podrás seguir viendo tus viajes y tus clientes los seguirán viendo, pero no podrás crear nuevos hasta contratar el servicio.")}</li>
       <li>${L("Les dades es guarden en servidors de la Unió Europea i només la teva agència i els teus clients les poden veure. Rimu Viatges les tracta únicament per prestar-te el servei, com a encarregat del tractament.", "Los datos se guardan en servidores de la Unión Europea y solo tu agencia y tus clientes pueden verlos. Rimu Viatges los trata únicamente para prestarte el servicio, como encargado del tratamiento.")}</li>
       <li>${L("Pots demanar la baixa i l'esborrat de les teves dades en qualsevol moment escrivint a admin@rimuviatges.com.", "Puedes pedir la baja y el borrado de tus datos en cualquier momento escribiendo a admin@rimuviatges.com.")}</li></ul></div>
