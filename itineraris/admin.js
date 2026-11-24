@@ -56,7 +56,8 @@ function canviarIdioma(nou){
   if(E){ pintarInfo(); pintarDies(); pintarGenerals(); pintarDocs(); actualitzarTotal(); if(!E.nou) carregarActivitat(); }
   else if(!$("panLlista").classList.contains("amagat") && USER) carregarLlista();
   else if(!$("panBib").classList.contains("amagat")) pintarBib();
-  else if(!$("panAg").classList.contains("amagat")) pintarAgencies();
+  else if(!$("panAg").classList.contains("amagat")){ pintarAgencies(); pintarSol(); }
+  if(P && !DEMO) comprovarProva();
 }
 document.querySelectorAll("#idiomes button").forEach(b => b.onclick = () => canviarIdioma(b.dataset.lang));
 
@@ -87,6 +88,7 @@ async function entrar(){
   traduirEstatic();
   $("blocIdioma").classList.toggle("amagat", !!P.agencia.idioma_fix);
   $("tabAg").classList.toggle("amagat", !P.superadmin);
+  comprovarProva(); if(P.superadmin) comptarSol();
   $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
   const obrir = new URLSearchParams(location.search).get("e");
   if(obrir) obrirEditor(obrir); else carregarLlista();
@@ -100,6 +102,7 @@ function entrarDemo(){
   $("lnkSortir").textContent = L("Sortir de la demostració", "Salir de la demostración");
   const obrir = new URLSearchParams(location.search).get("e");
   if(obrir) obrirEditor(obrir); else carregarLlista();
+  if(new URLSearchParams(location.search).has("prova")) obrirProva();
 }
 const desarDemo = () => { DEMO_E.tocat = true; IT_DEMO.desar(DEMO_E); };
 $("btnReiniciarDemo").onclick = () => {
@@ -171,7 +174,7 @@ async function carregarLlista(){
   (evs || []).forEach(e => { const v = vistes[e.itinerari_id] ||= { n: 0, ultim: e.created_at }; v.n++; });
   LLISTA = its.map(i => ({ ...i, vistes: vistes[i.id] || { n: 0 } }));
   if(!LLISTA.length){
-    $("llista").innerHTML = `<div class="buit">${L("Encara no tens cap itinerari. Prem «➕ Nou itinerari» per començar.", "Todavía no tienes ningún itinerario. Pulsa «➕ Nuevo itinerario» para empezar.")}</div>`; return;
+    $("llista").innerHTML = PROVA_ACABADA ? `<div class="buit">${L("Encara no tens cap itinerari.", "Todavía no tienes ningún itinerario.")}</div>` : `<div class="buit">${L("Encara no tens cap itinerari. Prem «➕ Nou itinerari» per començar.", "Todavía no tienes ningún itinerario. Pulsa «➕ Nuevo itinerario» para empezar.")}</div>`; return;
   }
   $("llista").innerHTML = LLISTA.map(i => {
     const dates = i.data_inici ? IT.dataCurta(i.data_inici) + (i.data_fi ? " – " + IT.dataCurta(i.data_fi) : "") : "";
@@ -189,7 +192,7 @@ async function carregarLlista(){
         <a class="boto wa petit" target="_blank" rel="noopener" href="${waLink(i)}">WhatsApp</a>
         <button class="boto sec petit" data-cp="${esc(urlClient(i))}">${L("Copiar enllaç", "Copiar enlace")}</button>
         <a class="boto sec petit" target="_blank" rel="noopener" href="${esc(urlClient(i))}">👁 ${L("Veure", "Ver")}</a>
-        <button class="boto sec petit" data-dup="${i.id}">⧉ ${L("Duplicar", "Duplicar")}</button>
+        ${PROVA_ACABADA ? "" : `<button class="boto sec petit" data-dup="${i.id}">⧉ ${L("Duplicar", "Duplicar")}</button>`}
       </div></div>`;
   }).join("");
   $("llista").querySelectorAll("[data-ed]").forEach(b => b.onclick = () => obrirEditor(b.dataset.ed));
@@ -1027,7 +1030,7 @@ async function carregarAgencies(){
   $("agLlista").innerHTML = `<div class="meta">${L("Carregant…", "Cargando…")}</div>`;
   const { data, error } = await sb.rpc("admin_agencies");
   if(error){ $("agLlista").innerHTML = `<div class="error">${esc(errAg(error))}</div>`; return; }
-  AGS = data || []; pintarAgencies();
+  AGS = data || []; pintarAgencies(); carregarSollicituds();
 }
 function pintarAgencies(){
   $("agLlista").innerHTML = AGS.map(a => `<div class="ag-fila">
@@ -1036,11 +1039,26 @@ function pintarAgencies(){
       <div class="n">${esc(a.nom)}</div>
       <div class="meta">${a.usuaris.length} ${a.usuaris.length === 1 ? L("usuari", "usuario") : L("usuaris", "usuarios")} · ${a.num_itineraris} ${L("itineraris", "itinerarios")}
         · ${a.idioma_fix === "es" ? L("només castellà", "solo castellano") : a.idioma_fix === "ca" ? L("només català", "solo catalán") : L("català i castellà", "catalán y castellano")}</div>
-      <div class="stats" style="margin:6px 0 0">${a.app_itineraris ? `<span class="xip verd">🗺️ ${L("Itineraris", "Itinerarios")}</span>` : ""}${a.app_formularis ? `<span class="xip verd">📝 ${L("Formularis", "Formularios")}</span>` : ""}${!a.app_itineraris && !a.app_formularis ? `<span class="xip coral">${L("Sense cap app", "Sin ninguna app")}</span>` : ""}</div>
+      <div class="stats" style="margin:6px 0 0">${a.app_itineraris ? `<span class="xip verd">🗺️ ${L("Itineraris", "Itinerarios")}${a.prova_it_fins ? " · " + (diesFins(a.prova_it_fins) >= 1 ? L(`prova: ${diesFins(a.prova_it_fins)} dies`, `prueba: ${diesFins(a.prova_it_fins)} días`) : L("prova acabada", "prueba acabada")) : ""}</span>` : ""}${a.app_formularis ? `<span class="xip verd">📝 ${L("Formularis", "Formularios")}</span>` : ""}${!a.app_itineraris && !a.app_formularis ? `<span class="xip coral">${L("Sense cap app", "Sin ninguna app")}</span>` : ""}</div>
     </div>
-    <button class="boto sec petit" type="button" data-ag="${esc(a.id)}">✏️ ${L("Editar", "Editar")}</button></div>`).join("")
+    <div class="fila-botons" style="flex-direction:column;gap:6px">
+      <button class="boto sec petit" type="button" data-ag="${esc(a.id)}">✏️ ${L("Editar", "Editar")}</button>
+      ${a.app_itineraris && a.prova_it_fins ? `<button class="boto sec petit" type="button" data-mes30="${esc(a.id)}" data-fins="${a.prova_it_fins}">+30 ${L("dies", "días")}</button>
+      <button class="boto petit" type="button" data-activa="${esc(a.id)}">✓ ${L("Activar (ha pagat)", "Activar (ha pagado)")}</button>` : ""}
+    </div></div>`).join("")
     || `<div class="buit">${L("Encara no hi ha agències.", "Todavía no hay agencias.")}</div>`;
   $("agLlista").querySelectorAll("[data-ag]").forEach(b => b.onclick = () => editarAgencia(AGS.find(a => a.id === b.dataset.ag)));
+  $("agLlista").querySelectorAll("[data-mes30]").forEach(b => b.onclick = async () => {
+    const base = new Date(Math.max(Date.now(), new Date(b.dataset.fins + "T12:00:00").getTime()));
+    base.setDate(base.getDate() + 30);
+    const { error } = await sb.rpc("canviar_prova_it", { p_agencia: b.dataset.mes30, p_fins: base.toISOString().slice(0, 10) });
+    toast(error ? L("No s'ha pogut canviar", "No se ha podido cambiar") : L("Prova allargada 30 dies", "Prueba alargada 30 días")); carregarAgencies();
+  });
+  $("agLlista").querySelectorAll("[data-activa]").forEach(b => b.onclick = async () => {
+    if(!confirm(L("Els itineraris d'aquesta agència quedaran actius sense data de final. Continuar?", "Los itinerarios de esta agencia quedarán activos sin fecha de final. ¿Continuar?"))) return;
+    const { error } = await sb.rpc("canviar_prova_it", { p_agencia: b.dataset.activa, p_fins: null });
+    toast(error ? L("No s'ha pogut activar", "No se ha podido activar") : L("Agència activada", "Agencia activada")); carregarAgencies();
+  });
 }
 $("btnAgNova").onclick = () => editarAgencia(null);
 $("agEdTancar").onclick = () => $("dlgAg").close();
@@ -1149,5 +1167,241 @@ $("fLogo").onchange = async () => {
     toast(L("Logo pujat. Recorda desar l'agència.", "Logo subido. Recuerda guardar la agencia."));
   }catch(e){ toast(L("No s'ha pogut pujar el logo", "No se ha podido subir el logo")); }
 };
+
+/* ================= MES DE PROVA ================= */
+const URL_LOGOS = RIMU.SUPABASE_URL + "/storage/v1/object/public/logos-agencies/";
+const URL_FORMULARIS = BASE.replace(/itineraris\/$/, "") + "admin.html";
+const diesFins = iso => Math.ceil((new Date(iso + "T23:59:59") - new Date()) / 86400000);
+const dataEs = d => d.toLocaleDateString(LANG === "es" ? "es-ES" : "ca-ES");
+let PROVA_ACABADA = false;
+
+// Bàner per a les agències que estan provant els itineraris
+async function comprovarProva(){
+  const fins = P && P.agencia && P.agencia.prova_it_fins, banda = $("bandaProva");
+  PROVA_ACABADA = false;
+  if(!fins || P.superadmin){ banda.classList.add("amagat"); $("btnNou").classList.remove("amagat"); return; }
+  const dies = diesFins(fins), data = IT.dataCurta(fins);
+  banda.classList.remove("amagat");
+  if(dies >= 1){
+    banda.style.background = "var(--blau-clar)";
+    banda.innerHTML = L(`🎁 Estàs en el <strong>mes de prova</strong>: et queden <strong>${dies} dies</strong> (fins al ${data}).`,
+      `🎁 Estás en tu <strong>mes de prueba</strong>: te quedan <strong>${dies} días</strong> (hasta el ${data}).`);
+    $("btnNou").classList.remove("amagat"); return;
+  }
+  PROVA_ACABADA = true;
+  banda.style.background = "var(--coral-clar)";
+  banda.innerHTML = L(`⏳ <strong>El teu mes de prova ha acabat.</strong> Pots continuar veient i editant els teus itineraris, i els enllaços dels clients segueixen funcionant, però per crear-ne de nous cal contractar el servei. Escriu-nos a <a href="mailto:admin@rimuviatges.com">admin@rimuviatges.com</a>.`,
+    `⏳ <strong>Tu mes de prueba ha terminado.</strong> Puedes seguir viendo y editando tus itinerarios, y los enlaces de los clientes siguen funcionando, pero para crear nuevos hay que contratar el servicio. Escríbenos a <a href="mailto:admin@rimuviatges.com">admin@rimuviatges.com</a>.`);
+  $("btnNou").classList.add("amagat");
+  const { data: primerCop } = await sb.rpc("marcar_avis_prova_it");
+  if(primerCop === true) fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", {
+    method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ _subject: "Prova d'itineraris acabada: " + P.agencia.nom, _template: "table", _captcha: "false",
+      "Agència": P.agencia.nom, "Correu": P.email, "Prova fins": data, "Gestiona-ho al panell": BASE + "admin.html" })
+  }).catch(() => {});
+}
+
+/* ---- Sol·licitud del mes de prova (des de la demo) ---- */
+let logoProva = null;
+const MSG_PROVA = {
+  JA_SOLLICITAT: ["Ja tenim una sol·licitud amb aquest correu. T'escriurem molt aviat.", "Ya tenemos una solicitud con este correo. Te escribiremos muy pronto."],
+  JA_CLIENT: ["Aquest correu ja té els itineraris activats. Entra al teu panell amb ell.", "Este correo ya tiene los itinerarios activados. Entra en tu panel con él."],
+  EMAIL_INVALID: ["Revisa el correu electrònic.", "Revisa el correo electrónico."],
+  NOM_INVALID: ["Escriu el nom de la teva agència.", "Escribe el nombre de tu agencia."],
+  MASSA: ["Ara mateix hi ha moltes sol·licituds. Torna-ho a provar d'aquí a una estona.", "Ahora mismo hay muchas solicitudes. Vuelve a intentarlo en un rato."]
+};
+function obrirProva(){
+  logoProva = null;
+  $("pTitol").textContent = L("Comença el teu mes de prova", "Empieza tu mes de prueba");
+  $("pCos").innerHTML = `
+    <p class="meta" style="margin:0 0 14px">${L("Et preparem el teu espai amb el logo de la teva agència, perquè facis els itineraris dels teus clients. Quan estigui llest, t'avisem per correu.",
+      "Te preparamos tu espacio con el logo de tu agencia, para que hagas los itinerarios de tus clientes. En cuanto esté listo, te avisamos por correo.")}</p>
+    <div class="camp"><label for="pNom">${L("Nom de la teva agència", "Nombre de tu agencia")}</label><input id="pNom" maxlength="80" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
+    <div class="camp"><label for="pEmail">${L("El teu correu", "Tu correo")}</label><input id="pEmail" type="email" maxlength="120" autocomplete="email" placeholder="${L("tu@agencia.com", "tu@agencia.com")}">
+      <div class="ajuda">${L("El faràs servir per entrar al teu panell.", "Lo usarás para entrar en tu panel.")}</div></div>
+    <div class="camp"><label>${L("Logo de la teva agència", "Logo de tu agencia")}</label>
+      <label class="foto-boto" for="pLogo" id="pLogoBoto"><span id="pLogoTxt">🖼️ ${L("Triar imatge (PNG o JPG)", "Elegir imagen (PNG o JPG)")}</span><img class="img-prev amagat" id="pLogoMini" alt="" style="max-height:40px;margin:0"></label>
+      <input class="amagat" type="file" id="pLogo" accept="image/png,image/jpeg,image/webp"></div>
+    <label class="consentiment"><input type="checkbox" id="pAccepto"> <span>${L("Accepto les", "Acepto las")} <a href="#" id="pVeureCond" style="color:var(--blau)">${L("condicions de la prova", "condiciones de la prueba")}</a>.</span></label>
+    <div id="pCond" class="amagat" style="font-size:13px;color:var(--gris);background:var(--fons);border-radius:10px;padding:10px 12px;margin-top:8px"><ul style="margin:0;padding-left:18px">
+      <li>${L("La prova és gratuïta durant 30 dies, sense targeta i sense compromís.", "La prueba es gratuita durante 30 días, sin tarjeta y sin compromiso.")}</li>
+      <li>${L("Quan s'acabi, podràs continuar veient els teus itineraris i els enllaços dels clients seguiran funcionant, però no en podràs crear de nous fins que contractis el servei.", "Al terminar, podrás seguir viendo tus itinerarios y los enlaces de tus clientes seguirán funcionando, pero no podrás crear nuevos hasta contratar el servicio.")}</li>
+      <li>${L("Les dades es guarden en servidors de la Unió Europea i només la teva agència les pot veure. Rimu Viatges les tracta únicament per prestar-te el servei, com a encarregat del tractament.", "Los datos se guardan en servidores de la Unión Europea y solo tu agencia puede verlos. Rimu Viatges los trata únicamente para prestarte el servicio, como encargado del tratamiento.")}</li>
+      <li>${L("Pots demanar la baixa i l'esborrat de les teves dades en qualsevol moment escrivint a admin@rimuviatges.com.", "Puedes pedir la baja y el borrado de tus datos en cualquier momento escribiendo a admin@rimuviatges.com.")}</li></ul></div>
+    <div id="pErr" class="error amagat"></div>
+    <div style="margin-top:16px"><button class="boto ample" type="button" id="pEnviar">${L("Sol·licitar el meu mes de prova", "Solicitar mi mes de prueba")}</button></div>`;
+  $("pVeureCond").onclick = e => { e.preventDefault(); $("pCond").classList.toggle("amagat"); };
+  $("pLogo").onchange = async () => {
+    const f = $("pLogo").files[0]; if(!f) return;
+    $("pErr").classList.add("amagat");
+    try{
+      const r = await prepararLogo(f);
+      if(r.blob.size > 2 * 1024 * 1024) throw 0;
+      logoProva = r;
+      $("pLogoMini").src = URL.createObjectURL(r.blob); $("pLogoMini").classList.remove("amagat");
+      $("pLogoTxt").textContent = "✓ " + f.name; $("pLogoBoto").classList.add("feta"); $("pLogoBoto").classList.remove("malament");
+    }catch(e){ logoProva = null; errProva(L("No hem pogut llegir la imatge. Prova amb un altre fitxer PNG o JPG.", "No hemos podido leer la imagen. Prueba con otro archivo PNG o JPG.")); }
+  };
+  $("pEnviar").onclick = enviarProva;
+  if(!$("dlgProva").open) $("dlgProva").showModal();
+  setTimeout(() => $("pNom").focus(), 50);
+}
+$("pTancar").onclick = () => $("dlgProva").close();
+$("btnProvaDemo").onclick = obrirProva;
+function errProva(t){ $("pErr").textContent = t; $("pErr").classList.remove("amagat"); }
+// Redueix el logo (màx. 600 px) i en conserva la transparència si és PNG
+function prepararLogo(file){
+  return new Promise((ok, ko) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * r)); c.height = Math.max(1, Math.round(img.height * r));
+      const png = file.type !== "image/jpeg", x = c.getContext("2d");
+      if(!png){ x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); }
+      x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      c.toBlob(b => b ? ok({ blob: b, ext: png ? "png" : "jpg" }) : ko(), png ? "image/png" : "image/jpeg", 0.9);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(); };
+    img.src = url;
+  });
+}
+async function enviarProva(){
+  $("pErr").classList.add("amagat");
+  const nom = $("pNom").value.trim(), email = $("pEmail").value.trim();
+  if(nom.length < 2){ errProva(L(...MSG_PROVA.NOM_INVALID)); $("pNom").focus(); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ errProva(L(...MSG_PROVA.EMAIL_INVALID)); $("pEmail").focus(); return; }
+  if(!logoProva){ $("pLogoBoto").classList.add("malament"); errProva(L("Afegeix el logo de la teva agència.", "Añade el logo de tu agencia.")); return; }
+  if(!$("pAccepto").checked){ errProva(L("Per continuar, accepta les condicions de la prova.", "Para continuar, acepta las condiciones de la prueba.")); return; }
+  const b = $("pEnviar"), txt = b.textContent; b.disabled = true; b.textContent = L("Enviant…", "Enviando…");
+  try{
+    const ruta = `sollicituds/${uuid()}.${logoProva.ext}`;
+    const up = await sb.storage.from("logos-agencies").upload(ruta, logoProva.blob, { contentType: logoProva.ext === "png" ? "image/png" : "image/jpeg", upsert: false });
+    if(up.error) throw up.error;
+    const { error } = await sb.rpc("sollicitar_prova_app", { p_nom: nom, p_email: email, p_logo: ruta, p_app: "itineraris" });
+    if(error){
+      const k = Object.keys(MSG_PROVA).find(x => (error.message || "").includes(x));
+      errProva(k ? L(...MSG_PROVA[k]) : L("No s'ha pogut enviar la sol·licitud. Torna-ho a provar.", "No se ha podido enviar la solicitud. Vuelve a intentarlo."));
+      b.disabled = false; b.textContent = txt; return;
+    }
+    fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", {
+      method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ _subject: "Nova sol·licitud de prova (itineraris): " + nom, _template: "table", _captcha: "false",
+        "App": "Itineraris", "Agència": nom, "Correu": email, "Aprova-la al panell (pestanya Agències)": BASE + "admin.html" })
+    }).catch(() => {});
+    $("pCos").innerHTML = `<div class="centre"><div style="font-size:44px">🎉</div>
+      <h2 style="justify-content:center">${L("Sol·licitud rebuda!", "¡Solicitud recibida!")}</h2>
+      <p>${L(`Estem preparant el teu espai. T'escriurem a <strong>${esc(email)}</strong> quan estigui llest, normalment en menys de 24 hores.`,
+        `Estamos preparando tu espacio. Te escribiremos a <strong>${esc(email)}</strong> en cuanto esté listo, normalmente en menos de 24 horas.`)}</p>
+      <button class="boto sec" type="button" id="pOkTancar">${L("Continuar veient la demo", "Seguir viendo la demo")}</button></div>`;
+    $("pOkTancar").onclick = () => $("dlgProva").close();
+  }catch(e){
+    errProva(L("No s'ha pogut enviar la sol·licitud. Torna-ho a provar.", "No se ha podido enviar la solicitud. Vuelve a intentarlo."));
+    b.disabled = false; b.textContent = txt;
+  }
+}
+
+/* ---- Sol·licituds pendents (només superadmin, pestanya Agències) ---- */
+let SOLS = [];
+async function comptarSol(){
+  const { count } = await sb.from("sollicituds").select("id", { count: "exact", head: true }).eq("estat", "pendent");
+  if(count) $("tabAg").textContent = L("🏢 Agències", "🏢 Agencias") + ` (${count})`;
+}
+async function carregarSollicituds(){
+  const { data, error } = await sb.from("sollicituds").select("*").eq("estat", "pendent").order("created_at", { ascending: true });
+  if(error){ $("solLlista").innerHTML = `<div class="error">${esc(error.message)}</div>`; return; }
+  SOLS = data || []; pintarSol();
+  $("tabAg").textContent = L("🏢 Agències", "🏢 Agencias") + (SOLS.length ? ` (${SOLS.length})` : "");
+}
+function pintarSol(){
+  $("solLlista").innerHTML = SOLS.length ? SOLS.map(s => {
+    const ja = AGS.find(a => a.usuaris.some(u => u.email.toLowerCase() === s.email.toLowerCase()));
+    return `<div class="sol-fila"><div style="display:flex;gap:12px;align-items:center">
+      ${s.logo_path ? `<img src="${esc(URL_LOGOS + s.logo_path)}" crossorigin="anonymous" alt="">` : ""}
+      <div style="flex:1;min-width:0"><strong>${esc(s.nom)}</strong><div class="meta">${esc(s.email)} · ${esc(quan(s.created_at))}</div>
+        <div class="stats" style="margin:6px 0 0"><span class="xip verd">${s.app === "itineraris" ? "🗺️ " + L("Itineraris", "Itinerarios") : "📝 " + L("Formularis", "Formularios")}</span>
+        ${ja ? `<span class="xip coral">${L("Ja és clienta", "Ya es clienta")}: ${esc(ja.nom)}</span>` : ""}</div></div></div>
+      <div class="fila-botons" style="margin-top:10px">
+        <button class="boto petit" type="button" data-aprova="${s.id}">✓ ${ja ? L("Afegir-li l'app (30 dies de prova)", "Añadirle la app (30 días de prueba)") : L("Aprovar (30 dies de prova)", "Aprobar (30 días de prueba)")}</button>
+        <button class="boto perill petit" type="button" data-rebutja="${s.id}">${L("Rebutjar", "Rechazar")}</button></div></div>`;
+  }).join("") : `<div class="meta">${L("No hi ha sol·licituds pendents.", "No hay solicitudes pendientes.")}</div>`;
+  $("solLlista").querySelectorAll("[data-aprova]").forEach(b => b.onclick = () => aprovarSol(b.dataset.aprova, b));
+  $("solLlista").querySelectorAll("[data-rebutja]").forEach(b => b.onclick = async () => {
+    if(!confirm(L("Rebutjar aquesta sol·licitud?", "¿Rechazar esta solicitud?"))) return;
+    const { error } = await sb.from("sollicituds").update({ estat: "rebutjada" }).eq("id", b.dataset.rebutja);
+    toast(error ? L("No s'ha pogut rebutjar", "No se ha podido rechazar") : L("Rebutjada", "Rechazada")); carregarSollicituds();
+  });
+}
+$("btnRefrescaSol").onclick = carregarAgencies;
+// Treu els colors principals del logo per a la marca de l'agència
+function colorsDelLogo(src){
+  return new Promise(resolve => {
+    const img = new Image(); img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try{
+        const c = document.createElement("canvas"), n = 80; c.width = n; c.height = n;
+        const x = c.getContext("2d"); x.drawImage(img, 0, 0, n, n);
+        const px = x.getImageData(0, 0, n, n).data, cubs = {};
+        for(let i = 0; i < px.length; i += 4){
+          const [r, g, b, a] = [px[i], px[i+1], px[i+2], px[i+3]];
+          if(a < 128) continue;
+          const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+          if(mx > 235 && mn > 235) continue;
+          if(mx - mn < 25 && mx > 60) continue;
+          const k = [r >> 5, g >> 5, b >> 5].join(",");
+          (cubs[k] = cubs[k] || { n: 0, r: 0, g: 0, b: 0 }).n++;
+          cubs[k].r += r; cubs[k].g += g; cubs[k].b += b;
+        }
+        const llista = Object.values(cubs).sort((a, b) => b.n - a.n).map(c => [c.r / c.n, c.g / c.n, c.b / c.n]);
+        if(!llista.length) return resolve({});
+        const dist = (a, b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
+        const lum = c => (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+        let prin = llista[0];
+        while(lum(prin) > 0.55) prin = prin.map(v => v * 0.85);
+        const acc = llista.find(c => dist(c, llista[0]) > 90) || prin;
+        const hex = c => "#" + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("").toUpperCase();
+        const fosc = c => c.map(v => v * 0.78), clar = c => c.map(v => v + (255 - v) * 0.9);
+        resolve({ color: hex(prin), color_fosc: hex(fosc(prin)), color_clar: hex(clar(prin)), accent: hex(acc), accent_clar: hex(clar(acc)) });
+      }catch(e){ resolve({}); }
+    };
+    img.onerror = () => resolve({});
+    img.src = src + (src.includes("?") ? "&" : "?") + "v=" + Date.now();
+  });
+}
+async function aprovarSol(id, boto){
+  const s = SOLS.find(x => x.id === id); if(!s) return;
+  const ja = AGS.find(a => a.usuaris.some(u => u.email.toLowerCase() === s.email.toLowerCase()));
+  const app = s.app === "itineraris" ? L("els itineraris", "los itinerarios") : L("els formularis", "los formularios");
+  if(!confirm(ja ? L(`Activar ${app} a «${ja.nom}» amb 30 dies de prova?`, `¿Activar ${app} a «${ja.nom}» con 30 días de prueba?`)
+                 : L(`Crear l'agència «${s.nom}» amb ${app} i 30 dies de prova?`, `¿Crear la agencia «${s.nom}» con ${app} y 30 días de prueba?`))) return;
+  boto.disabled = true; boto.textContent = L("Creant…", "Creando…");
+  const colors = !ja && s.logo_path ? await colorsDelLogo(URL_LOGOS + s.logo_path) : {};
+  const { error } = await sb.rpc("aprovar_sollicitud", { p_id: id, p_colors: colors });
+  if(error){ toast(L("No s'ha pogut aprovar: ", "No se ha podido aprobar: ") + error.message); boto.disabled = false; return; }
+  mostrarBenvinguda(s, !!ja);
+  carregarAgencies();
+}
+function mostrarBenvinguda(s, jaClienta){
+  const fins = new Date(); fins.setDate(fins.getDate() + 30);
+  const itin = s.app === "itineraris", url = itin ? BASE + "admin.html" : URL_FORMULARIS;
+  const que = itin ? "crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros";
+  const text = jaClienta
+    ? `¡Hola! Ya tienes activado en ${s.nom} ${itin ? "el panel para crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros"}.\n\n`
+      + `Entra en: ${url}\ncon el mismo correo (${s.email}) y la misma contraseña que ya usas.\n\n`
+      + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`
+    : `¡Hola! Ya tienes listo tu espacio de ${s.nom} para ${que}.\n\n`
+      + `1. Entra en: ${url}\n`
+      + `2. Escribe tu correo (${s.email}) y la contraseña que quieras, y pulsa «¿Primera vez? Crear la contraseña».\n`
+      + `3. Confirma tu cuenta desde el correo que te llegará y vuelve a entrar.\n\n`
+      + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`;
+  const b = $("benvinguda");
+  b.innerHTML = `<div style="margin-top:12px;border-top:1px solid var(--linia);padding-top:12px"><div class="ok"><strong>${L("Fet!", "¡Hecho!")}</strong> ${L("Envia-li aquest missatge perquè hi pugui entrar:", "Envíale este mensaje para que pueda entrar:")}</div>
+    <textarea readonly rows="9" style="margin-top:10px;font-size:13.5px">${esc(text)}</textarea>
+    <div class="fila-botons" style="margin-top:10px">
+      <a class="boto petit" href="mailto:${esc(s.email)}?subject=${encodeURIComponent("Tu mes de prueba ya está listo")}&body=${encodeURIComponent(text)}">✉️ ${L("Enviar per correu", "Enviar por correo")}</a>
+      <button class="boto sec petit" type="button" id="btnCopiaBenv">${L("Copiar missatge", "Copiar mensaje")}</button></div></div>`;
+  b.classList.remove("amagat");
+  $("btnCopiaBenv").onclick = () => copiar(text);
+}
 
 iniciar();
