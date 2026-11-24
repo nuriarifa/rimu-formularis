@@ -88,6 +88,7 @@ async function entrar(){
   traduirEstatic();
   $("blocIdioma").classList.toggle("amagat", !!P.agencia.idioma_fix);
   $("tabAg").classList.toggle("amagat", !P.superadmin);
+  aplicarIA();
   comprovarProva(); if(P.superadmin) comptarSol();
   $("vistaLogin").classList.add("amagat"); $("vistaApp").classList.remove("amagat");
   const obrir = new URLSearchParams(location.search).get("e");
@@ -104,6 +105,9 @@ function entrarDemo(){
   if(obrir) obrirEditor(obrir); else carregarLlista();
   if(new URLSearchParams(location.search).has("prova")) obrirProva();
 }
+// La IA per redactar és del pla prèmium: només es veu si l'agència la té activada (a la demo, sempre)
+const teIA = () => DEMO || !!(P && (P.superadmin || (P.agencia && P.agencia.ia_itineraris)));
+function aplicarIA(){ document.body.classList.toggle("sense-ia", !teIA()); }
 const desarDemo = () => { DEMO_E.tocat = true; IT_DEMO.desar(DEMO_E); };
 $("btnReiniciarDemo").onclick = () => {
   if(!confirm(L("Tornar a l'exemple inicial? Es perden els canvis que hagis fet a la demostració.", "¿Volver al ejemplo inicial? Se pierden los cambios que hayas hecho en la demostración."))) return;
@@ -377,7 +381,7 @@ function pintarDies(){
         <div class="camp"><label>${L("Títol del dia", "Título del día")}</label><input data-dc="titol" value="${esc(d.titol)}" placeholder="${L("Ex.: Arribada a Tòquio", "Ej.: Llegada a Tokio")}"></div>
         <div data-llista-abans="${d.id}" style="margin-bottom:10px">${serveisDe(d.id).filter(esAbans).map(htmlSrvEd).join("")}</div>
         <div class="camp"><div class="cap-camp"><label>${L("Què faran", "Qué harán")}</label><button type="button" class="ia" data-ia-dia="${d.id}">✨ ${L("Redactar amb IA", "Redactar con IA")}</button></div>
-          <textarea data-dc="descripcio" placeholder="${L("Explicació del dia (pots escriure quatre notes i prémer «Redactar amb IA»)", "Explicación del día (puedes escribir cuatro notas y pulsar «Redactar con IA»)")}">${esc(d.descripcio)}</textarea></div>
+          <textarea data-dc="descripcio" placeholder="${teIA() ? L("Explicació del dia (pots escriure quatre notes i prémer «Redactar amb IA»)", "Explicación del día (puedes escribir cuatro notas y pulsar «Redactar con IA»)") : L("Explicació del dia", "Explicación del día")}">${esc(d.descripcio)}</textarea></div>
         <div data-llista-srv="${d.id}">${serveisDe(d.id).filter(s => !esAbans(s)).map(htmlSrvEd).join("")}</div>
         <div class="fila-botons" style="margin-top:10px">
           <button class="boto sec petit" type="button" data-nou-srv="${d.id}">➕ ${L("Servei", "Servicio")}</button>
@@ -894,6 +898,9 @@ async function demanarIA(boto, que, context, notes){
   try{
     const { data, error } = await sb.functions.invoke("it-redactar", { body: { que, idioma: E.it.idioma, context, notes } });
     if(error) throw error;
+    if(data && data.error === "IA_NO_ACTIVA"){
+      alert(L("La redacció amb IA no està inclosa en el teu pla. Escriu-nos si la vols activar.", "La redacción con IA no está incluida en tu plan. Escríbenos si quieres activarla.")); return null;
+    }
     if(data && data.error === "FALTA_CLAU"){
       alert(L("La IA encara no està activada (falta la clau a Supabase).", "La IA todavía no está activada (falta la clave en Supabase).")); return null;
     }
@@ -1039,7 +1046,7 @@ function pintarAgencies(){
       <div class="n">${esc(a.nom)}</div>
       <div class="meta">${a.usuaris.length} ${a.usuaris.length === 1 ? L("usuari", "usuario") : L("usuaris", "usuarios")} · ${a.num_itineraris} ${L("itineraris", "itinerarios")}
         · ${a.idioma_fix === "es" ? L("només castellà", "solo castellano") : a.idioma_fix === "ca" ? L("només català", "solo catalán") : L("català i castellà", "catalán y castellano")}</div>
-      <div class="stats" style="margin:6px 0 0">${a.app_itineraris ? `<span class="xip verd">🗺️ ${L("Itineraris", "Itinerarios")}${a.prova_it_fins ? " · " + (diesFins(a.prova_it_fins) >= 1 ? L(`prova: ${diesFins(a.prova_it_fins)} dies`, `prueba: ${diesFins(a.prova_it_fins)} días`) : L("prova acabada", "prueba acabada")) : ""}</span>` : ""}${a.app_formularis ? `<span class="xip verd">📝 ${L("Formularis", "Formularios")}</span>` : ""}${!a.app_itineraris && !a.app_formularis ? `<span class="xip coral">${L("Sense cap app", "Sin ninguna app")}</span>` : ""}</div>
+      <div class="stats" style="margin:6px 0 0">${a.app_itineraris ? `<span class="xip verd">🗺️ ${L("Itineraris", "Itinerarios")}${a.prova_it_fins ? " · " + (diesFins(a.prova_it_fins) >= 1 ? L(`prova: ${diesFins(a.prova_it_fins)} dies`, `prueba: ${diesFins(a.prova_it_fins)} días`) : L("prova acabada", "prueba acabada")) : ""}</span>` : ""}${a.app_itineraris && a.ia_itineraris ? `<span class="xip verd">✨ IA</span>` : ""}${a.app_formularis ? `<span class="xip verd">📝 ${L("Formularis", "Formularios")}</span>` : ""}${!a.app_itineraris && !a.app_formularis ? `<span class="xip coral">${L("Sense cap app", "Sin ninguna app")}</span>` : ""}</div>
     </div>
     <div class="fila-botons" style="flex-direction:column;gap:6px">
       <button class="boto sec petit" type="button" data-ag="${esc(a.id)}">✏️ ${L("Editar", "Editar")}</button>
@@ -1065,14 +1072,15 @@ $("agEdTancar").onclick = () => $("dlgAg").close();
 
 function editarAgencia(a){
   const nova = !a;
-  const x = a ? { ...a } : { nom: "", email_avis: "", idioma_fix: "", color: "#3D698E", accent: "#E79893", lema_ca: "", lema_es: "", logo_url: null, logo_fitxer: null, app_itineraris: true, app_formularis: true, usuaris: [] };
+  const x = a ? { ...a } : { nom: "", email_avis: "", idioma_fix: "", color: "#3D698E", accent: "#E79893", lema_ca: "", lema_es: "", logo_url: null, logo_fitxer: null, app_itineraris: true, app_formularis: true, ia_itineraris: false, usuaris: [] };
   $("agEdTitol").textContent = nova ? L("Nova agència", "Nueva agencia") : x.nom;
   const pintar = () => {
     $("agEdCos").innerHTML = `
       <div class="camp"><label>${L("Nom de l'agència", "Nombre de la agencia")}</label><input id="agNom" value="${esc(x.nom)}" placeholder="${L("Ex.: Viatges Mediterrani", "Ej.: Viajes Mediterráneo")}"></div>
       <div class="camp"><label>${L("Apps que pot fer servir", "Apps que puede usar")}</label>
         <div class="opcions"><label><input type="checkbox" id="agAppIt" ${x.app_itineraris ? "checked" : ""}> 🗺️ ${L("Itineraris", "Itinerarios")}</label>
-        <label><input type="checkbox" id="agAppForm" ${x.app_formularis ? "checked" : ""}> 📝 ${L("Formularis de viatgers", "Formularios de viajeros")}</label></div></div>
+        <label><input type="checkbox" id="agAppForm" ${x.app_formularis ? "checked" : ""}> 📝 ${L("Formularis de viatgers", "Formularios de viajeros")}</label></div>
+        <div class="opcions" style="margin-top:8px"><label><input type="checkbox" id="agIA" ${x.ia_itineraris ? "checked" : ""}> ✨ ${L("Redactar amb IA als itineraris (prèmium)", "Redactar con IA en los itinerarios (prémium)")}</label></div></div>
       <div class="camp"><label>${L("Idioma del panell i dels clients", "Idioma del panel y de los clientes")}</label>
         <select id="agIdioma">
           <option value="" ${!x.idioma_fix ? "selected" : ""}>${L("Català i castellà (es tria en cada itinerari)", "Catalán y castellano (se elige en cada itinerario)")}</option>
@@ -1103,7 +1111,7 @@ function editarAgencia(a){
         "La persona entra en el panel con este correo y, la primera vez, pulsa «¿Primera vez? Crear la contraseña». Sirve para las apps marcadas arriba.")}</p>`}`;
     const llegir = () => { x.nom = $("agNom").value; x.idioma_fix = $("agIdioma").value; x.email_avis = $("agEmail").value;
       x.lema_ca = $("agLemaCa").value; x.lema_es = $("agLemaEs").value; x.color = $("agColor").value.toUpperCase(); x.accent = $("agAccent").value.toUpperCase();
-      x.app_itineraris = $("agAppIt").checked; x.app_formularis = $("agAppForm").checked; };
+      x.app_itineraris = $("agAppIt").checked; x.app_formularis = $("agAppForm").checked; x.ia_itineraris = $("agIA").checked; };
     $("agLogo").onclick = () => { llegir(); triarLogo(u => { x.logo_url = u; pintar(); }); };
     const tl = $("agTreureLogo"); if(tl) tl.onclick = () => { llegir(); x.logo_url = null; pintar(); };
     $("agDesa").onclick = async () => {
@@ -1113,13 +1121,13 @@ function editarAgencia(a){
       const p = { id, nou: nova, nom: x.nom, email_avis: x.email_avis, idioma_fix: x.idioma_fix || "", lema_ca: x.lema_ca, lema_es: x.lema_es,
         color: x.color, color_fosc: barreja(x.color, "#000000", 0.25), color_clar: barreja(x.color, "#FFFFFF", 0.9),
         accent: x.accent, accent_clar: barreja(x.accent, "#FFFFFF", 0.85), logo_url: x.logo_url || "",
-        app_itineraris: !!x.app_itineraris, app_formularis: !!x.app_formularis };
+        app_itineraris: !!x.app_itineraris, app_formularis: !!x.app_formularis, ia_itineraris: !!x.ia_itineraris };
       const { error } = await sb.rpc("admin_agencia_desar", { p });
       if(error){ toast(errAg(error)); return; }
       toast(L("Agència desada", "Agencia guardada"));
       await carregarAgencies();
       const nou = AGS.find(z => z.id === id);
-      if(P.agencia.id === id){ P.agencia = { ...P.agencia, ...nou }; IT.aplicarColors(P.agencia); IT.carregarLogo(P.agencia); }
+      if(P.agencia.id === id){ P.agencia = { ...P.agencia, ...nou }; IT.aplicarColors(P.agencia); IT.carregarLogo(P.agencia); aplicarIA(); }
       if(nova && nou) editarAgencia(nou); else $("dlgAg").close();
     };
     if(nova) return;

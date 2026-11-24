@@ -52,8 +52,8 @@
   .cap-camp label{margin:0}
   .ia{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--blau);color:var(--blau);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;white-space:nowrap}
   .ia:disabled{opacity:.5}
-  /* Botons «Redactar amb IA» amagats: quedaran per al pla prèmium */
-  [data-ia],[data-ia-dia],[data-ia-srv]{display:none !important}
+  /* Botons «Redactar amb IA»: només per a les agències que tenen la IA activada */
+  .sense-ia [data-ia],.sense-ia [data-ia-dia],.sense-ia [data-ia-srv]{display:none !important}
   textarea{min-height:80px;resize:vertical}
   .barra-ed{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--linia);box-shadow:0 -4px 16px rgba(0,0,0,.06);z-index:10}
   .barra-ed .dins{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
