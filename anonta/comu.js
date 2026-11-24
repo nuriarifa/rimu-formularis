@@ -107,19 +107,40 @@ window.AN = (function(){
       .replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-").slice(-80) || "fitxer";
   }
 
-  // Logo de l'agència (imatge pujada) o, per defecte, el de Rimu Viatges
+  // Marca: logo i colors de l'agència (mes de prova i pla alt) o, si no, els d'Anonta
+  const ANONTA = { id: "anonta", nom: "Anonta", color: "#1F3A5F", color_fosc: "#152A45", color_clar: "#E8EEF6",
+                   accent: "#F2A65A", accent_clar: "#FDF1E4" };
+  const LOGO_ANONTA = new URL("logo-anonta.svg", document.currentScript?.src || location.href).href;
+  function srcLogo(ag){
+    if(!ag || ag.propia === false || ag.id === "anonta") return LOGO_ANONTA;
+    if(ag.logo_url) return ag.logo_url;
+    if(ag.id === "rimu" && window.RIMU_LOGO) return window.RIMU_LOGO;
+    return null;
+  }
   function posarLogo(ag){
-    const src = ag && ag.logo_url ? ag.logo_url : (!ag || ag.id === "rimu" ? window.RIMU_LOGO : null);
-    document.querySelectorAll("img.logo").forEach(i => {
-      if(src){ i.src = src; i.alt = ag?.nom || "Rimu Viatges"; i.style.display = ""; }
-      else { i.style.display = "none"; }
-    });
-    const t = document.querySelector(".logo-text");
-    if(t) t.textContent = src ? "" : (ag?.nom || "");
+    const src = srcLogo(ag);
+    const fes = () => {
+      document.querySelectorAll("img.logo").forEach(i => {
+        if(src){ i.src = src; i.alt = src === LOGO_ANONTA ? "Anonta" : (ag?.nom || ""); i.style.display = ""; }
+        else { i.style.display = "none"; }
+      });
+      const t = document.querySelector(".logo-text");
+      if(t) t.textContent = src ? "" : (ag?.nom || "");
+    };
+    fes();
+    // logo.js posa el logo de Rimu en carregar la pàgina: el tornem a posar després
+    if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", fes);
+  }
+  function posarMarca(ag){
+    const propia = ag && ag.propia !== false;
+    aplicarColors(propia ? ag : ANONTA);
+    posarLogo(propia ? ag : null);
+    const tc = document.querySelector('meta[name="theme-color"]');
+    if(tc) tc.content = (propia ? ag.color : null) || ANONTA.color;
   }
 
   function nomComplet(c){ return [c?.nom, c?.cognoms].filter(Boolean).join(" "); }
 
   return { BUCKET, TIPUS_SERVEI, CATEGORIA_DOC, CATEGORIA_DESTI, ESTAT, esc, text, euros, dataLlarga, dataMitja,
-           dataCurta, avui, diesEntre, mida, aplicarColors, urlsSignades, reduirFoto, nomFitxerSegur, nomComplet, posarLogo };
+           dataCurta, avui, diesEntre, mida, aplicarColors, urlsSignades, reduirFoto, nomFitxerSegur, nomComplet, posarLogo, posarMarca, ANONTA, LOGO_ANONTA };
 })();
