@@ -58,12 +58,18 @@
         { viatge_id: M, client_id: CLIENT_DEMO, titular: true }, { viatge_id: R, client_id: "c-pere", titular: true }
       ],
       an_serveis: [
-        { id: id(), viatge_id: J, tipus: "vol", titol: "Vol Barcelona → Tòquio (Haneda)", proveidor: "Qatar Airways", data_inici: ini, hora_inici: "08:25", data_fi: dia(46), hora_fi: "07:10", localitzador: "QR7K2M", descripcio: "Escala a Doha. Una maleta de 23 kg per persona. Us aconsellem ser a l'aeroport 3 hores abans.", ordre: 0, created_at: ara() },
+        { id: id(), viatge_id: J, tipus: "vol", titol: null, proveidor: "Qatar Airways", data_inici: ini, hora_inici: "08:25", data_fi: dia(46), hora_fi: "07:10", localitzador: "QR7K2M", descripcio: "Escala a Doha. Us aconsellem ser a l'aeroport 3 hores abans.", ordre: 0, created_at: ara(),
+          extra: { numero: "QR148", origen: "Barcelona (BCN)", desti: "Tòquio (HND)", data_arribada: true, cabina: true, cabina_kg: "7", facturada: true, facturada_kg: "23" } },
         { id: id(), viatge_id: J, tipus: "trasllat", titol: "Trasllat aeroport → hotel", proveidor: "Receptiu local", data_inici: dia(46), hora_inici: "08:00", data_fi: null, hora_fi: null, localitzador: null, descripcio: "Us esperaran a la sortida amb un cartell amb el vostre nom.", ordre: 0, created_at: ara() },
-        { id: id(), viatge_id: J, tipus: "hotel", titol: "Hotel a Tòquio (Shinjuku)", proveidor: "Hotel Shinjuku Garden", data_inici: dia(46), hora_inici: "15:00", data_fi: dia(49), hora_fi: "11:00", localitzador: "HSG-55821", descripcio: "Habitació triple amb esmorzar.", ordre: 0, created_at: ara() },
+        { id: id(), viatge_id: J, tipus: "hotel", titol: "Hotel Shinjuku Garden (Tòquio)", proveidor: null, data_inici: dia(46), hora_inici: null, data_fi: dia(49), hora_fi: null, localitzador: "HSG-55821", descripcio: "Al cor de Shinjuku, a 5 minuts a peu de l'estació.", ordre: 0, created_at: ara(),
+          extra: { estrelles: 4, allotjament: "hotel", regim: "ad", habitacio: "Triple", checkin: "A partir de les 15:00. Sortida abans de les 11:00. Cal ensenyar els passaports." } },
         { id: id(), viatge_id: J, tipus: "tren", titol: "Japan Rail Pass 7 dies", proveidor: "JR", data_inici: dia(49), hora_inici: null, data_fi: dia(55), hora_fi: null, localitzador: "JRP-3X", descripcio: "Inclou els trens bala entre Tòquio, Kyoto i Osaka. S'activa a la primera estació.", ordre: 0, created_at: ara() },
-        { id: id(), viatge_id: J, tipus: "hotel", titol: "Ryokan tradicional a Kyoto", proveidor: "Ryokan Gion (exemple)", data_inici: dia(49), hora_inici: "15:00", data_fi: dia(52), hora_fi: "10:00", localitzador: "RG-1180", descripcio: "Sopar kaiseki inclòs la primera nit.", ordre: 0, created_at: ara() },
-        { id: id(), viatge_id: J, tipus: "asseguranca", titol: "Assegurança de viatge completa", proveidor: "Asseguradora (exemple)", data_inici: ini, hora_inici: null, data_fi: dia(54), hora_fi: null, localitzador: "POL-99812", descripcio: "Cobertura mèdica, cancel·lació i equipatge.", ordre: 0, created_at: ara() }
+        { id: id(), viatge_id: J, tipus: "hotel", titol: "Ryokan Gion (Kyoto)", proveidor: null, data_inici: dia(49), hora_inici: null, data_fi: dia(52), hora_fi: null, localitzador: "RG-1180", descripcio: "Sopar kaiseki inclòs la primera nit.", ordre: 0, created_at: ara(),
+          extra: { estrelles: 3, allotjament: "ryokan", regim: "mp", habitacio: "Tatami familiar", checkin: "A partir de les 15:00. Sortida abans de les 10:00." } },
+        { id: id(), viatge_id: J, tipus: "excursio", titol: "Excursió a Nara amb guia", proveidor: null, data_inici: dia(50), hora_inici: "08:30", data_fi: null, hora_fi: null, localitzador: "EXC-2207", descripcio: "Temple Todai-ji i el parc dels cérvols. Dinar no inclòs.", ordre: 0, created_at: ara(),
+          extra: { lloc: "Recepció del ryokan" } },
+        { id: id(), viatge_id: J, tipus: "asseguranca", titol: "Assegurança de viatge completa", proveidor: null, data_inici: null, hora_inici: null, data_fi: null, hora_fi: null, localitzador: "POL-99812", descripcio: "Cobertura mèdica, cancel·lació i equipatge.", ordre: 0, created_at: ara(),
+          extra: { tipus: "assistencia_cancel" } }
       ],
       an_documents: [
         { id: id(), viatge_id: J, nom: "Bitllets d'avió", categoria: "bitllet", path: "demo/doc-vols.html", mida: 184000, visible: true, created_at: ara() },
@@ -112,7 +118,17 @@
     "Escapada a Roma": "Escapada a Roma",
     "Itàlia": "Italia",
     "Vol Barcelona → Tòquio (Haneda)": "Vuelo Barcelona → Tokio (Haneda)",
-    "Escala a Doha. Una maleta de 23 kg per persona. Us aconsellem ser a l'aeroport 3 hores abans.": "Escala en Doha. Una maleta de 23 kg por persona. Os aconsejamos estar en el aeropuerto 3 horas antes.",
+    "Escala a Doha. Us aconsellem ser a l'aeroport 3 hores abans.": "Escala en Doha. Os aconsejamos estar en el aeropuerto 3 horas antes.",
+    "Tòquio (HND)": "Tokio (HND)",
+    "Hotel Shinjuku Garden (Tòquio)": "Hotel Shinjuku Garden (Tokio)",
+    "Al cor de Shinjuku, a 5 minuts a peu de l'estació.": "En el corazón de Shinjuku, a 5 minutos a pie de la estación.",
+    "A partir de les 15:00. Sortida abans de les 11:00. Cal ensenyar els passaports.": "A partir de las 15:00. Salida antes de las 11:00. Hay que enseñar los pasaportes.",
+    "Ryokan Gion (Kyoto)": "Ryokan Gion (Kioto)",
+    "Tatami familiar": "Tatami familiar",
+    "A partir de les 15:00. Sortida abans de les 10:00.": "A partir de las 15:00. Salida antes de las 10:00.",
+    "Excursió a Nara amb guia": "Excursión a Nara con guía",
+    "Temple Todai-ji i el parc dels cérvols. Dinar no inclòs.": "Templo Todai-ji y el parque de los ciervos. Comida no incluida.",
+    "Recepció del ryokan": "Recepción del ryokan",
     "Trasllat aeroport → hotel": "Traslado aeropuerto → hotel",
     "Us esperaran a la sortida amb un cartell amb el vostre nom.": "Os esperarán a la salida con un cartel con vuestro nombre.",
     "Hotel a Tòquio (Shinjuku)": "Hotel en Tokio (Shinjuku)",
@@ -164,9 +180,11 @@
   // Idioma de la demo: la llavor es crea en castellà si la demo està en castellà
   const idiomaDemo = () => { try{ return localStorage.getItem("anonta-demo-idioma") || localStorage.getItem("anonta-idioma-panell") || ""; }catch{ return ""; } };
   function enCastella(st){
-    Object.values(st.db).forEach(files => files.forEach(r => Object.keys(r).forEach(k => {
-      if(typeof r[k] === "string" && ES[r[k]]) r[k] = ES[r[k]];
-    })));
+    const tradueix = o => Object.keys(o).forEach(k => {
+      if(typeof o[k] === "string" && ES[o[k]]) o[k] = ES[o[k]];
+      else if(o[k] && typeof o[k] === "object" && !Array.isArray(o[k])) tradueix(o[k]);
+    });
+    Object.values(st.db).filter(Array.isArray).forEach(files => files.forEach(tradueix));
     st.db.an_clients.forEach(c => c.idioma = "es");
     st.db._idioma = "es";
     return st;
@@ -174,11 +192,12 @@
 
   // ---------- emmagatzematge al navegador ----------
   let ST;
+  const VERSIO = 2; // es puja quan canvia l'exemple, perquè tothom vegi el nou
   function carregar(){
     const es = idiomaDemo() === "es";
     try{ const db = JSON.parse(localStorage.getItem(CLAU)); const f = JSON.parse(localStorage.getItem(CLAU_FIT));
-      if(db && f && (db._idioma === "es") === es){ ST = { db, fitxers: f }; return; } }catch{}
-    ST = inicial(); if(es) enCastella(ST); desar();
+      if(db && f && (db._idioma === "es") === es && db._versio === VERSIO){ ST = { db, fitxers: f }; return; } }catch{}
+    ST = inicial(); ST.db._versio = VERSIO; if(es) enCastella(ST); desar();
   }
   function desar(){
     try{ localStorage.setItem(CLAU, JSON.stringify(ST.db)); localStorage.setItem(CLAU_FIT, JSON.stringify(ST.fitxers)); return true; }
@@ -222,7 +241,7 @@
     an_clients: () => ({ idioma: "ca", user_id: null, created_at: ara() }),
     an_viatges: () => ({ agencia_id: "rimu", estat: "en_preparacio", publicat: false, mostrar_pagaments: true, created_at: ara(), updated_at: ara() }),
     an_viatge_clients: () => ({ titular: false }),
-    an_serveis: () => ({ tipus: "altre", ordre: 0, created_at: ara() }),
+    an_serveis: () => ({ tipus: "altre", ordre: 0, extra: {}, created_at: ara() }),
     an_documents: () => ({ categoria: "altre", visible: true, created_at: ara() }),
     an_pagaments: () => ({ import: 0, created_at: ara() }),
     an_dies: () => ({ ordre: 0 }), an_activitats: () => ({ ordre: 0 }), an_desti: () => ({ categoria: "consell", ordre: 0 })
@@ -390,7 +409,10 @@
         const dies = new Set(ST.db.an_dies.filter(d => ids.has(d.viatge_id)).map(d => d.id));
         Object.entries(CAMPS_TR).forEach(([taula, camps]) => ST.db[taula]
           .filter(r => visible(taula, r) && (taula === "an_viatges" ? ids.has(r.id) : taula === "an_activitats" ? dies.has(r.dia_id) : ids.has(r.viatge_id)))
-          .forEach(r => camps.forEach(c => { if(r[c] && ES[r[c]]) t[`${taula}:${r.id}:${c}`] = ES[r[c]]; })));
+          .forEach(r => {
+            camps.forEach(c => { if(r[c] && ES[r[c]]) t[`${taula}:${r.id}:${c}`] = ES[r[c]]; });
+            if(taula === "an_serveis") Object.entries(r.extra || {}).forEach(([k, val]) => { if(typeof val === "string" && ES[val]) t[`an_serveis:${r.id}:x_${k}`] = ES[val]; });
+          }));
       }
       return { data: { t }, error: null };
     }
