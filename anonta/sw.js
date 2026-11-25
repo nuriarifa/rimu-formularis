@@ -17,3 +17,24 @@ self.addEventListener("fetch", e => {
     }).catch(() => caches.match(req))
   );
 });
+
+// Notificacions al mòbil (missatges del xat, documents nous, canvis, recordatoris)
+self.addEventListener("push", e => {
+  let d = {};
+  try{ d = e.data ? e.data.json() : {}; }catch(_){ d = { titol: "Anonta", cos: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.titol || "Anonta", {
+    body: d.cos || "", tag: d.tag || undefined, renotify: !!d.tag,
+    data: { url: new URL(d.url || "./", self.registration.scope).href }
+  }));
+});
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || self.registration.scope;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(llista => {
+    const cami = u => new URL(u).pathname.replace(/index\.html$/, "");
+    for(const c of llista){
+      if(cami(c.url) === cami(url) && "focus" in c){ if(c.navigate) c.navigate(url).catch(() => {}); return c.focus(); }
+    }
+    return self.clients.openWindow(url);
+  }));
+});
