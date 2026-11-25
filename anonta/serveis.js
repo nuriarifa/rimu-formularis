@@ -1,6 +1,14 @@
 // Anonta · Camps propis de cada tipus de servei (vol, allotjament, excursió, assegurança)
 // i com es mostren a l'app del client. Ho fan servir el panell i l'app.
 window.SRV = (function(){
+  // Tipus nou «Circuit» (es posa just després d'excursió)
+  (function(){
+    const t = AN.TIPUS_SERVEI, nou = {};
+    Object.keys(t).forEach(k => { nou[k] = t[k]; if(k === "excursio") nou.circuit = { ico: "🚌", ca: "Circuit", es: "Circuito" }; });
+    Object.keys(t).forEach(k => delete t[k]); Object.assign(t, nou);
+  })();
+  // Categories d'hotels dels circuits (de menys a més)
+  const CATEGORIES = { A: "3★", B: "4★", C: "4★ sup.", D: "5★" };
   const REGIMS = {
     sa: { ca: "Només allotjament",      es: "Solo alojamiento" },
     ad: { ca: "Allotjament i esmorzar", es: "Alojamiento y desayuno" },
@@ -28,10 +36,14 @@ window.SRV = (function(){
   const T = {
     ca: { nits: n => n === 1 ? "1 nit" : `${n} nits`, cabina: "Maleta de cabina", facturada: "Maleta facturada", checkin: "Check-in",
           trobada: "Punt de trobada", polissa: "Núm. de pòlissa", localitzador: "Localitzador", habitacio: "Habitació", sortida: "Sortida", arribada: "Arribada",
-          entrada: "Entrada", sortidaH: "Sortida", assegurança: "Assegurança" },
+          entrada: "Entrada", sortidaH: "Sortida", assegurança: "Assegurança",
+          dies: n => n === 1 ? "1 dia" : `${n} dies`, categoria: "Categoria", vols: "Vols", hotels: "Hotels previstos (o similars)",
+          inclou: "Inclou", noInclou: "No inclou", tel24: "Telèfon 24 h del receptiu", operador: "Operador" },
     es: { nits: n => n === 1 ? "1 noche" : `${n} noches`, cabina: "Maleta de cabina", facturada: "Maleta facturada", checkin: "Check-in",
           trobada: "Punto de encuentro", polissa: "Nº de póliza", localitzador: "Localizador", habitacio: "Habitación", sortida: "Salida", arribada: "Llegada",
-          entrada: "Entrada", sortidaH: "Salida", assegurança: "Seguro" }
+          entrada: "Entrada", sortidaH: "Salida", assegurança: "Seguro",
+          dies: n => n === 1 ? "1 día" : `${n} días`, categoria: "Categoría", vols: "Vuelos", hotels: "Hoteles previstos (o similares)",
+          inclou: "Incluye", noInclou: "No incluye", tel24: "Teléfono 24 h del receptivo", operador: "Operador" }
   };
   const nits = (a, b) => (a && b) ? Math.max(0, Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000)) : null;
   const nomDe = (map, k, idioma) => k && map[k] ? (map[k][idioma] || map[k].ca) : "";
@@ -75,6 +87,29 @@ window.SRV = (function(){
     }else if(s.tipus === "excursio"){
       cos = linia([s.data_inici && dm(s.data_inici), s.hora_inici].filter(Boolean).map(esc).join(" · "), "📅")
         + (e.lloc ? linia(`${esc(t.trobada)}: ${esc(tr(s, "x_lloc"))}`, "📍") : "") + loc() + detalls;
+    }else if(s.tipus === "circuit"){
+      if(s.proveidor) cap += " · " + esc(s.proveidor);
+      const n = nits(s.data_inici, s.data_fi);
+      const dates = [s.data_inici && dm(s.data_inici), s.data_fi && dm(s.data_fi)].filter(Boolean).join(" → ");
+      const cat = e.categoria ? `${t.categoria} ${esc(e.categoria)}${CATEGORIES[e.categoria] ? " (" + CATEGORIES[e.categoria] + ")" : ""}` : "";
+      const vols = (e.vols || []).map(v => {
+        const ruta = (v.origen || v.desti) ? `${esc(v.origen || "?")} → ${esc(v.desti || "?")}` : "";
+        const hores = [v.sortida, v.arribada && (v.arribada + (v.plus1 ? " (+1)" : ""))].filter(Boolean).join(" → ");
+        return `<div class="meta" style="margin-top:3px">✈️ ${[v.data && esc(dm(v.data)), [v.numero, v.companyia].filter(Boolean).map(esc).join(" "), ruta, hores && esc(hores)].filter(Boolean).join(" · ")}</div>`;
+      }).join("");
+      const maletes = [e.cabina && `🎒 ${t.cabina}${e.cabina_kg ? " " + esc(e.cabina_kg) + " kg" : ""}`,
+                       e.facturada && `🧳 ${t.facturada}${e.facturada_kg ? " " + esc(e.facturada_kg) + " kg" : ""}`].filter(Boolean).join(" · ");
+      const hotels = (e.hotels || []).map(h => `<div class="meta" style="margin-top:2px">🏨 ${[h.ciutat && `<b>${esc(h.ciutat)}</b>`, h.hotel && esc(h.hotel), h.nits && esc(t.nits(Number(h.nits)))].filter(Boolean).join(" · ")}</div>`).join("");
+      const tel = e.telefon ? `<div style="margin-top:6px">📞 ${esc(t.tel24)}: <a href="tel:${esc(String(e.telefon).replace(/[^\d+]/g, ""))}">${esc(e.telefon)}</a></div>` : "";
+      cos = linia(esc(dates) + (n ? ` · <b>${esc(t.dies(n + 1))} / ${esc(t.nits(n))}</b>` : ""), "📅")
+        + linia([cat, e.regim && esc(nomDe(REGIMS, e.regim, idioma))].filter(Boolean).join(" · "), "🏨") + loc()
+        + (vols ? `<div style="margin-top:8px;font-weight:600;font-size:14px">${esc(t.vols)}</div>${vols}` : "")
+        + (maletes ? `<div class="meta" style="margin-top:3px">${maletes}</div>` : "")
+        + (hotels ? `<div style="margin-top:8px;font-weight:600;font-size:14px">${esc(t.hotels)}</div>${hotels}` : "")
+        + detalls
+        + (e.inclou ? `<div style="margin-top:8px;font-size:15px">✅ <b>${esc(t.inclou)}:</b><br>${text(tr(s, "x_inclou"))}</div>` : "")
+        + (e.no_inclou ? `<div style="margin-top:8px;font-size:15px">❌ <b>${esc(t.noInclou)}:</b><br>${text(tr(s, "x_no_inclou"))}</div>` : "")
+        + tel;
     }else if(s.tipus === "asseguranca"){
       const tip = e.tipus === "altre" ? tr(s, "x_tipus_altre") : tipusAssegurança(e, idioma);
       cos = (tip ? `<div class="meta">🛡️ ${esc(tip)}</div>` : "") + loc(t.polissa) + detalls;
@@ -88,5 +123,5 @@ window.SRV = (function(){
       <div class="meta">${cap}</div><div class="nom">${titol}</div>${cos}</div></div>`;
   }
 
-  return { REGIMS, ALLOTJAMENTS, ASSEGURANCES, T, nits, nomDe, titolVol, tipusAssegurança, htmlClient };
+  return { REGIMS, ALLOTJAMENTS, ASSEGURANCES, CATEGORIES, T, nits, nomDe, titolVol, tipusAssegurança, htmlClient };
 })();
