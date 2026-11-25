@@ -80,17 +80,21 @@
     <div class="pestanyes">
       <button id="tabNou" class="actiu" data-t="tabNou">➕ Nou formulari</button>
       <button id="tabLlista" data-t="tabLlista">📋 Formularis</button>
-      <button id="tabSol" class="amagat">🆕 Sol·licituds <span id="numSol"></span></button>
+      <button id="tabSol" class="amagat">🏢 Agències <span id="numSol"></span></button>
     </div>
 
     <!-- SOL·LICITUDS (només superadmin) -->
     <div id="panSol" class="amagat">
-      <div class="barra"><strong style="color:var(--blau)">Sol·licituds de prova</strong>
+      <div class="barra"><strong style="color:var(--blau);font-size:17px">🎁 Sol·licituds del mes de prova</strong>
         <button class="boto sec petit" id="btnRefrescaSol">↻ Actualitzar</button></div>
       <div id="llistaSol"></div>
       <div id="benvinguda" class="amagat"></div>
-      <h3 style="margin-top:24px">Agències en prova</h3>
-      <div id="llistaProves"></div>
+      <div class="grup" style="margin-top:22px">
+        <div class="grup-titol">🏢 Agències amb formularis</div>
+        <div id="llistaProves"></div>
+        <p class="meta" style="margin:14px 0 0">Només hi surten les agències donades d'alta als formularis. Una agència que només té Anonta o itineraris no hi és i no hi pot entrar.
+          <b>Mes de prova</b>: pot crear formularis fins a la data; després només pot mirar. <b>Activa</b>: sense data de final. <b>Donar de baixa</b>: ja no hi pot entrar (les dades es conserven).</p>
+      </div>
     </div>
 
     <!-- NOU -->
@@ -376,14 +380,14 @@ async function comprovarProva(){
 const URL_LOGOS = RIMU.SUPABASE_URL + "/storage/v1/object/public/logos-agencies/";
 let dadesSol = [];
 async function comptarSollicituds(){
-  const { count } = await sb.from("sollicituds").select("id", { count: "exact", head: true }).eq("estat", "pendent");
+  const { count } = await sb.from("sollicituds").select("id", { count: "exact", head: true }).eq("estat", "pendent").eq("app", "formularis");
   $("numSol").textContent = count ? `(${count})` : "";
 }
 async function carregarSollicituds(){
   $("llistaSol").innerHTML = `<div class="targeta centre meta">Carregant…</div>`;
   const [{ data: sol, error }, { data: ags }] = await Promise.all([
-    sb.from("sollicituds").select("*").eq("estat", "pendent").order("created_at", { ascending: true }),
-    sb.from("agencies").select("id,nom,email_avis,prova_fins").not("prova_fins", "is", null).order("prova_fins")
+    sb.from("sollicituds").select("*").eq("estat", "pendent").eq("app", "formularis").order("created_at", { ascending: true }),
+    sb.rpc("fo_admin_agencies")
   ]);
   if(error){ $("llistaSol").innerHTML = `<div class="targeta error">Error: ${esc(error.message)}</div>`; return; }
   dadesSol = sol || [];
@@ -392,8 +396,7 @@ async function carregarSollicituds(){
     <div class="grup"><div class="grup-cap" style="align-items:center">
       <div style="display:flex;gap:12px;align-items:center">
         ${s.logo_path ? `<img src="${esc(URL_LOGOS + s.logo_path)}" crossorigin="anonymous" alt="" style="width:64px;height:64px;object-fit:contain;border:1px solid var(--linia);border-radius:10px;background:#fff">` : ""}
-        <div><div class="grup-titol">${esc(s.nom)}</div><div class="meta">${esc(s.email)} · ${new Date(s.created_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"})}</div>
-          <div class="meta" style="margin-top:4px;font-weight:700">${s.app === "itineraris" ? "🗺️ Itineraris" : "📝 Formularis"}</div></div>
+        <div><div class="grup-titol">${esc(s.nom)}</div><div class="meta">${esc(s.email)} · ${new Date(s.created_at).toLocaleString("ca",{dateStyle:"short",timeStyle:"short"})}</div></div>
       </div></div>
       <div class="fila-botons" style="margin-top:12px">
         <button class="boto petit" data-aprova="${s.id}">✓ Aprovar (30 dies de prova)</button>
@@ -404,27 +407,46 @@ async function carregarSollicituds(){
   $("llistaSol").querySelectorAll("[data-rebutja]").forEach(b => b.onclick = () => rebutjar(b.dataset.rebutja));
   pintarProves(ags || []);
 }
+const ESTATS = { prova: "🎁 Mes de prova", activa: "✓ Activa (ha pagat)", cap: "Donar de baixa" };
 function pintarProves(ags){
   $("llistaProves").innerHTML = ags.length ? ags.map(a => {
-    const dies = diesFins(a.prova_fins), acabada = dies < 1;
+    const estat = a.prova_fins ? "prova" : "activa";
+    const dies = a.prova_fins ? diesFins(a.prova_fins) : null;
+    const xip = a.prova_fins
+      ? `<span class="estat ${dies >= 1 ? "rebut" : "pendent"}">${dies >= 1 ? `Queden ${dies} dies` : "Prova acabada"}</span>`
+      : `<span class="estat rebut">Activa</span>`;
     return `<div class="form-fila"><div class="form-fila-cap">
-      <div><strong>${esc(a.nom)}</strong><div class="meta">${esc(a.email_avis || "")} · prova fins al ${dataCurta(a.prova_fins)}</div></div>
-      <span class="estat ${acabada ? "pendent" : "rebut"}">${acabada ? "Prova acabada" : `Queden ${dies} dies`}</span></div>
-      <div class="fila-botons" style="margin-top:8px">
-        <button class="boto sec petit" data-mes30="${esc(a.id)}" data-fins="${a.prova_fins}">+30 dies</button>
-        <button class="boto petit" data-activa="${esc(a.id)}">✓ Activar (ha pagat)</button>
-      </div></div>`;
-  }).join("") : `<p class="meta">Cap agència en prova ara mateix.</p>`;
+      <div style="display:flex;gap:10px;align-items:center">
+        ${a.logo_url ? `<img src="${esc(a.logo_url)}" alt="" style="width:44px;height:44px;object-fit:contain;border:1px solid var(--linia);border-radius:8px;background:#fff">` : ""}
+        <div><strong>${esc(a.nom)}</strong>
+          <div class="meta">${esc((a.usuaris || []).join(", ") || "sense usuaris")}</div>
+          <div class="meta">${a.formularis} formularis · ${a.rebuts} rebuts${a.prova_fins ? ` · prova fins al ${dataCurta(a.prova_fins)}` : ""}</div></div></div>
+      ${xip}</div>
+      ${a.id === "rimu" ? "" : `<div class="fila-botons" style="margin-top:8px;align-items:center">
+        <select data-estat="${esc(a.id)}" style="width:auto">${Object.entries(ESTATS).map(([k, n]) =>
+          `<option value="${k}"${k === estat ? " selected" : ""}>${n}</option>`).join("")}</select>
+        ${a.prova_fins ? `<button class="boto sec petit" data-mes30="${esc(a.id)}" data-fins="${a.prova_fins}">+30 dies</button>` : ""}
+      </div>`}</div>`;
+  }).join("") : `<p class="meta">Encara no n'hi ha cap.</p>`;
+  $("llistaProves").querySelectorAll("[data-estat]").forEach(sel => {
+    const abans = sel.value;
+    sel.onchange = async () => {
+      const a = ags.find(x => x.id === sel.dataset.estat), nou = sel.value;
+      const msg = nou === "cap" ? `Donar de baixa «${a.nom}» dels formularis? No hi podrà entrar ni crear-ne de nous. Les dades es conserven i, si ho vols, la pots tornar a donar d'alta.`
+        : nou === "prova" ? `Posar «${a.nom}» en mes de prova (30 dies des d'avui)?`
+        : `Activar «${a.nom}» sense data de final?`;
+      if(!confirm(msg)){ sel.value = abans; return; }
+      const { error } = await sb.rpc("fo_canviar_estat", { p_agencia: a.id, p_estat: nou, p_fins: null });
+      if(error){ sel.value = abans; toast("No s'ha pogut canviar"); return; }
+      toast(nou === "cap" ? "Donada de baixa" : "Canviat ✓"); carregarSollicituds();
+    };
+  });
   $("llistaProves").querySelectorAll("[data-mes30]").forEach(b => b.onclick = async () => {
     const base = new Date(Math.max(Date.now(), new Date(b.dataset.fins + "T12:00:00").getTime()));
     base.setDate(base.getDate() + 30);
-    const { error } = await sb.rpc("canviar_prova", { p_agencia: b.dataset.mes30, p_fins: base.toISOString().slice(0, 10) });
-    toast(error ? "No s'ha pogut canviar" : "Prova allargada 30 dies"); carregarSollicituds();
-  });
-  $("llistaProves").querySelectorAll("[data-activa]").forEach(b => b.onclick = async () => {
-    if(!confirm("L'agència passarà a estar activa sense data de final. Continuar?")) return;
-    const { error } = await sb.rpc("canviar_prova", { p_agencia: b.dataset.activa, p_fins: null });
-    toast(error ? "No s'ha pogut activar" : "Agència activada"); carregarSollicituds();
+    const fins = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,"0")}-${String(base.getDate()).padStart(2,"0")}`;
+    const { error } = await sb.rpc("fo_canviar_estat", { p_agencia: b.dataset.mes30, p_estat: "prova", p_fins: fins });
+    toast(error ? "No s'ha pogut canviar" : `Prova allargada fins al ${dataCurta(fins)}`); carregarSollicituds();
   });
 }
 // Treu els colors principals del logo per a la marca de l'agència
@@ -464,27 +486,21 @@ function colorsDelLogo(src){
 }
 async function aprovar(id, boto){
   const s = dadesSol.find(x => x.id === id); if(!s) return;
-  if(!confirm(`Aprovar «${s.nom}» (${s.app === "itineraris" ? "itineraris" : "formularis"}) amb 30 dies de prova? Si ja és clienta, se li afegeix l'app.`)) return;
+  if(!confirm(`Crear l'agència «${s.nom}» amb 30 dies de prova?`)) return;
   boto.disabled = true; boto.textContent = "Creant…";
-  const { data: totes } = await sb.rpc("admin_agencies");
-  const jaClienta = (totes || []).some(a => (a.usuaris || []).some(u => u.email.toLowerCase() === s.email.toLowerCase()));
   const colors = s.logo_path ? await colorsDelLogo(URL_LOGOS + s.logo_path) : {};
   const { data: agId, error } = await sb.rpc("aprovar_sollicitud", { p_id: id, p_colors: colors });
-  if(error){ toast("No s'ha pogut aprovar: " + error.message); boto.disabled = false; boto.textContent = "✓ Aprovar (30 dies de prova)"; return; }
-  mostrarBenvinguda(s, agId, jaClienta);
+  if(error){ toast(/JA_TE_APP/.test(error.message) ? "Aquesta agència ja té els formularis" : "No s'ha pogut aprovar: " + error.message); boto.disabled = false; boto.textContent = "✓ Aprovar (30 dies de prova)"; return; }
+  mostrarBenvinguda(s);
   carregarSollicituds();
 }
-function mostrarBenvinguda(s, agId, jaClienta){
+function mostrarBenvinguda(s){
   const fins = new Date(); fins.setDate(fins.getDate() + 30);
-  const itin = s.app === "itineraris", url = itin ? BASE + "itineraris/admin.html" : BASE + "admin.html";
-  const text = jaClienta
-    ? `¡Hola! Ya tienes activado en ${s.nom} ${itin ? "el panel para crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros"}.\n\n`
-      + `Entra en: ${url}\ncon el mismo correo (${s.email}) y la misma contraseña que ya usas.\n\n`
-      + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`
-    : `¡Hola! Ya tienes listo tu espacio de ${s.nom} para ${itin ? "crear los itinerarios de viaje de tus clientes" : "el formulario de datos de viajeros"}.\n\n`
-    + `1. Entra en: ${url}\n`
+  const text = `¡Hola! Ya tienes listo tu espacio de ${s.nom} para el formulario de datos de viajeros.\n\n`
+    + `1. Entra en: ${BASE}admin.html\n`
     + `2. Escribe tu correo (${s.email}) y la contraseña que quieras, y pulsa «¿Primera vez? Crear la contraseña».\n`
     + `3. Confirma tu cuenta desde el correo que te llegará y vuelve a entrar.\n\n`
+    + `Si ya usas otra de nuestras apps (Anonta o itinerarios), entra con el mismo correo y la misma contraseña.\n\n`
     + `Tu prueba gratuita dura hasta el ${fins.toLocaleDateString("es")}. Cualquier duda, escríbenos.\n\nRimu Viatges`;
   const b = $("benvinguda");
   b.innerHTML = `<div class="targeta" style="margin-top:12px"><div class="ok"><strong>Agència creada!</strong> Envia-li aquest missatge perquè hi pugui entrar:</div>
