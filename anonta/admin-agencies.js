@@ -1,103 +1,116 @@
-// Anonta · Pestanya «Agències» (només per a l'administradora): sol·licituds del mes de prova i plans
+// Anonta · Pestanya «Agències» (només per a l'administradora): totes les agències i totes les apps en un sol lloc.
+// Sol·licituds de prova de les tres apps, i per a cada agència l'estat d'Anonta, dels formularis i dels itineraris.
 (function(){
   const URL_LOGOS = RIMU.SUPABASE_URL + "/storage/v1/object/public/logos-agencies/";
-  const PLANS = () => ({
-    prova:   [L("Mes de prova", "Mes de prueba"), L("gratis · logo propi i IA", "gratis · logo propio e IA")],
-    basic:   [L("Bàsic", "Básico"), L(`20 €/mes · logo Anonta, sense IA`, `20 €/mes · logo Anonta, sin IA`)],
-    premium: [L("Prèmium", "Prémium"), L(`25 €/mes · logo propi i IA`, `25 €/mes · logo propio e IA`)],
-    cap:     [L("Donar de baixa", "Dar de baja"), L("ja no hi pot entrar", "ya no puede entrar")]
+  const NOM_APP = () => ({ anonta: "🧳 Anonta", formularis: "📝 " + L("Formularis", "Formularios"), itineraris: "🗺️ " + L("Itineraris", "Itinerarios") });
+  const ESTATS = () => ({
+    anonta: {
+      prova:   L("🎁 Mes de prova (logo propi i IA)", "🎁 Mes de prueba (logo propio e IA)"),
+      basic:   L("Bàsic · 20 €/mes (logo Anonta, sense IA)", "Básico · 20 €/mes (logo Anonta, sin IA)"),
+      premium: L("Prèmium · 25 €/mes (logo propi i IA)", "Prémium · 25 €/mes (logo propio e IA)")
+    },
+    formularis: { prova: L("🎁 Mes de prova", "🎁 Mes de prueba"), activa: L("✓ Activa (ha pagat)", "✓ Activa (ha pagado)") },
+    itineraris: { prova: L("🎁 Mes de prova", "🎁 Mes de prueba"), activa: L("✓ Activa (ha pagat)", "✓ Activa (ha pagado)") }
   });
   let SOLS = [], AGS = [];
 
   window.comptarSollicituds = async function(){
-    const { count } = await sb.from("an_sollicituds").select("id", { count: "exact", head: true }).eq("estat", "pendent");
+    const { data } = await sb.rpc("ag_admin_sollicituds");
+    const n = (data || []).length;
     const b = document.querySelector('#navPrincipal [data-vista="agencies"]');
-    if(b && count) b.innerHTML = `🏢 ${L("Agències", "Agencias")} <span class="xip coral" style="margin-left:4px">${count}</span>`;
+    if(b) b.innerHTML = `🏢 ${L("Agències", "Agencias")}${n ? ` <span class="xip coral" style="margin-left:4px">${n}</span>` : ""}`;
   };
 
   window.vistaAgencies = async function(){
     pantalla.innerHTML = `<p class="meta">${L("Carregant…", "Cargando…")}</p>`;
-    const [s, a] = await Promise.all([
-      sb.from("an_sollicituds").select("*").eq("estat", "pendent").order("created_at"),
-      sb.rpc("an_admin_agencies")
-    ]);
+    const [s, a] = await Promise.all([sb.rpc("ag_admin_sollicituds"), sb.rpc("ag_admin_agencies")]);
     if(s.error || a.error){ pantalla.innerHTML = `<div class="error">${esc(errMsg(s.error || a.error))}</div>`; return; }
     SOLS = s.data || []; AGS = a.data || [];
     pantalla.innerHTML = `
       <h2 style="margin:0 0 14px">${L("Agències", "Agencias")}</h2>
       <div class="targeta">
-        <h2>🎁 ${L("Sol·licituds del mes de prova", "Solicitudes del mes de prueba")}</h2>
+        <h2>🎁 ${L("Sol·licituds de prova", "Solicitudes de prueba")}</h2>
         <div id="solLlista">${SOLS.length ? "" : `<p class="meta" style="margin:0">${L("No n'hi ha cap de pendent.", "No hay ninguna pendiente.")}</p>`}</div>
         <div id="benvinguda" class="amagat"></div>
       </div>
-      <div class="targeta">
-        <h2>🏢 ${L("Agències amb Anonta", "Agencias con Anonta")}</h2>
-        <div id="agLlista"></div>
-        <p class="ajuda">${L("El pla decideix la marca que veuen els clients: <b>Mes de prova</b> i <b>Prèmium</b> amb el logo i els colors de l'agència; <b>Bàsic</b> amb la marca Anonta. La IA només és al Prèmium i a la prova. Preus sense IVA. Quan una prova s'acaba, l'agència pot mirar però no crear viatges nous.",
-          "El plan decide la marca que ven los clientes: <b>Mes de prueba</b> y <b>Prémium</b> con el logo y los colores de la agencia; <b>Básico</b> con la marca Anonta. La IA solo está en el Prémium y en la prueba. Precios sin IVA. Cuando una prueba termina, la agencia puede mirar pero no crear viajes nuevos.")}</p>
-      </div>`;
+      <div id="agLlista"></div>
+      <p class="ajuda">${L("Cada agència només té les apps que hi surten activades. <b>Mes de prova</b>: pot crear coses fins a la data; després només pot mirar. <b>Activa</b> o un pla: sense data de final. <b>Donar de baixa</b>: ja no hi entra, però les dades es conserven. A Anonta, el pla decideix la marca: <b>Bàsic</b> amb la marca Anonta; <b>Prova</b> i <b>Prèmium</b> amb el logo de l'agència. Preus sense IVA.",
+        "Cada agencia solo tiene las apps que salen activadas. <b>Mes de prueba</b>: puede crear cosas hasta la fecha; después solo puede mirar. <b>Activa</b> o un plan: sin fecha de final. <b>Dar de baja</b>: ya no entra, pero los datos se conservan. En Anonta, el plan decide la marca: <b>Básico</b> con la marca Anonta; <b>Prueba</b> y <b>Prémium</b> con el logo de la agencia. Precios sin IVA.")}</p>`;
     pintaSols(); pintaAgs();
   };
 
   function pintaSols(){
     if(!SOLS.length) return;
-    $("solLlista").innerHTML = SOLS.map(s => {
-      const ja = AGS.find(a => a.usuaris.some(u => u.toLowerCase() === s.email.toLowerCase()));
-      return `<div class="doc" style="align-items:flex-start;flex-wrap:wrap">
+    $("solLlista").innerHTML = SOLS.map(s => `<div class="doc" style="align-items:flex-start;flex-wrap:wrap">
         ${s.logo_path ? `<img src="${esc(URL_LOGOS + s.logo_path)}" alt="" style="width:64px;height:64px;object-fit:contain;border:1px solid var(--linia);border-radius:10px;background:#fff">` : ""}
         <div class="n" style="min-width:180px"><b>${esc(s.nom)}</b>
-          <span class="meta">${esc(s.email)} · ${s.idioma === "es" ? "Castellano" : "Català"} · ${new Date(s.created_at).toLocaleDateString(LANG === "es" ? "es-ES" : "ca-ES")}</span>
-          ${ja ? `<span class="xip blau">${L("Ja és agència vostra: ", "Ya es agencia vuestra: ")}${esc(ja.nom)}</span>` : ""}</div>
+          <span class="meta">${esc(s.email)} · ${new Date(s.created_at).toLocaleDateString(LANG === "es" ? "es-ES" : "ca-ES")}</span>
+          <span class="xip blau">${L("Vol provar", "Quiere probar")}: ${NOM_APP()[s.app]}</span>
+          ${s.agencia_existent ? `<span class="xip verd">${L("Ja és agència vostra: ", "Ya es agencia vuestra: ")}${esc(s.agencia_existent)}</span>` : `<span class="xip">${L("Agència nova", "Agencia nueva")}</span>`}</div>
         <div class="fila">
           <button class="boto petit" type="button" data-aprova="${s.id}">✓ ${L("Aprovar (30 dies de prova)", "Aprobar (30 días de prueba)")}</button>
           <button class="mini perill" type="button" data-rebutja="${s.id}">${L("Rebutjar", "Rechazar")}</button>
-        </div></div>`;
-    }).join("");
+        </div></div>`).join("");
     $("solLlista").querySelectorAll("[data-aprova]").forEach(b => b.onclick = () => aprovar(b.dataset.aprova, b));
     $("solLlista").querySelectorAll("[data-rebutja]").forEach(b => b.onclick = async () => {
       const s = SOLS.find(x => x.id === b.dataset.rebutja);
-      if(!confirm(L(`Rebutjar la sol·licitud de «${s.nom}»?`, `¿Rechazar la solicitud de «${s.nom}»?`))) return;
-      const { error } = await sb.from("an_sollicituds").update({ estat: "rebutjada" }).eq("id", s.id);
+      if(!confirm(L(`Rebutjar la sol·licitud de «${s.nom}» (${NOM_APP()[s.app]})?`, `¿Rechazar la solicitud de «${s.nom}» (${NOM_APP()[s.app]})?`))) return;
+      const taula = s.app === "anonta" ? "an_sollicituds" : "sollicituds";
+      const { error } = await sb.from(taula).update({ estat: "rebutjada" }).eq("id", s.id);
       if(error) return avis(errMsg(error), true);
       avis(L("Sol·licitud rebutjada", "Solicitud rechazada"));
       vistaAgencies(); comptarSollicituds();
     });
   }
 
+  function filaApp(a, k){
+    const x = a[k] || {}, est = ESTATS()[k];
+    const actual = !x.actiu ? "cap" : k === "anonta" ? x.pla : (x.prova_fins ? "prova" : "activa");
+    const enProva = x.actiu && x.prova_fins && (k !== "anonta" || x.pla === "prova");
+    const dies = enProva ? diesFins(x.prova_fins) : null;
+    const estatTxt = !x.actiu ? `<span class="xip">${L("No la té", "No la tiene")}</span>`
+      : enProva ? `<span class="xip ${dies >= 0 ? "blau" : "coral"}">${dies >= 0 ? L(`queden ${dies} dies`, `quedan ${dies} días`) : L("prova acabada", "prueba terminada")}</span>`
+      : `<span class="xip verd">✓ ${L("Activa", "Activa")}</span>`;
+    const unitat = { anonta: L("viatges", "viajes"), formularis: L("formularis", "formularios"), itineraris: L("itineraris", "itinerarios") }[k];
+    const opcions = Object.entries(est).map(([v, n]) => `<option value="${v}"${v === actual ? " selected" : ""}>${n}</option>`).join("")
+      + (a.id === "rimu" ? "" : `<option value="cap"${actual === "cap" ? " selected" : ""}>${x.actiu ? L("Donar de baixa", "Dar de baja") : L("— No la té —", "— No la tiene —")}</option>`);
+    return `<div class="doc" style="flex-wrap:wrap;align-items:center">
+      <div class="n" style="min-width:150px"><b>${NOM_APP()[k]}</b><span class="meta">${x.n || 0} ${unitat}</span></div>
+      ${estatTxt}
+      <select data-ag="${esc(a.id)}" data-app="${k}" data-abans="${actual}" style="width:auto">${opcions}</select>
+      ${enProva ? `<button class="mini" type="button" data-mes30="${esc(a.id)}" data-app="${k}" data-fins="${x.prova_fins}">+30 ${L("dies", "días")}</button>` : ""}
+    </div>`;
+  }
+
   function pintaAgs(){
-    $("agLlista").innerHTML = AGS.length ? AGS.map(a => {
-      const dies = a.prova_fins ? diesFins(a.prova_fins) : null;
-      const estatProva = a.pla === "prova" && a.prova_fins
-        ? (dies >= 0 ? L(`queden ${dies} dies`, `quedan ${dies} días`) : L("prova acabada", "prueba terminada")) : "";
-      return `<div class="doc" style="flex-wrap:wrap">
-        <div class="n" style="min-width:180px"><b>${esc(a.nom)}</b>
-          <span class="meta">${esc((a.usuaris || []).join(", ") || L("sense usuaris", "sin usuarios"))}</span>
-          <span class="meta">${a.clients} ${L("clients", "clientes")} · ${a.viatges} ${L("viatges", "viajes")}${estatProva ? ` · <b style="color:${dies >= 0 ? "var(--blau)" : "#A4504A"}">${estatProva}</b>` : ""}</span></div>
-        <select data-pla="${esc(a.id)}" style="width:auto">${Object.entries(PLANS()).filter(([k]) => k !== "cap" || a.id !== "rimu")
-          .map(([k, [n, d]]) => `<option value="${k}"${k === a.pla ? " selected" : ""}>${n} · ${d}</option>`).join("")}</select>
-        ${a.pla === "prova" ? `<button class="mini" type="button" data-mes30="${esc(a.id)}" data-fins="${a.prova_fins || ""}">+30 ${L("dies", "días")}</button>` : ""}
-      </div>`;
-    }).join("") : `<p class="meta">${L("Encara no n'hi ha cap.", "Todavía no hay ninguna.")}</p>`;
-    $("agLlista").querySelectorAll("[data-pla]").forEach(sel => {
-      const abans = sel.value;
-      sel.onchange = async () => {
-        const a = AGS.find(x => x.id === sel.dataset.pla), pla = sel.value;
-        const msg = pla === "cap"
-          ? L(`Donar de baixa «${a.nom}»? No podrà entrar al panell i els seus clients deixaran de veure l'app. Les dades es conserven.`,
-              `¿Dar de baja «${a.nom}»? No podrá entrar en el panel y sus clientes dejarán de ver la app. Los datos se conservan.`)
-          : L(`Canviar «${a.nom}» al pla ${PLANS()[pla][0]}?`, `¿Cambiar «${a.nom}» al plan ${PLANS()[pla][0]}?`);
-        if(!confirm(msg)){ sel.value = abans; return; }
-        const { error } = await sb.rpc("an_canviar_pla", { p_agencia: a.id, p_pla: pla, p_fins: null });
-        if(error){ sel.value = abans; return avis(errMsg(error), true); }
-        avis(L("Pla canviat ✓", "Plan cambiado ✓"));
-        vistaAgencies();
-      };
+    $("agLlista").innerHTML = AGS.map(a => `<div class="targeta">
+        <div class="fila" style="gap:12px;align-items:center;margin-bottom:6px">
+          ${a.logo_url ? `<img src="${esc(a.logo_url)}" alt="" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--linia);border-radius:10px;background:#fff">` : ""}
+          <div><h2 style="margin:0">${esc(a.nom)}</h2><span class="meta">${esc((a.usuaris || []).join(", ") || L("sense usuaris", "sin usuarios"))}</span></div>
+        </div>
+        ${["anonta", "formularis", "itineraris"].map(k => filaApp(a, k)).join("")}
+      </div>`).join("") || `<p class="meta">${L("Encara no n'hi ha cap.", "Todavía no hay ninguna.")}</p>`;
+
+    $("agLlista").querySelectorAll("select[data-ag]").forEach(sel => sel.onchange = async () => {
+      const a = AGS.find(x => x.id === sel.dataset.ag), k = sel.dataset.app, nou = sel.value, abans = sel.dataset.abans;
+      const nomApp = NOM_APP()[k];
+      const msg = nou === "cap"
+        ? L(`Donar de baixa «${a.nom}» de ${nomApp}? Ja no hi podrà entrar. Les dades es conserven i la pots tornar a activar quan vulguis.`,
+            `¿Dar de baja «${a.nom}» de ${nomApp}? Ya no podrá entrar. Los datos se conservan y la puedes volver a activar cuando quieras.`)
+        : nou === "prova"
+          ? L(`Posar ${nomApp} de «${a.nom}» en mes de prova (30 dies des d'avui)?`, `¿Poner ${nomApp} de «${a.nom}» en mes de prueba (30 días desde hoy)?`)
+          : L(`Activar ${nomApp} per a «${a.nom}» sense data de final?`, `¿Activar ${nomApp} para «${a.nom}» sin fecha de final?`);
+      if(!confirm(msg)){ sel.value = abans; return; }
+      const { error } = await sb.rpc("ag_canviar_app", { p_agencia: a.id, p_app: k, p_estat: nou, p_fins: null });
+      if(error){ sel.value = abans; return avis(errMsg(error), true); }
+      avis(nou === "cap" ? L("Donada de baixa", "Dada de baja") : L("Canviat ✓", "Cambiado ✓"));
+      vistaAgencies();
     });
     $("agLlista").querySelectorAll("[data-mes30]").forEach(b => b.onclick = async () => {
       const avui = AN.avui(), base = new Date(((b.dataset.fins && b.dataset.fins > avui) ? b.dataset.fins : avui) + "T12:00:00");
       base.setDate(base.getDate() + 30);
       const fins = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,"0")}-${String(base.getDate()).padStart(2,"0")}`;
-      const { error } = await sb.rpc("an_canviar_pla", { p_agencia: b.dataset.mes30, p_pla: "prova", p_fins: fins });
+      const { error } = await sb.rpc("ag_canviar_app", { p_agencia: b.dataset.mes30, p_app: b.dataset.app, p_estat: "prova", p_fins: fins });
       if(error) return avis(errMsg(error), true);
       avis(L(`Prova allargada fins al ${dataCurta(fins)} ✓`, `Prueba alargada hasta el ${dataCurta(fins)} ✓`));
       vistaAgencies();
@@ -142,15 +155,14 @@
 
   async function aprovar(id, boto){
     const s = SOLS.find(x => x.id === id); if(!s) return;
-    const ja = AGS.find(a => a.usuaris.some(u => u.toLowerCase() === s.email.toLowerCase()));
-    if(ja) return avis(L(`«${ja.nom}» ja té Anonta. Si cal, canvia-li el pla a la llista d'agències i rebutja aquesta sol·licitud.`,
-                         `«${ja.nom}» ya tiene Anonta. Si hace falta, cámbiale el plan en la lista de agencias y rechaza esta solicitud.`), true);
-    if(!confirm(L(`Crear l'espai de «${s.nom}» amb 30 dies de prova?`, `¿Crear el espacio de «${s.nom}» con 30 días de prueba?`))) return;
+    if(!confirm(s.agencia_existent
+      ? L(`Activar ${NOM_APP()[s.app]} per a «${s.agencia_existent}» amb 30 dies de prova?`, `¿Activar ${NOM_APP()[s.app]} para «${s.agencia_existent}» con 30 días de prueba?`)
+      : L(`Crear l'agència «${s.nom}» amb ${NOM_APP()[s.app]} i 30 dies de prova?`, `¿Crear la agencia «${s.nom}» con ${NOM_APP()[s.app]} y 30 días de prueba?`))) return;
     boto.disabled = true; boto.textContent = L("Creant…", "Creando…");
     const colors = s.logo_path ? await colorsDelLogo(URL_LOGOS + s.logo_path) : {};
-    const { error } = await sb.rpc("an_aprovar_sollicitud", { p_id: id, p_colors: colors });
+    const { error } = await sb.rpc(s.app === "anonta" ? "an_aprovar_sollicitud" : "aprovar_sollicitud", { p_id: id, p_colors: colors });
     if(error){
-      avis(/JA_TE_APP/.test(error.message) ? L("Aquesta agència ja té Anonta.", "Esta agencia ya tiene Anonta.") : L("No s'ha pogut aprovar: ", "No se ha podido aprobar: ") + error.message, true);
+      avis(/JA_TE_APP/.test(error.message) ? L("Aquesta agència ja té l'app.", "Esta agencia ya tiene la app.") : L("No s'ha pogut aprovar: ", "No se ha podido aprobar: ") + error.message, true);
       boto.disabled = false; boto.textContent = "✓ " + L("Aprovar (30 dies de prova)", "Aprobar (30 días de prueba)");
       return;
     }
@@ -160,31 +172,36 @@
     benvinguda(s2);
   }
 
-  // Missatge per enviar a l'agència quan ja té l'espai creat (en el seu idioma)
+  // Missatge per enviar a l'agència quan ja té l'app activada (tothom entra pel panell d'Anonta)
   function benvinguda(s){
     const fins = new Date(); fins.setDate(fins.getDate() + 30);
     const url = new URL("admin.html", location.href).href.split("?")[0].split("#")[0];
-    const es = s.idioma !== "ca";
+    const es = s.idioma ? s.idioma !== "ca" : true;
     const data = fins.toLocaleDateString(es ? "es-ES" : "ca-ES");
-    const text = es
-      ? `¡Hola! Ya tienes listo el espacio de ${s.nom} en Anonta, la app de viaje para tus clientes, con tu logo y tus colores.\n\n`
-        + `1. Entra en: ${url}\n`
-        + `2. Escribe tu correo (${s.email}) y la contraseña que quieras, y pulsa «¿Primera vez? Crear la contraseña».\n`
-        + `3. Si te llega un correo para confirmar la cuenta, confírmala y vuelve a entrar.\n\n`
-        + `Si ya usas nuestros formularios o itinerarios, entra con el mismo correo y la misma contraseña.\n\n`
-        + `Tu prueba gratuita dura hasta el ${data}. Cualquier duda, escríbenos.\n\nRimu Viatges`
-      : `Hola! Ja tens a punt l'espai de ${s.nom} a Anonta, l'app de viatge per als teus clients, amb el teu logo i els teus colors.\n\n`
-        + `1. Entra a: ${url}\n`
-        + `2. Escriu el teu correu (${s.email}) i la contrasenya que vulguis, i prem «Primer cop? Crear la contrasenya».\n`
-        + `3. Si t'arriba un correu per confirmar el compte, confirma'l i torna a entrar.\n\n`
-        + `Si ja fas servir els nostres formularis o itineraris, entra amb el mateix correu i la mateixa contrasenya.\n\n`
-        + `La teva prova gratuïta dura fins al ${data}. Qualsevol dubte, escriu-nos.\n\nRimu Viatges`;
+    const app = { anonta: "Anonta", formularis: es ? "el formulario de datos de viajeros" : "el formulari de dades de viatgers",
+                  itineraris: es ? "los itinerarios y presupuestos" : "els itineraris i pressupostos" }[s.app];
+    const text = s.agencia_existent
+      ? (es ? `¡Hola! Ya tienes activado ${app} para ${s.agencia_existent}. Entra en tu panel con el mismo correo y la misma contraseña de siempre:\n${url}#apps\n\nTu prueba gratuita dura hasta el ${data}. Cualquier duda, escríbenos.\n\nRimu Viatges`
+            : `Hola! Ja tens activat ${app} per a ${s.agencia_existent}. Entra al teu panell amb el mateix correu i la mateixa contrasenya de sempre:\n${url}#apps\n\nLa teva prova gratuïta dura fins al ${data}. Qualsevol dubte, escriu-nos.\n\nRimu Viatges`)
+      : es
+        ? `¡Hola! Ya tienes listo el espacio de ${s.nom} con ${app}, con tu logo y tus colores.\n\n`
+          + `1. Entra en: ${url}\n`
+          + `2. Escribe tu correo (${s.email}) y la contraseña que quieras, y pulsa «¿Primera vez? Crear la contraseña».\n`
+          + `3. Si te llega un correo para confirmar la cuenta, confírmala y vuelve a entrar.\n\n`
+          + `Desde el mismo panel, en «Mis apps», puedes probar también nuestras otras apps.\n\n`
+          + `Tu prueba gratuita dura hasta el ${data}. Cualquier duda, escríbenos.\n\nRimu Viatges`
+        : `Hola! Ja tens a punt l'espai de ${s.nom} amb ${app}, amb el teu logo i els teus colors.\n\n`
+          + `1. Entra a: ${url}\n`
+          + `2. Escriu el teu correu (${s.email}) i la contrasenya que vulguis, i prem «Primer cop? Crear la contrasenya».\n`
+          + `3. Si t'arriba un correu per confirmar el compte, confirma'l i torna a entrar.\n\n`
+          + `Des del mateix panell, a «Les meves apps», també pots provar les nostres altres apps.\n\n`
+          + `La teva prova gratuïta dura fins al ${data}. Qualsevol dubte, escriu-nos.\n\nRimu Viatges`;
     const b = $("benvinguda");
     b.innerHTML = `<div style="margin-top:12px;border-top:1px solid var(--linia);padding-top:12px">
       <div class="ok"><strong>${L("Fet!", "¡Hecho!")}</strong> ${L("Envia-li aquest missatge perquè hi pugui entrar:", "Envíale este mensaje para que pueda entrar:")}</div>
       <textarea readonly rows="10" style="margin-top:10px;font-size:13.5px">${esc(text)}</textarea>
       <div class="fila" style="margin-top:10px">
-        <a class="boto petit" href="mailto:${esc(s.email)}?subject=${encodeURIComponent(es ? "Tu mes de prueba de Anonta ya está listo" : "El teu mes de prova d'Anonta ja està a punt")}&body=${encodeURIComponent(text)}">✉️ ${L("Enviar per correu", "Enviar por correo")}</a>
+        <a class="boto petit" href="mailto:${esc(s.email)}?subject=${encodeURIComponent(es ? "Tu prueba ya está lista" : "La teva prova ja està a punt")}&body=${encodeURIComponent(text)}">✉️ ${L("Enviar per correu", "Enviar por correo")}</a>
         <button class="boto sec petit" type="button" id="bCopiaBenv">${L("Copiar el missatge", "Copiar el mensaje")}</button></div></div>`;
     b.classList.remove("amagat");
     $("bCopiaBenv").onclick = async () => {
