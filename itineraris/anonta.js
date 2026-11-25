@@ -1,7 +1,11 @@
 // Itineraris · Connexió amb Anonta: quan el client accepta la proposta, l'itinerari es converteix en un viatge d'Anonta
 // (amb els dies i els serveis que s'ha quedat). Només surt si l'agència té Anonta.
 (function(){
-  if(DEMO){ const l = document.getElementById("lnkApps"); if(l) l.classList.add("amagat"); return; }
+  if(DEMO) return;
+  // Enllaç al panell comú, al costat de «Tancar sessió»
+  const sortir = document.getElementById("lnkSortir");
+  if(sortir) sortir.insertAdjacentHTML("beforebegin", `<a href="../anonta/admin.html#apps" style="color:var(--blau);font-size:14px;margin-right:18px"
+    data-es="🧩 Todas mis apps" data-ca="🧩 Totes les meves apps">${L("🧩 Totes les meves apps", "🧩 Todas mis apps")}</a>`);
   let teAnonta = null;
   const original = carregarLlista;
   carregarLlista = async function(){ await original(); await afegir(); };
