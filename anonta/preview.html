@@ -40,6 +40,9 @@
   // es mostra com el veu un titular del viatge
   c.rpc = (nom, args) => nom === "an_veu_pagaments" ? Promise.resolve({ data: !!(P.viatge && P.viatge.mostrar_pagaments), error: null }) : rpc(nom, args);
   supabase.createClient = () => c;
+  // dins del marc de mòbil el que fa scroll és el body: quan l'app torna a dalt, també hi torna el body
+  const sc = window.scrollTo.bind(window);
+  window.scrollTo = (...a) => { sc(...a); const y = typeof a[0] === "object" ? a[0].top : a[1]; if(y === 0 && document.body) document.body.scrollTop = 0; };
 })();
 </script>
 <style>
@@ -57,8 +60,10 @@
   .banda-prev b{color:#FFD58A}
   .banda-prev .no-pub{display:block;margin-top:4px;color:#FFD58A}
   @media (min-width:700px){
-    html{background:#E9EDF2}
-    body{max-width:420px;margin:24px auto;border:10px solid #22313F;border-radius:32px;overflow:hidden;min-height:calc(100vh - 48px);box-shadow:0 10px 30px rgba(0,0,0,.15)}
+    html{background:#E9EDF2;height:100%;overflow:hidden}
+    /* el «mòbil» té l'alçada de la finestra i el contingut fa scroll a dins */
+    body{max-width:420px;margin:24px auto;border:10px solid #22313F;border-radius:32px;height:calc(100vh - 48px);box-sizing:border-box;
+      overflow-y:auto;overscroll-behavior:contain;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   }
 </style>
 </head>
