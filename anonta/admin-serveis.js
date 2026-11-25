@@ -268,7 +268,7 @@
       if(error) throw error;
       if(r.error === "FALTA_CLAU"){ avis(L("La cerca de vols encara no està activada. Omple les dades a mà.", "La búsqueda de vuelos todavía no está activada. Rellena los datos a mano."), true); return; }
       if(r.error === "NO_TROBAT"){ avis(L("No s'ha trobat aquest vol en aquesta data. Omple-ho a mà.", "No se ha encontrado este vuelo en esta fecha. Rellénalo a mano."), true); return; }
-      if(r.error) throw new Error(r.error);
+      if(r.error){ avis(r.error, true); return; }
       q("numero").value = r.numero || numero;
       if(r.companyia) q("proveidor").value = r.companyia;
       if(r.origen) q("origen").value = r.origen_nom && !fila ? `${r.origen_nom} (${r.origen})` : r.origen;
@@ -276,7 +276,10 @@
       if(r.sortida) q("hora_inici").value = r.sortida;
       if(r.arribada) q("hora_fi").value = r.arribada;
       q("data_arribada").checked = !!r.data_arribada;
-      avis(L("Dades del vol omplertes ✈️ Recorda clicar «Desa».", "Datos del vuelo rellenados ✈️ Recuerda pulsar «Guardar»."));
+      if(r.aprox && r.data_trobada && r.data_trobada !== data)
+        avis(L(`No l'he trobat el ${dataCurta(data)}: he posat les dades del mateix vol del ${dataCurta(r.data_trobada)}. Revisa les hores i clica «Desa».`,
+               `No lo he encontrado el ${dataCurta(data)}: he puesto los datos del mismo vuelo del ${dataCurta(r.data_trobada)}. Revisa las horas y pulsa «Guardar».`), true);
+      else avis(L("Dades del vol omplertes ✈️ Recorda clicar «Desa».", "Datos del vuelo rellenados ✈️ Recuerda pulsar «Guardar»."));
     }catch(err){ avis(L("No s'ha pogut buscar el vol.", "No se ha podido buscar el vuelo."), true); }
     finally{ boto.disabled = false; boto.textContent = "🔎"; }
   }
