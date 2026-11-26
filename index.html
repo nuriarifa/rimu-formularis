@@ -121,6 +121,18 @@
   .final{text-align:center;padding:72px 0;background:linear-gradient(180deg,#fff,var(--blau-clar))}
   .final h2{font-size:32px;color:var(--blau);margin:0 0 10px}
   .final p{color:var(--gris);margin:0 0 24px;font-size:17px}
+  .contacte{max-width:640px;margin:0 auto;background:#fff;border:1px solid var(--linia);border-radius:20px;padding:26px}
+  .contacte label.c{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+  .contacte input[type=text],.contacte input[type=email],.contacte input[type=tel],.contacte textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--linia);border-radius:10px;padding:10px 12px;background:#fff}
+  .contacte .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .contacte .acc{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin-top:14px;color:var(--gris)}
+  .contacte .acc input{margin-top:4px}
+  .contacte .err{color:#B3261E;font-size:14px;margin-top:10px}
+  .contacte .ok{background:#E9F6EE;color:#1E6B3E;border-radius:12px;padding:14px;font-size:15px}
+  footer .legal{display:flex;gap:14px;flex-wrap:wrap}
+  footer .legal a{color:rgba(255,255,255,.85);text-decoration:none}
+  footer .legal a:hover{text-decoration:underline}
+  @media (max-width:560px){ .contacte .dos{grid-template-columns:1fr} }
   footer{background:#22313F;color:rgba(255,255,255,.8);font-size:14px;padding:28px 0}
   footer .amp{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   footer a{color:#fff}
@@ -147,6 +159,7 @@
     <nav>
       <a class="enllac amaga" href="#apps" data-t="navApps"></a>
       <a class="enllac amaga" href="#preus" data-t="navPreus"></a>
+      <a class="enllac amaga" href="#contacte" data-t="navContacte"></a>
       <a class="enllac" href="anonta/admin.html" data-t="entrar" data-gc="entrar"></a>
       <div class="idiomes"><button type="button" data-l="es">ES</button><button type="button" data-l="ca">CA</button></div>
     </nav>
@@ -222,10 +235,28 @@
   </div>
 </section>
 
+<section class="blo gris" id="contacte">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="contTitol"></h2><p data-t="contSub"></p></div>
+    <form class="contacte" id="fContacte" novalidate>
+      <div class="dos">
+        <div><label class="c" for="cNom" data-t="cNom"></label><input type="text" id="cNom" autocomplete="name" maxlength="120"></div>
+        <div><label class="c" for="cAg" data-t="cAg"></label><input type="text" id="cAg" autocomplete="organization" maxlength="160"></div>
+        <div><label class="c" for="cCorreu" data-t="cCorreu"></label><input type="email" id="cCorreu" autocomplete="email" maxlength="200"></div>
+        <div><label class="c" for="cTel" data-t="cTel"></label><input type="tel" id="cTel" autocomplete="tel" maxlength="40"></div>
+      </div>
+      <label class="c" for="cMiss" data-t="cMiss"></label><textarea id="cMiss" rows="5" maxlength="4000"></textarea>
+      <label class="acc"><input type="checkbox" id="cAcc"> <span data-t="cAcc" data-html></span></label>
+      <div class="err" id="cErr" hidden></div>
+      <div style="margin-top:16px"><button class="boto prim" type="submit" id="cEnvia" data-t="cEnvia"></button></div>
+    </form>
+  </div>
+</section>
+
 <footer>
   <div class="amp">
     <div data-t="peu" data-html></div>
-    <div><a href="mailto:admin@rimuviatges.com">admin@rimuviatges.com</a></div>
+    <div class="legal"><a href="legal.html#aviso-legal" data-t="lAvis"></a><a href="legal.html#privacidad" data-t="lPriv"></a><a href="legal.html#cookies" data-t="lCookies"></a><a href="legal.html#condiciones" data-t="lCond"></a></div>
   </div>
 </footer>
 
@@ -285,7 +316,13 @@
         ["¿Mis datos y los de mis clientes están seguros?", "Cada agencia solo ve sus viajes y cada cliente solo ve los suyos. Los documentos se abren con enlaces temporales y privados."]
       ],
       finalTitol: "¿Lo probamos con tu próximo viaje?", finalSub: "30 días gratis, sin tarjeta y sin compromiso.",
-      peu: "© Anonta"
+      peu: "© Anonta",
+      navContacte: "Contacto", contTitol: "¿Hablamos?", contSub: "¿Tienes alguna duda o quieres contarnos algo? Escríbenos y te respondemos lo antes posible.",
+      cNom: "Nombre", cAg: "Agencia (opcional)", cCorreu: "Correo", cTel: "Teléfono (opcional)", cMiss: "Mensaje",
+      cAcc: "He leído y acepto la <a href=\"legal.html#privacidad\" target=\"_blank\">política de privacidad</a>.", cEnvia: "Enviar mensaje",
+      cFalta: "Falta tu nombre, un correo válido o el mensaje.", cFaltaAcc: "Para enviar el mensaje, acepta la política de privacidad.",
+      cOk: "✅ ¡Gracias! Hemos recibido tu mensaje y te responderemos pronto.", cErr: "No se ha podido enviar. Escríbenos a admin@rimuviatges.com.", cEnviant: "Enviando…",
+      lAvis: "Aviso legal", lPriv: "Privacidad", lCookies: "Cookies", lCond: "Condiciones de contratación"
     },
     ca: {
       navApps: "Apps", navPreus: "Preus", entrar: "Entrar",
@@ -332,7 +369,13 @@
         ["Les meves dades i les dels meus clients estan segures?", "Cada agència només veu els seus viatges i cada client només veu els seus. Els documents s'obren amb enllaços temporals i privats."]
       ],
       finalTitol: "Ho provem amb el teu pròxim viatge?", finalSub: "30 dies gratis, sense targeta i sense compromís.",
-      peu: "© Anonta"
+      peu: "© Anonta",
+      navContacte: "Contacte", contTitol: "En parlem?", contSub: "Tens algun dubte o ens vols explicar alguna cosa? Escriu-nos i et respondrem com més aviat millor.",
+      cNom: "Nom", cAg: "Agència (opcional)", cCorreu: "Correu", cTel: "Telèfon (opcional)", cMiss: "Missatge",
+      cAcc: "He llegit i accepto la <a href=\"legal.html#privacidad\" target=\"_blank\">política de privacitat</a>.", cEnvia: "Enviar el missatge",
+      cFalta: "Falta el teu nom, un correu vàlid o el missatge.", cFaltaAcc: "Per enviar el missatge, accepta la política de privacitat.",
+      cOk: "✅ Gràcies! Hem rebut el teu missatge i et respondrem aviat.", cErr: "No s'ha pogut enviar. Escriu-nos a admin@rimuviatges.com.", cEnviant: "Enviant…",
+      lAvis: "Avís legal", lPriv: "Privacitat", lCookies: "Galetes", lCond: "Condicions de contractació"
     }
   };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -378,6 +421,34 @@
   function compta(nom){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "clic-" + nom, title: nom, event: true }); }catch(e){} }
   document.addEventListener("click", e => { const b = e.target.closest("[data-gc]"); if(b) compta(b.dataset.gc); });
   if(location.hash === "#demo") location.href = CALENDARI;
+
+  // ---- Formulari de contacte: es desa a la base de dades (es veu al panell) i arriba per correu ----
+  document.getElementById("fContacte").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const t = T[LANG], v = id => document.getElementById(id).value.trim(), err = document.getElementById("cErr");
+    const d = { nom: v("cNom"), agencia: v("cAg") || null, email: v("cCorreu"), telefon: v("cTel") || null, missatge: v("cMiss"), idioma: LANG };
+    const mal = m => { err.textContent = m; err.hidden = false; };
+    if(!d.nom || !d.missatge || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return mal(t.cFalta);
+    if(!document.getElementById("cAcc").checked) return mal(t.cFaltaAcc);
+    err.hidden = true;
+    const b = document.getElementById("cEnvia"); b.disabled = true; b.textContent = t.cEnviant;
+    let ok = false;
+    try{
+      const r = await fetch(RIMU.SUPABASE_URL + "/rest/v1/web_contactes", { method: "POST",
+        headers: { apikey: RIMU.SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(d) });
+      ok = r.ok;
+    }catch(e){}
+    try{
+      const r = await fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", { method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ _subject: "Missatge des d'anonta.es: " + (d.agencia || d.nom), _template: "table", _captcha: "false", _replyto: d.email,
+          "Nom": d.nom, "Agència": d.agencia || "", "Correu": d.email, "Telèfon": d.telefon || "", "Missatge": d.missatge }) });
+      ok = ok || r.ok;
+    }catch(e){}
+    if(!ok){ b.disabled = false; b.textContent = t.cEnvia; return mal(t.cErr); }
+    compta("contacte");
+    document.getElementById("fContacte").innerHTML = `<div class="ok">${esc(t.cOk)}</div>`;
+  });
 
   document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { LANG = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", LANG); }catch(e){} pinta(); });
   pinta();
