@@ -23,9 +23,11 @@
 
   window.vistaAgencies = async function(){
     pantalla.innerHTML = `<p class="meta">${L("Carregant…", "Cargando…")}</p>`;
-    const [s, a] = await Promise.all([sb.rpc("ag_admin_sollicituds"), sb.rpc("ag_admin_agencies")]);
+    const [s, a, tf] = await Promise.all([sb.rpc("ag_admin_sollicituds"), sb.rpc("ag_admin_agencies"), sb.rpc("ag_admin_tarifes")]);
     if(s.error || a.error){ pantalla.innerHTML = `<div class="error">${esc(errMsg(s.error || a.error))}</div>`; return; }
     SOLS = s.data || []; AGS = a.data || [];
+    const tarifes = new Map((tf.data || []).map(x => [x.id, x.tarifa]));
+    AGS.forEach(x => x.tarifa = tarifes.get(x.id) || "web");
     pantalla.innerHTML = `
       <h2 style="margin:0 0 14px">${L("Agències", "Agencias")}</h2>
       <div class="targeta">
@@ -34,8 +36,8 @@
         <div id="benvinguda" class="amagat"></div>
       </div>
       <div id="agLlista"></div>
-      <p class="ajuda">${L("Cada agència només té les apps que hi surten activades. <b>Mes de prova</b>: pot crear coses fins a la data; després només pot mirar. <b>Activa</b> o un pla: sense data de final. <b>Donar de baixa</b>: ja no hi entra, però les dades es conserven. A Anonta, el pla decideix la marca: <b>Bàsic</b> amb la marca Anonta; <b>Prova</b> i <b>Prèmium</b> amb el logo de l'agència. Preus sense IVA.",
-        "Cada agencia solo tiene las apps que salen activadas. <b>Mes de prueba</b>: puede crear cosas hasta la fecha; después solo puede mirar. <b>Activa</b> o un plan: sin fecha de final. <b>Dar de baja</b>: ya no entra, pero los datos se conservan. En Anonta, el plan decide la marca: <b>Básico</b> con la marca Anonta; <b>Prueba</b> y <b>Prémium</b> con el logo de la agencia. Precios sin IVA.")}</p>`;
+      <p class="ajuda">${L("Cada agència només té les apps que hi surten activades. <b>Mes de prova</b>: pot crear coses fins a la data; després només pot mirar. <b>Activa</b> o un pla: sense data de final. <b>Donar de baixa</b>: ja no hi entra, però les dades es conserven. A Anonta, el pla decideix la marca: <b>Bàsic</b> amb la marca Anonta; <b>Prova</b> i <b>Prèmium</b> amb el logo de l'agència. Preus dels plans: d'agent, sense IVA. A cada agència tries si veu els preus d'agent o els de fora (els de la web, amb IVA inclòs).",
+        "Cada agencia solo tiene las apps que salen activadas. <b>Mes de prueba</b>: puede crear cosas hasta la fecha; después solo puede mirar. <b>Activa</b> o un plan: sin fecha de final. <b>Dar de baja</b>: ya no entra, pero los datos se conservan. En Anonta, el plan decide la marca: <b>Básico</b> con la marca Anonta; <b>Prueba</b> y <b>Prémium</b> con el logo de la agencia. Precios de los planes: de agente, sin IVA. En cada agencia eliges si ve los precios de agente o los de fuera (los de la web, con IVA incluido).")}</p>`;
     pintaSols(); pintaAgs();
   };
 
@@ -86,11 +88,23 @@
     $("agLlista").innerHTML = AGS.map(a => `<div class="targeta">
         <div class="fila" style="gap:12px;align-items:center;margin-bottom:6px">
           ${a.logo_url ? `<img src="${esc(a.logo_url)}" alt="" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--linia);border-radius:10px;background:#fff">` : ""}
-          <div><h2 style="margin:0">${esc(a.nom)}</h2><span class="meta">${esc((a.usuaris || []).join(", ") || L("sense usuaris", "sin usuarios"))}</span></div>
+          <div style="flex:1"><h2 style="margin:0">${esc(a.nom)}</h2><span class="meta">${esc((a.usuaris || []).join(", ") || L("sense usuaris", "sin usuarios"))}</span></div>
+          <label class="meta" style="display:flex;flex-direction:column;gap:2px">${L("Preus", "Precios")}
+            <select data-tarifa="${esc(a.id)}" style="width:auto">
+              <option value="agent"${a.tarifa === "agent" ? " selected" : ""}>${L("Agent de Rimu", "Agente de Rimu")}</option>
+              <option value="web"${a.tarifa === "web" ? " selected" : ""}>${L("De fora (IVA inclòs)", "De fuera (IVA incluido)")}</option>
+            </select></label>
         </div>
         ${["anonta", "formularis", "itineraris"].map(k => filaApp(a, k)).join("")}
       </div>`).join("") || `<p class="meta">${L("Encara no n'hi ha cap.", "Todavía no hay ninguna.")}</p>`;
 
+    $("agLlista").querySelectorAll("select[data-tarifa]").forEach(sel => sel.onchange = async () => {
+      const a = AGS.find(x => x.id === sel.dataset.tarifa);
+      const { error } = await sb.rpc("ag_canviar_tarifa", { p_agencia: a.id, p_tarifa: sel.value });
+      if(error){ sel.value = a.tarifa; return avis(errMsg(error), true); }
+      a.tarifa = sel.value;
+      avis(sel.value === "agent" ? L(`«${a.nom}» veurà els preus d'agent ✓`, `«${a.nom}» verá los precios de agente ✓`) : L(`«${a.nom}» veurà els preus de fora ✓`, `«${a.nom}» verá los precios de fuera ✓`));
+    });
     $("agLlista").querySelectorAll("select[data-ag]").forEach(sel => sel.onchange = async () => {
       const a = AGS.find(x => x.id === sel.dataset.ag), k = sel.dataset.app, nou = sel.value, abans = sel.dataset.abans;
       const nomApp = NOM_APP()[k];
