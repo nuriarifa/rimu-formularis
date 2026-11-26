@@ -1,374 +1,355 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>…</title>
-<meta name="robots" content="noindex,nofollow">
-<script>if(!new URLSearchParams(location.search).get("f")) location.replace("anonta/admin.html");</script>
-<link rel="stylesheet" href="estil.css">
+<script>
+  // Els enllaços dels formularis (anonta.es/?f=…) van al formulari del client
+  if(new URLSearchParams(location.search).get("f")) location.replace("formulari.html" + location.search);
+</script>
+<title>Anonta · Apps para agencias de viajes</title>
+<meta name="description" content="La app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. 30 días gratis.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Anonta · Apps para agencias de viajes">
+<meta property="og:description" content="App de viaje para tus clientes, itinerarios con IA y formulario de datos de viajeros. Pruébalo 30 días gratis.">
+<meta name="theme-color" content="#1F3A5F">
+<link rel="icon" href="anonta/icona-anonta.svg" type="image/svg+xml">
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--blau:#1F3A5F;--blau-mig:#3D698E;--blau-clar:#E8EEF6;--coral:#F2A65A;--coral-clar:#FDF1E4;--rosa:#E79893;--text:#22313F;--gris:#5F6F80;--linia:#DDE5EC;--fons:#F7F9FC}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:#fff;line-height:1.5;font-size:16px}
+  a{color:inherit}
+  .amp{max-width:1120px;margin:0 auto;padding:0 20px}
+  /* Capçalera */
+  header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--linia)}
+  header .amp{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+  header .marca img{height:38px;display:block}
+  header nav{display:flex;align-items:center;gap:8px}
+  header nav a.enllac{font-size:15px;font-weight:600;text-decoration:none;color:var(--gris);padding:8px 10px}
+  header nav a.enllac:hover{color:var(--blau)}
+  .idiomes{display:flex;gap:4px}
+  .idiomes button{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--linia);background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--gris)}
+  .idiomes button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .boto{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:11px 20px;text-decoration:none;border:2px solid transparent;cursor:pointer;white-space:nowrap}
+  .boto.prim{background:var(--coral);color:#3A2410;box-shadow:0 6px 18px rgba(242,166,90,.35)}
+  .boto.prim:hover{filter:brightness(.96)}
+  .boto.sec{background:#fff;color:var(--blau);border-color:var(--blau)}
+  .boto.sec:hover{background:var(--blau-clar)}
+  .boto.petit{font-size:14px;padding:8px 14px}
+  /* Portada */
+  .hero{background:linear-gradient(180deg,var(--blau-clar),#fff);padding:64px 0 56px}
+  .hero .amp{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+  .hero h1{font-size:44px;line-height:1.1;margin:0 0 16px;color:var(--blau);letter-spacing:-.02em}
+  .hero h1 em{font-style:normal;color:var(--blau-mig);background:linear-gradient(transparent 62%,rgba(242,166,90,.45) 62%)}
+  .hero p.sub{font-size:19px;color:var(--gris);margin:0 0 26px;max-width:560px}
+  .hero .crides{display:flex;gap:12px;flex-wrap:wrap}
+  .hero .garanties{margin-top:16px;font-size:14px;color:var(--gris);display:flex;gap:16px;flex-wrap:wrap}
+  .hero .garanties span::before{content:"✓ ";color:#2E8B57;font-weight:800}
+  .mobil{width:280px;margin:0 auto;border:10px solid #22313F;border-radius:38px;background:#fff;box-shadow:0 24px 60px rgba(31,58,95,.25);overflow:hidden}
+  .mobil .bar{background:var(--blau);color:#fff;padding:18px 16px 14px}
+  .mobil .bar small{opacity:.75;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .mobil .bar b{display:block;font-size:19px;margin-top:2px}
+  .mobil .bar span{font-size:12.5px;opacity:.85}
+  .mobil .cos{padding:12px;background:var(--fons);display:flex;flex-direction:column;gap:9px}
+  .mobil .it{background:#fff;border:1px solid var(--linia);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+  .mobil .it .ic{font-size:18px;line-height:1}
+  .mobil .it b{display:block;font-size:13.5px}
+  .mobil .it .xip{display:inline-block;margin-top:6px;font-size:11.5px;border:1px solid var(--linia);border-radius:999px;padding:2px 8px;background:var(--fons)}
+  .mobil .noti{background:#22313F;color:#fff;border-radius:12px;padding:9px 12px;font-size:12.5px}
+  /* Seccions */
+  section.blo{padding:72px 0}
+  section.blo.gris{background:var(--fons)}
+  .titol-sec{text-align:center;max-width:720px;margin:0 auto 40px}
+  .titol-sec h2{font-size:32px;line-height:1.2;color:var(--blau);margin:0 0 10px;letter-spacing:-.01em}
+  .titol-sec p{color:var(--gris);font-size:17px;margin:0}
+  .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .app{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:26px;display:flex;flex-direction:column}
+  .app .ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--blau-clar);margin-bottom:14px}
+  .app h3{margin:0 0 4px;font-size:22px;color:var(--blau)}
+  .app .lema{color:var(--gris);margin:0 0 14px;font-size:15px}
+  .app ul{list-style:none;padding:0;margin:0 0 18px;font-size:14.5px;flex:1}
+  .app li{padding-left:24px;position:relative;margin-bottom:7px}
+  .app li::before{content:"✓";position:absolute;left:0;color:#2E8B57;font-weight:800}
+  .app li.ia::before{content:"✨"}
+  .app .accions{display:flex;gap:8px;flex-wrap:wrap}
+  /* Preus */
+  .taula-preus{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .preu{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:24px}
+  .preu h3{margin:0 0 14px;font-size:20px;color:var(--blau);display:flex;align-items:center;gap:8px}
+  .pla{border-top:1px solid var(--linia);padding:12px 0}
+  .pla:first-of-type{border-top:0;padding-top:0}
+  .pla .nom{font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .pla .imp{font-size:26px;font-weight:800;color:var(--blau);white-space:nowrap}
+  .pla .imp small{font-size:13px;font-weight:600;color:var(--gris)}
+  .pla .det{font-size:13.5px;color:var(--gris);margin-top:2px}
+  .pla.prem .nom span.et{background:var(--coral-clar);color:#8A4B12;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px}
+  .pack{margin-top:26px;background:var(--blau);color:#fff;border-radius:24px;padding:30px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:20px;align-items:center}
+  .pack h3{margin:0 0 6px;font-size:24px}
+  .pack p{margin:0;opacity:.85;font-size:15px}
+  .pack .opc{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:16px}
+  .pack .opc .nom{font-weight:700;font-size:15px}
+  .pack .opc .imp{font-size:30px;font-weight:800;line-height:1.1;margin-top:4px}
+  .pack .opc .imp small{font-size:13px;font-weight:600;opacity:.8}
+  .pack .opc .abans{font-size:13px;opacity:.75}
+  .pack .opc .abans s{opacity:.9}
+  .pack .badge{display:inline-block;background:var(--coral);color:#3A2410;font-weight:800;font-size:13px;border-radius:999px;padding:4px 10px;margin-bottom:10px}
+  .nota-preus{text-align:center;color:var(--gris);font-size:14px;margin-top:18px}
+  /* Passos */
+  .passos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:p}
+  .pas{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:24px;position:relative}
+  .pas::before{counter-increment:p;content:counter(p);display:flex;width:36px;height:36px;border-radius:50%;background:var(--coral);color:#3A2410;font-weight:800;align-items:center;justify-content:center;margin-bottom:12px}
+  .pas h3{margin:0 0 6px;color:var(--blau);font-size:18px}
+  .pas p{margin:0;color:var(--gris);font-size:15px}
+  /* Preguntes */
+  .faq{max-width:760px;margin:0 auto}
+  .faq details{background:#fff;border:1px solid var(--linia);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+  .faq summary{font-weight:700;cursor:pointer;color:var(--blau);list-style:none;display:flex;justify-content:space-between;gap:10px}
+  .faq summary::after{content:"+";font-size:20px;line-height:1;color:var(--gris)}
+  .faq details[open] summary::after{content:"–"}
+  .faq details p{margin:10px 0 0;color:var(--gris);font-size:15px}
+  /* Final */
+  .final{text-align:center;padding:72px 0;background:linear-gradient(180deg,#fff,var(--blau-clar))}
+  .final h2{font-size:32px;color:var(--blau);margin:0 0 10px}
+  .final p{color:var(--gris);margin:0 0 24px;font-size:17px}
+  footer{background:#22313F;color:rgba(255,255,255,.8);font-size:14px;padding:28px 0}
+  footer .amp{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:#fff}
+  @media (max-width:900px){
+    .hero .amp{grid-template-columns:1fr}
+    .hero h1{font-size:34px}
+    .apps,.taula-preus,.passos{grid-template-columns:1fr}
+    .pack{grid-template-columns:1fr}
+    header nav a.enllac.amaga{display:none}
+  }
+  @media (max-width:420px){
+    header nav a.enllac.amaga{display:none}
+    .hero{padding:40px 0}
+    .hero h1{font-size:30px}
+    section.blo{padding:52px 0}
+    .titol-sec h2{font-size:26px}
+  }
+</style>
 </head>
 <body>
-<header class="cap">
-  <img class="logo" alt="" style="visibility:hidden">
+<header>
+  <div class="amp">
+    <a class="marca" href="#"><img src="anonta/logo-anonta.svg" alt="Anonta"></a>
+    <nav>
+      <a class="enllac amaga" href="#apps" data-t="navApps"></a>
+      <a class="enllac amaga" href="#preus" data-t="navPreus"></a>
+      <a class="enllac" href="anonta/admin.html" data-t="entrar"></a>
+      <div class="idiomes"><button type="button" data-l="es">ES</button><button type="button" data-l="ca">CA</button></div>
+    </nav>
+  </div>
 </header>
 
-<main class="contingut">
-  <div id="carregant" class="targeta centre">…</div>
-  <div id="error" class="targeta centre amagat"></div>
-
-  <form id="form" class="amagat" novalidate>
-    <div class="targeta">
-      <div class="viatge-titol" id="titol"></div>
-      <div class="viatge-dates" id="dates"></div>
-      <div class="ratlla"></div>
-      <p id="intro" style="margin:0"></p>
-      <div id="jaEnviat" class="avis amagat"></div>
+<section class="hero">
+  <div class="amp">
+    <div>
+      <h1 data-t="heroTitol" data-html></h1>
+      <p class="sub" data-t="heroSub"></p>
+      <div class="crides">
+        <a class="boto prim" href="anonta/demo.html?web#prova" data-t="provaGratis"></a>
+        <a class="boto sec" href="#apps" data-t="veureApps"></a>
+      </div>
+      <div class="garanties"><span data-t="g1"></span><span data-t="g2"></span><span data-t="g3"></span></div>
     </div>
-
-    <div id="viatgers"></div>
-
-    <div class="targeta">
-      <label class="consentiment">
-        <input type="checkbox" id="consent">
-        <span id="txtConsent"></span>
-      </label>
-      <div id="errForm" class="error amagat"></div>
-      <div style="margin-top:16px"><button class="boto ample" id="btnEnviar" type="submit"></button></div>
+    <div class="mobil" aria-hidden="true">
+      <div class="bar"><small data-t="mAg"></small><b data-t="mViatge"></b><span data-t="mDates"></span></div>
+      <div class="cos">
+        <div class="noti" data-t="mNoti"></div>
+        <div class="it"><span class="ic">✈️</span><div><b data-t="mRuta"></b><span data-t="mVol"></span><br><span class="xip" data-t="mBitllet"></span></div></div>
+        <div class="it"><span class="ic">🏨</span><div><b>Shinjuku Garden Hotel</b><span data-t="mHotel"></span><br><span class="xip" data-t="mBo"></span></div></div>
+        <div class="it"><span class="ic">🗓️</span><div><b data-t="mDia"></b><span data-t="mDiaTxt"></span></div></div>
+        <div class="it"><span class="ic">💶</span><div><b data-t="mPag"></b><span data-t="mPagTxt"></span></div></div>
+      </div>
     </div>
-  </form>
-
-  <div id="gracies" class="targeta centre amagat">
-    <div style="font-size:44px">✈️</div>
-    <h2 style="justify-content:center" id="txtGracies"></h2>
-    <p id="txtGracies2"></p>
   </div>
+</section>
 
-  <div class="peu" id="peu"></div>
-</main>
+<section class="blo" id="apps">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="appsTitol"></h2><p data-t="appsSub"></p></div>
+    <div class="apps" id="llistaApps"></div>
+  </div>
+</section>
+
+<section class="blo gris" id="preus">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="preusTitol"></h2><p data-t="preusSub"></p></div>
+    <div class="taula-preus" id="taulaPreus"></div>
+    <div class="pack" id="pack"></div>
+    <p class="nota-preus" data-t="notaPreus"></p>
+  </div>
+</section>
+
+<section class="blo">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="passosTitol"></h2></div>
+    <div class="passos">
+      <div class="pas"><h3 data-t="p1"></h3><p data-t="p1t"></p></div>
+      <div class="pas"><h3 data-t="p2"></h3><p data-t="p2t"></p></div>
+      <div class="pas"><h3 data-t="p3"></h3><p data-t="p3t"></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blo gris">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="faqTitol"></h2></div>
+    <div class="faq" id="faq"></div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="amp">
+    <h2 data-t="finalTitol"></h2>
+    <p data-t="finalSub"></p>
+    <a class="boto prim" href="anonta/demo.html?web#prova" data-t="provaGratis"></a>
+  </div>
+</section>
+
+<footer>
+  <div class="amp">
+    <div data-t="peu" data-html></div>
+    <div><a href="mailto:admin@rimuviatges.com">admin@rimuviatges.com</a></div>
+  </div>
+</footer>
 
 <script>
-const T = {
-  ca: {
-    carregant: "Carregant…",
-    noTrobat: "No hem trobat aquest formulari. Revisa l'enllaç o contacta amb la teva agència.",
-    errConn: "No s'ha pogut carregar el formulari. Torna-ho a provar d'aquí a una estona.",
-    intro1: "Per preparar el teu viatge necessitem algunes dades. Algunes ja les tenim i les veuràs omplertes: revisa que siguin correctes i completa la resta.",
-    introN: "Per preparar el viatge necessitem les dades de tots els viatgers. Les que ja tenim les veureu omplertes: reviseu que siguin correctes i completeu la resta.",
-    jaEnviat: "Ja hem rebut aquestes dades. Si cal corregir alguna cosa, modifica-la i torna a enviar.",
-    viatger: "Viatger/a",
-    personals: "Dades personals", document: "Documentació", adreca: "Adreça", contacte: "Contacte",
-    nom: "Nom", cognoms: "Cognoms", nomAjuda: "Exactament com apareix al passaport",
-    naixement: "Data de naixement", dni: "Número de DNI",
-    passaport: "Número de passaport", caducitat: "Data de caducitat del passaport",
-    carrer: "Carrer, número i pis", poblacio: "Població", cp: "Codi postal", provincia: "Província",
-    telefon: "Telèfon", email: "Correu electrònic",
-    avisPass: "Atenció: el passaport ha de tenir com a mínim 6 mesos de validesa a partir de la data del viatge. Si caduca abans, caldrà renovar-lo.",
-    consent: "Accepto que {ag} utilitzi aquestes dades únicament per gestionar la reserva i la documentació d'aquest viatge.",
-    enviar: "Enviar les dades", enviant: "Enviant…",
-    falten: "Falten alguns camps obligatoris (marcats en vermell).",
-    faltaConsent: "Cal acceptar el tractament de les dades per poder enviar.",
-    errEnviar: "No s'han pogut enviar les dades. Comprova la connexió i torna-ho a provar.",
-    gracies: "Moltes gràcies!", gracies2: "Hem rebut les dades correctament. Ens posarem en contacte amb tu si cal res més.",
-    jaRebut: "Ja hem rebut les teves dades", jaRebut2: "Per seguretat, ja no es mostren en aquest enllaç. Si cal corregir alguna cosa, posa't en contacte amb {ag}.",
-    lema: "El teu pròxim destí comença aquí",
-    fotoDni: "Foto del DNI (cara de davant)", fotoPass: "Foto del passaport (pàgina de la foto)",
-    opcional: "opcional", triaFoto: "📷 Fer foto o triar arxiu", pujant: "Pujant la foto…",
-    pujada: "✓ Foto pujada", jaEnviada: "✓ Foto ja enviada", canviar: "Canviar",
-    errFoto: "No s'ha pogut pujar la foto. Torna-ho a provar.", massaGran: "L'arxiu és massa gran (màxim 10 MB).",
-    faltaFoto: "Falta la foto del passaport.", esperaFoto: "Espera que acabi de pujar la foto.",
-    ajudaFoto: "Que es vegi sencer i es pugui llegir bé.",
-    del: "del", al: "al",
-    mesos: ["de gener","de febrer","de març","d'abril","de maig","de juny","de juliol","d'agost","de setembre","d'octubre","de novembre","de desembre"]
-  },
-  es: {
-    carregant: "Cargando…",
-    noTrobat: "No hemos encontrado este formulario. Revisa el enlace o contacta con tu agencia.",
-    errConn: "No se ha podido cargar el formulario. Vuelve a intentarlo en un rato.",
-    intro1: "Para preparar tu viaje necesitamos algunos datos. Algunos ya los tenemos y los verás rellenados: revisa que sean correctos y completa el resto.",
-    introN: "Para preparar el viaje necesitamos los datos de todos los viajeros. Los que ya tenemos los veréis rellenados: revisad que sean correctos y completad el resto.",
-    jaEnviat: "Ya hemos recibido estos datos. Si hay que corregir algo, modifícalo y vuelve a enviar.",
-    viatger: "Viajero/a",
-    personals: "Datos personales", document: "Documentación", adreca: "Dirección", contacte: "Contacto",
-    nom: "Nombre", cognoms: "Apellidos", nomAjuda: "Exactamente como aparece en el pasaporte",
-    naixement: "Fecha de nacimiento", dni: "Número de DNI",
-    passaport: "Número de pasaporte", caducitat: "Fecha de caducidad del pasaporte",
-    carrer: "Calle, número y piso", poblacio: "Población", cp: "Código postal", provincia: "Provincia",
-    telefon: "Teléfono", email: "Correo electrónico",
-    avisPass: "Atención: el pasaporte debe tener como mínimo 6 meses de validez a partir de la fecha del viaje. Si caduca antes, habrá que renovarlo.",
-    consent: "Acepto que {ag} utilice estos datos únicamente para gestionar la reserva y la documentación de este viaje.",
-    enviar: "Enviar los datos", enviant: "Enviando…",
-    falten: "Faltan algunos campos obligatorios (marcados en rojo).",
-    faltaConsent: "Hay que aceptar el tratamiento de los datos para poder enviar.",
-    errEnviar: "No se han podido enviar los datos. Comprueba la conexión y vuelve a intentarlo.",
-    gracies: "¡Muchas gracias!", gracies2: "Hemos recibido los datos correctamente. Nos pondremos en contacto contigo si hace falta algo más.",
-    jaRebut: "Ya hemos recibido tus datos", jaRebut2: "Por seguridad, ya no se muestran en este enlace. Si hay que corregir algo, ponte en contacto con {ag}.",
-    lema: "Tu próximo destino empieza aquí",
-    fotoDni: "Foto del DNI (cara delantera)", fotoPass: "Foto del pasaporte (página de la foto)",
-    opcional: "opcional", triaFoto: "📷 Hacer foto o elegir archivo", pujant: "Subiendo la foto…",
-    pujada: "✓ Foto subida", jaEnviada: "✓ Foto ya enviada", canviar: "Cambiar",
-    errFoto: "No se ha podido subir la foto. Vuelve a intentarlo.", massaGran: "El archivo es demasiado grande (máximo 10 MB).",
-    faltaFoto: "Falta la foto del pasaporte.", esperaFoto: "Espera a que termine de subir la foto.",
-    ajudaFoto: "Que se vea entero y se pueda leer bien.",
-    del: "del", al: "al",
-    mesos: ["de enero","de febrero","de marzo","de abril","de mayo","de junio","de julio","de agosto","de septiembre","de octubre","de noviembre","de diciembre"]
+(function(){
+  const W = TARIFES.web, D = TARIFES.descomptePack;
+  const eur = n => (Math.round(n * 100) / 100).toLocaleString(LANG === "ca" ? "ca-ES" : "es-ES", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }) + " €";
+  const sumaB = W.anonta.basic + W.itineraris.basic + W.formularis;
+  const sumaP = W.anonta.premium + W.itineraris.premium + W.formularis;
+  const packB = sumaB * (1 - D / 100), packP = sumaP * (1 - D / 100);
+  let LANG = "es";
+  try{ LANG = localStorage.getItem("anonta_web_idioma") || (/^ca\b/i.test(navigator.language) ? "ca" : "es"); }catch(e){}
+
+  const T = {
+    es: {
+      navApps: "Apps", navPreus: "Precios", entrar: "Entrar",
+      heroTitol: "Tu agencia, en el <em>móvil de tus clientes</em>",
+      heroSub: "Una app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. Pensado por una agencia de viajes, para agencias de viajes.",
+      provaGratis: "🎁 Pruébalo 30 días gratis", veureApps: "Ver las apps",
+      g1: "Sin tarjeta", g2: "Sin permanencia", g3: "Plan Prémium incluido en la prueba",
+      mAg: "Tu agencia", mViatge: "Japón en familia", mDates: "10 – 19 de enero",
+      mNoti: "🔔 Nuevo documento: billetes de avión", mRuta: "Barcelona (BCN) → Tokio (HND)", mVol: " · 08:25 → 07:10 (+1)", mBitllet: "🎫 Billetes", mHotel: " · 3 noches · Desayuno", mBo: "🧾 Bono del hotel",
+      mDia: "Día 2 · Tokio tradicional", mDiaTxt: " · 10:00 Asakusa y Senso-ji", mPag: "Pago pendiente", mPagTxt: " · 1.200 € antes del 15/12",
+      appsTitol: "Tres apps que trabajan juntas", appsSub: "Puedes usar solo una o las tres: los datos pasan de una a otra sin volver a escribirlos.",
+      ver: "Ver la demo", provar: "Probar gratis",
+      a1: "Anonta", a1l: "La app de viaje para tus clientes",
+      a1f: ["Todo el viaje en el móvil: vuelos, hoteles, traslados y excursiones", "Documentos dentro de cada servicio (billetes, bonos, seguro…)", "Itinerario día a día con horarios", "Pagos pendientes y avisos automáticos", "Mensajes con la agencia y notificaciones en el móvil", "En catalán y en castellano"],
+      a1ia: ["Recomendaciones del destino e itinerario propuestos con IA"],
+      a2: "Itinerarios", a2l: "Presupuestos que se venden solos",
+      a2f: ["Itinerarios día a día con fotos", "Servicios opcionales que el cliente elige", "Total y precio por persona al momento", "PDF para enviar o imprimir", "Cuando el cliente acepta, se convierte en un viaje de Anonta"],
+      a2ia: ["IA para redactar los días y los servicios"],
+      a3: "Formulario de viajeros", a3l: "Los datos de los viajeros, sin perseguir a nadie",
+      a3f: ["Un enlace por WhatsApp y el cliente lo rellena desde el móvil", "Datos de todos los viajeros, con foto del DNI y del pasaporte", "Aviso si el pasaporte caduca antes de tiempo", "Te llega un correo cuando lo envían", "Con un clic, los datos pasan a Anonta"],
+      a3ia: [],
+      preusTitol: "Precios claros, sin sorpresas", preusSub: "Precios mensuales por agencia, con IVA incluido. Los 30 primeros días son gratis y con todo el plan Prémium.",
+      basic: "Básico", premium: "Prémium", unic: "Tarifa única", mes: "/mes",
+      dA_b: "App con el logo de Anonta. Sin IA.", dA_p: "Tu logo y tus colores en la app del cliente, e IA.",
+      dI_b: "Itinerarios ilimitados, opcionales y PDF.", dI_p: "Todo lo del Básico e IA para redactar.",
+      dF: "Formularios ilimitados para todos tus viajes.", recomanat: "Recomendado",
+      packTitol: "Las 3 apps juntas", packTxt: `Si contratas Anonta, Itinerarios y el Formulario de viajeros, tienes un ${D} % de descuento sobre el total, cada mes.`,
+      packB: "Pack Básico", packP: "Pack Prémium", enLloc: "en lugar de",
+      notaPreus: "Todos los precios llevan el IVA incluido. Sin permanencia: puedes darte de baja cuando quieras. ¿Dudas? Escríbenos a admin@rimuviatges.com.",
+      passosTitol: "Empezar es muy fácil",
+      p1: "Pide tu prueba", p1t: "Rellena el nombre de tu agencia, tu correo y, si quieres, tu logo. Nada más.",
+      p2: "Pruébalo 30 días", p2t: "Con tus viajes y tus clientes de verdad, y con todo el plan Prémium.",
+      p3: "Elige tu plan", p3t: "Si te convence, eliges Básico o Prémium. Y si añades las otras apps, el descuento del pack.",
+      faqTitol: "Preguntas frecuentes",
+      faq: [
+        ["¿Mis clientes tienen que descargar algo de una tienda de apps?", "No. Les envías un enlace, entran con su correo y, si quieren, la añaden a la pantalla de inicio del móvil como una app más. Funciona en iPhone y Android."],
+        ["¿Puedo poner el logo de mi agencia?", "Sí, con el plan Prémium la app del cliente lleva tu logo y tus colores. Con el Básico, lleva el logo de Anonta."],
+        ["¿Qué pasa cuando termina la prueba?", "Nada automático: no te pedimos tarjeta. Si quieres continuar, eliges plan y seguimos. Si no, no pagas nada."],
+        ["¿Puedo empezar con una sola app?", "Claro. Puedes empezar con la que necesites y añadir las demás desde tu panel, en «Mis apps»."],
+        ["¿Mis datos y los de mis clientes están seguros?", "Cada agencia solo ve sus viajes y cada cliente solo ve los suyos. Los documentos se abren con enlaces temporales y privados."]
+      ],
+      finalTitol: "¿Lo probamos con tu próximo viaje?", finalSub: "30 días gratis, sin tarjeta y sin compromiso.",
+      peu: "Anonta es un proyecto de <b>Rimu Viatges</b>, agencia de viajes de Ripoll."
+    },
+    ca: {
+      navApps: "Apps", navPreus: "Preus", entrar: "Entrar",
+      heroTitol: "La teva agència, al <em>mòbil dels teus clients</em>",
+      heroSub: "Una app de viatge amb el logo de la teva agència, itineraris i pressupostos que enamoren i les dades dels viatgers sense haver d'empaitar ningú. Pensat per una agència de viatges, per a agències de viatges.",
+      provaGratis: "🎁 Prova-ho 30 dies gratis", veureApps: "Veure les apps",
+      g1: "Sense targeta", g2: "Sense permanència", g3: "Pla Prèmium inclòs a la prova",
+      mAg: "La teva agència", mViatge: "Japó en família", mDates: "10 – 19 de gener",
+      mNoti: "🔔 Nou document: bitllets d'avió", mRuta: "Barcelona (BCN) → Tòquio (HND)", mVol: " · 08:25 → 07:10 (+1)", mBitllet: "🎫 Bitllets", mHotel: " · 3 nits · Esmorzar", mBo: "🧾 Bo de l'hotel",
+      mDia: "Dia 2 · Tòquio tradicional", mDiaTxt: " · 10:00 Asakusa i Senso-ji", mPag: "Pagament pendent", mPagTxt: " · 1.200 € abans del 15/12",
+      appsTitol: "Tres apps que treballen juntes", appsSub: "Pots fer servir només una o les tres: les dades passen d'una a l'altra sense tornar-les a escriure.",
+      ver: "Veure la demo", provar: "Provar gratis",
+      a1: "Anonta", a1l: "L'app de viatge per als teus clients",
+      a1f: ["Tot el viatge al mòbil: vols, hotels, trasllats i excursions", "Documents dins de cada servei (bitllets, bons, assegurança…)", "Itinerari dia a dia amb horaris", "Pagaments pendents i avisos automàtics", "Missatges amb l'agència i notificacions al mòbil", "En català i en castellà"],
+      a1ia: ["Recomanacions del destí i itinerari proposats amb IA"],
+      a2: "Itineraris", a2l: "Pressupostos que es venen sols",
+      a2f: ["Itineraris dia a dia amb fotos", "Serveis opcionals que el client tria", "Total i preu per persona al moment", "PDF per enviar o imprimir", "Quan el client accepta, es converteix en un viatge d'Anonta"],
+      a2ia: ["IA per redactar els dies i els serveis"],
+      a3: "Formulari de viatgers", a3l: "Les dades dels viatgers, sense empaitar ningú",
+      a3f: ["Un enllaç per WhatsApp i el client l'omple des del mòbil", "Dades de tots els viatgers, amb foto del DNI i del passaport", "Avís si el passaport caduca abans d'hora", "Et arriba un correu quan l'envien", "Amb un clic, les dades passen a Anonta"],
+      a3ia: [],
+      preusTitol: "Preus clars, sense sorpreses", preusSub: "Preus mensuals per agència, amb IVA inclòs. Els 30 primers dies són gratis i amb tot el pla Prèmium.",
+      basic: "Bàsic", premium: "Prèmium", unic: "Tarifa única", mes: "/mes",
+      dA_b: "App amb el logo d'Anonta. Sense IA.", dA_p: "El teu logo i els teus colors a l'app del client, i IA.",
+      dI_b: "Itineraris il·limitats, opcionals i PDF.", dI_p: "Tot el del Bàsic i IA per redactar.",
+      dF: "Formularis il·limitats per a tots els teus viatges.", recomanat: "Recomanat",
+      packTitol: "Les 3 apps juntes", packTxt: `Si contractes Anonta, Itineraris i el Formulari de viatgers, tens un ${D} % de descompte sobre el total, cada mes.`,
+      packB: "Pack Bàsic", packP: "Pack Prèmium", enLloc: "en lloc de",
+      notaPreus: "Tots els preus porten l'IVA inclòs. Sense permanència: et pots donar de baixa quan vulguis. Dubtes? Escriu-nos a admin@rimuviatges.com.",
+      passosTitol: "Començar és molt fàcil",
+      p1: "Demana la teva prova", p1t: "Posa el nom de la teva agència, el teu correu i, si vols, el teu logo. Res més.",
+      p2: "Prova-ho 30 dies", p2t: "Amb els teus viatges i els teus clients de veritat, i amb tot el pla Prèmium.",
+      p3: "Tria el teu pla", p3t: "Si t'agrada, tries Bàsic o Prèmium. I si hi afegeixes les altres apps, el descompte del pack.",
+      faqTitol: "Preguntes freqüents",
+      faq: [
+        ["Els meus clients han de descarregar alguna cosa d'una botiga d'apps?", "No. Els envies un enllaç, entren amb el seu correu i, si volen, l'afegeixen a la pantalla d'inici del mòbil com una app més. Funciona a iPhone i Android."],
+        ["Hi puc posar el logo de la meva agència?", "Sí, amb el pla Prèmium l'app del client porta el teu logo i els teus colors. Amb el Bàsic, porta el logo d'Anonta."],
+        ["Què passa quan s'acaba la prova?", "Res automàtic: no et demanem targeta. Si vols continuar, tries pla i seguim. Si no, no pagues res."],
+        ["Puc començar amb una sola app?", "És clar. Pots començar amb la que necessitis i afegir-hi les altres des del teu panell, a «Les meves apps»."],
+        ["Les meves dades i les dels meus clients estan segures?", "Cada agència només veu els seus viatges i cada client només veu els seus. Els documents s'obren amb enllaços temporals i privats."]
+      ],
+      finalTitol: "Ho provem amb el teu pròxim viatge?", finalSub: "30 dies gratis, sense targeta i sense compromís.",
+      peu: "Anonta és un projecte de <b>Rimu Viatges</b>, agència de viatges de Ripoll."
+    }
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function pinta(){
+    const t = T[LANG];
+    document.documentElement.lang = LANG;
+    document.querySelectorAll(".idiomes button").forEach(b => b.classList.toggle("actiu", b.dataset.l === LANG));
+    document.querySelectorAll("[data-t]").forEach(el => { const v = t[el.dataset.t]; if(typeof v === "string"){ if(el.hasAttribute("data-html")) el.innerHTML = v; else el.textContent = v; } });
+
+    const apps = [
+      { ico: "📱", n: t.a1, l: t.a1l, f: t.a1f, ia: t.a1ia, demo: "anonta/demo.html?web", prova: "anonta/demo.html?web#prova" },
+      { ico: "🗺️", n: t.a2, l: t.a2l, f: t.a2f, ia: t.a2ia, demo: "itineraris/admin.html?demo&web", prova: "itineraris/admin.html?demo&prova&web" },
+      { ico: "📝", n: t.a3, l: t.a3l, f: t.a3f, ia: t.a3ia, demo: "demo.html?web", prova: "demo.html?web" }
+    ];
+    document.getElementById("llistaApps").innerHTML = apps.map(a => `
+      <div class="app"><div class="ico">${a.ico}</div><h3>${esc(a.n)}</h3><p class="lema">${esc(a.l)}</p>
+        <ul>${a.f.map(x => `<li>${esc(x)}</li>`).join("")}${a.ia.map(x => `<li class="ia">${esc(x)} <small>(${esc(t.premium)})</small></li>`).join("")}</ul>
+        <div class="accions"><a class="boto sec petit" href="${a.demo}">👀 ${esc(t.ver)}</a><a class="boto prim petit" href="${a.prova}">${esc(t.provar)}</a></div></div>`).join("");
+
+    const pla = (nom, imp, det, prem) => `<div class="pla${prem ? " prem" : ""}"><div class="nom"><span>${esc(nom)}${prem ? `<span class="et">${esc(t.recomanat)}</span>` : ""}</span>
+      <span class="imp">${eur(imp)}<small>${t.mes}</small></span></div><div class="det">${esc(det)}</div></div>`;
+    document.getElementById("taulaPreus").innerHTML = `
+      <div class="preu"><h3>📱 ${esc(t.a1)}</h3>${pla(t.basic, W.anonta.basic, t.dA_b)}${pla(t.premium, W.anonta.premium, t.dA_p, true)}</div>
+      <div class="preu"><h3>🗺️ ${esc(t.a2)}</h3>${pla(t.basic, W.itineraris.basic, t.dI_b)}${pla(t.premium, W.itineraris.premium, t.dI_p, true)}</div>
+      <div class="preu"><h3>📝 ${esc(t.a3)}</h3>${pla(t.unic, W.formularis, t.dF)}</div>`;
+    document.getElementById("pack").innerHTML = `
+      <div><span class="badge">−${D} %</span><h3>${esc(t.packTitol)}</h3><p>${esc(t.packTxt)}</p></div>
+      <div class="opc"><div class="nom">${esc(t.packB)}</div><div class="imp">${eur(packB)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaB)}</s></div></div>
+      <div class="opc"><div class="nom">${esc(t.packP)}</div><div class="imp">${eur(packP)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaP)}</s></div></div>`;
+    document.getElementById("faq").innerHTML = t.faq.map(([q, r]) => `<details><summary>${esc(q)}</summary><p>${esc(r)}</p></details>`).join("");
+    document.title = LANG === "ca" ? "Anonta · Apps per a agències de viatges" : "Anonta · Apps para agencias de viajes";
   }
-};
-
-// Camps: [clau, tipus, obligatori, ample]
-const SECCIONS = [
-  ["personals", [["nom","text",1],["cognoms","text",1],["naixement","date",1],["dni","text",1]]],
-  ["document",  [["passaport","text",1],["caducitat","date",1]]],
-  ["adreca",    [["carrer","text",1,1],["poblacio","text",1],["cp","text",1],["provincia","text",1]]],
-  ["contacte",  [["telefon","tel",1],["email","email",1]]]
-];
-
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let L = T.ca, F = null, FOTOS = [], PUJANT = 0;
-const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
-
-// Redueix la foto (màx. 1800 px, JPEG) perquè ocupi poc i pugi ràpid
-function reduirFoto(file){
-  return new Promise(resolve => {
-    const esHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
-    if(!/^image\//.test(file.type) && !esHeic) return resolve(file);
-    const img = new Image(), url = URL.createObjectURL(file);
-    img.onload = () => {
-      const max = 1800, r = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      // Sempre JPEG si l'original no ho és (p. ex. HEIC de l'iPhone); si ja ho és, només si ocupa menys
-      c.toBlob(b => resolve(b && (b.size < file.size || !/jpeg|png|webp/.test(file.type)) ? b : file), "image/jpeg", 0.82);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-    img.src = url;
-  });
-}
-
-async function pujarFoto(inp){
-  const file = inp.files && inp.files[0];
-  if(!file) return;
-  const i = +inp.dataset.i, tipus = inp.dataset.tipus;
-  const caixa = $(`fc${i}_${tipus}`), boto = caixa.querySelector(".foto-boto"),
-        estat = caixa.querySelector(".foto-estat"), mini = caixa.querySelector(".foto-mini");
-  caixa.querySelector(".error")?.remove();
-  if(file.size > 10 * 1024 * 1024){ errorFoto(caixa, L.massaGran); return; }
-  PUJANT++; estat.textContent = L.pujant; boto.classList.remove("feta","malament");
-  try{
-    const blob = await reduirFoto(file);
-    const ext = blob.type === "image/jpeg" ? "jpg" : (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const ruta = `${F.id}/viatger${i+1}_${tipus}_${Date.now()}.${ext}`;
-    const { error } = await sb.storage.from("documents").upload(ruta, blob, { contentType: blob.type || file.type, upsert: false });
-    if(error) throw error;
-    FOTOS[i][tipus] = ruta;
-    estat.textContent = L.pujada + " · " + L.canviar;
-    boto.classList.add("feta");
-    if(/^image\//.test(blob.type)){ mini.src = URL.createObjectURL(blob); mini.classList.remove("amagat"); }
-  }catch(e){
-    estat.textContent = L.triaFoto;
-    errorFoto(caixa, L.errFoto);
-  }finally{ PUJANT--; inp.value = ""; }
-}
-function errorFoto(caixa, t){
-  const d = document.createElement("div"); d.className = "error"; d.textContent = t; caixa.appendChild(d);
-  caixa.querySelector(".foto-boto").classList.add("malament");
-}
-
-function dataLlarga(iso){
-  if(!iso) return "";
-  const [a,m,d] = iso.split("-").map(Number);
-  return d + " " + L.mesos[m-1] + " " + a;
-}
-
-function pintar(){
-  document.documentElement.lang = F.idioma;
-  const AG = F.agencia || { nom: "Rimu Viatges" };
-  aplicarMarca(F.agencia);
-  document.title = AG.nom + " · " + F.titol;
-  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
-  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
-  $("titol").textContent = F.titol;
-  let d = "";
-  if(F.data_inici && F.data_fi) d = "Del " + dataLlarga(F.data_inici) + " " + L.al + " " + dataLlarga(F.data_fi);
-  else if(F.data_inici) d = dataLlarga(F.data_inici);
-  $("dates").textContent = d;
-  $("intro").textContent = F.viatgers.length > 1 ? L.introN : L.intro1;
-  if(F.estat === "rebut"){ $("jaEnviat").textContent = L.jaEnviat; $("jaEnviat").classList.remove("amagat"); }
-  $("txtConsent").textContent = L.consent.replace("{ag}", AG.nom);
-  $("btnEnviar").textContent = L.enviar;
-  $("txtGracies").textContent = L.gracies;
-  $("txtGracies2").textContent = L.gracies2;
-
-  const ambPass = F.passaport_obligatori !== false;
-  const seccions = SECCIONS.map(([sec, camps]) =>
-    [sec, camps.filter(([k]) => ambPass || (k !== "passaport" && k !== "caducitat"))]);
-  FOTOS = F.viatgers.map(v => ({ dni: v.foto_dni || "", passaport: v.foto_passaport || "" }));
-  PUJANT = 0;
-
-  let html = "";
-  F.viatgers.forEach((v, i) => {
-    html += `<div class="targeta"><h2><span class="num">${i+1}</span>${esc(L.viatger)}${F.viatgers.length>1?" "+(i+1):""}</h2>`;
-    // Els acompanyants (no el viatger principal) no han de posar adreça, correu ni telèfon
-    const secundari = i > 0 || v.secundari === true;
-    seccions.map(([sec, camps]) => [sec, secundari ? (sec === "adreca" ? [] : camps.filter(([k]) => k !== "email" && k !== "telefon")) : camps])
-      .forEach(([sec, camps]) => {
-      const fotos = sec === "document" ? [
-        !v.te_foto_dni ? ["dni", L.fotoDni, false] : null,
-        ambPass && !v.te_foto_passaport ? ["passaport", L.fotoPass, true] : null
-      ].filter(Boolean) : [];
-      if(!camps.length && !fotos.length) return;
-      html += `<h3>${esc(L[sec])}</h3><div class="graella">`;
-      camps.forEach(([k, tipus, obl, ample]) => {
-        const val = v[k] || "";
-        const id = `v${i}_${k}`;
-        const ajuda = (k==="nom"||k==="cognoms") ? `<div class="ajuda">${esc(L.nomAjuda)}</div>` : "";
-        html += `<div class="${ample?"ample":""}"><label for="${id}">${esc(L[k])}</label>
-          <input id="${id}" data-i="${i}" data-k="${k}" type="${tipus}" value="${esc(val)}"
-            ${obl?"required":""} class="${val?"prefill":""}"
-            ${k==="email"?'autocomplete="email" inputmode="email"':""}
-            ${k==="telefon"?'autocomplete="tel" inputmode="tel"':""}
-            ${k==="cp"?'inputmode="numeric" autocomplete="postal-code"':""}>${ajuda}</div>`;
-      });
-      fotos.forEach(([tipus, et, obl]) => {
-        const ja = FOTOS[i][tipus];
-        html += `<div class="ample foto-camp" id="fc${i}_${tipus}">
-          <label>${esc(et)}${obl ? "" : ` <span class="opc">(${esc(L.opcional)})</span>`}</label>
-          <label class="foto-boto${ja?" feta":""}" for="f${i}_${tipus}">
-            <span class="foto-estat">${ja ? esc(L.jaEnviada) + " · " + esc(L.canviar) : esc(L.triaFoto)}</span>
-            <img class="foto-mini amagat" alt="">
-          </label>
-          <input class="amagat" type="file" id="f${i}_${tipus}" accept="image/jpeg,image/png,image/webp,application/pdf"
-            data-i="${i}" data-tipus="${tipus}" data-obl="${obl?1:0}">
-          <div class="ajuda">${esc(L.ajudaFoto)}</div></div>`;
-      });
-      html += `</div>`;
-      if(sec==="document" && ambPass) html += `<div id="avisPass${i}" class="avis amagat">${esc(L.avisPass)}</div>`;
-    });
-    html += `</div>`;
-  });
-  $("viatgers").innerHTML = html;
-  if(ambPass) F.viatgers.forEach((_, i) => {
-    const c = $(`v${i}_caducitat`);
-    c.addEventListener("change", () => comprovaPassaport(i));
-    comprovaPassaport(i);
-  });
-  document.querySelectorAll("input[type=file]").forEach(inp =>
-    inp.addEventListener("change", () => pujarFoto(inp)));
-  document.querySelectorAll("#viatgers input").forEach(inp =>
-    inp.addEventListener("input", () => { inp.style.borderColor = ""; }));
-}
-
-function comprovaPassaport(i){
-  const cad = $(`v${i}_caducitat`).value;
-  const ref = F.data_fi || F.data_inici;
-  let malament = false;
-  if(cad && ref){
-    const r = new Date(ref + "T00:00:00"); r.setMonth(r.getMonth() + 6);
-    malament = new Date(cad + "T00:00:00") < r;
-  }
-  $(`avisPass${i}`).classList.toggle("amagat", !malament);
-}
-
-async function carregar(){
-  const id = new URLSearchParams(location.search).get("f");
-  if(!id){ mostrarError(T.ca.noTrobat); return; }
-  try{
-    const { data, error } = await sb.rpc("obtenir_formulari", { p_id: id });
-    if(error){ mostrarError(/uuid/i.test(error.message) ? T.ca.noTrobat : T.ca.errConn); return; }
-    if(!data){ mostrarError(T.ca.noTrobat); return; }
-    F = data; L = T[F.idioma] || T.ca;
-    if(F.estat !== "pendent"){ mostrarJaRebut(); return; }
-    pintar();
-    $("carregant").classList.add("amagat");
-    $("form").classList.remove("amagat");
-  }catch(e){ mostrarError(T.ca.errConn); }
-}
-// Formulari ja enviat: només un missatge, sense cap dada personal
-function mostrarJaRebut(){
-  const AG = F.agencia || { nom: "" };
-  document.documentElement.lang = F.idioma;
-  aplicarMarca(F.agencia);
-  document.title = AG.nom + " · " + F.titol;
-  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
-  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
-  $("txtGracies").textContent = L.jaRebut;
-  $("txtGracies2").textContent = L.jaRebut2.replace("{ag}", AG.nom);
-  $("carregant").classList.add("amagat");
-  $("gracies").classList.remove("amagat");
-}
-function mostrarError(t){
-  $("carregant").classList.add("amagat");
-  $("error").textContent = t; $("error").classList.remove("amagat");
-}
-
-$("form").addEventListener("submit", async ev => {
-  ev.preventDefault();
-  const err = $("errForm"); err.classList.add("amagat");
-  let primer = null;
-  document.querySelectorAll("#viatgers input").forEach(inp => {
-    const buit = inp.required && !inp.value.trim();
-    const malEmail = inp.type==="email" && inp.value && !inp.checkValidity();
-    inp.style.borderColor = (buit || malEmail) ? "#B3261E" : "";
-    if((buit || malEmail) && !primer) primer = inp;
-  });
-  if(primer){ err.textContent = L.falten; err.classList.remove("amagat"); primer.focus(); return; }
-  if(PUJANT > 0){ err.textContent = L.esperaFoto; err.classList.remove("amagat"); return; }
-  const faltaFoto = [...document.querySelectorAll("input[type=file][data-obl='1']")]
-    .find(inp => !FOTOS[+inp.dataset.i][inp.dataset.tipus]);
-  if(faltaFoto){
-    const caixa = faltaFoto.closest(".foto-camp");
-    caixa.querySelector(".foto-boto").classList.add("malament");
-    err.textContent = L.faltaFoto; err.classList.remove("amagat");
-    caixa.scrollIntoView({ behavior: "smooth", block: "center" }); return;
-  }
-  if(!$("consent").checked){ err.textContent = L.faltaConsent; err.classList.remove("amagat"); return; }
-
-  const viatgers = F.viatgers.map((v, i) => {
-    const o = { ...v };
-    SECCIONS.forEach(([, camps]) => camps.forEach(([k]) => { const el = $(`v${i}_${k}`); if(el) o[k] = el.value.trim(); }));
-    o.foto_dni = FOTOS[i].dni || "";
-    o.foto_passaport = FOTOS[i].passaport || "";
-    return o;
-  });
-
-  const b = $("btnEnviar"); b.disabled = true; b.textContent = L.enviant;
-  try{
-    const { data, error } = await sb.rpc("enviar_formulari", { p_id: F.id, p_viatgers: viatgers });
-    if(error || data !== true) throw error || new Error("no");
-    avisarPerCorreu(viatgers);
-    $("form").classList.add("amagat");
-    $("gracies").classList.remove("amagat");
-    window.scrollTo(0, 0);
-  }catch(e){
-    err.textContent = L.errEnviar; err.classList.remove("amagat");
-    b.disabled = false; b.textContent = L.enviar;
-  }
-});
-
-// Avís per correu a l'agència (sense dades personals sensibles)
-function avisarPerCorreu(viatgers){
-  const email = F.agencia && F.agencia.email_avis;
-  if(!email) return;
-  const es = F.agencia.idioma_fix === "es";
-  const noms = viatgers.map(v => (v.nom + " " + v.cognoms).trim()).join(", ");
-  const panell = location.href.replace(/index\.html.*$/, "").replace(/\?.*$/, "").replace(/\/?$/, "/") + "admin.html";
-  const cos = es
-    ? { _subject: "Nuevo formulario recibido: " + F.titol + " – " + noms, "Viaje": F.titol, "Viajeros": noms, "Consúltalo en el panel": panell }
-    : { _subject: "Nou formulari rebut: " + F.titol + " – " + noms, "Viatge": F.titol, "Viatgers": noms, "Consulta-ho al panell": panell };
-  fetch("https://formsubmit.co/ajax/" + email, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({ ...cos, _template: "table", _captcha: "false" })
-  }).catch(() => {});
-}
-
-$("carregant").textContent = T.ca.carregant;
-carregar();
+  document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { LANG = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", LANG); }catch(e){} pinta(); });
+  pinta();
+})();
 </script>
 </body>
 </html>
