@@ -3,15 +3,20 @@
 (function(){
   const URL_LOGOS = RIMU.SUPABASE_URL + "/storage/v1/object/public/logos-agencies/";
   const NOM_APP = () => ({ anonta: "🧳 Anonta", formularis: "📝 " + L("Formularis", "Formularios"), itineraris: "🗺️ " + L("Itineraris", "Itinerarios") });
-  const ESTATS = () => ({
+  // Els preus del pla depenen de si l'agència és agent de Rimu (sense IVA) o de fora (IVA inclòs)
+  const ESTATS = (tarifa = "agent") => {
+    const web = tarifa === "web", P = (window.TARIFES && TARIFES[web ? "web" : "agent"].anonta) || { basic: 20, premium: 25 };
+    const iva = web ? L(" IVA incl.", " IVA incl.") : "";
+    return {
     anonta: {
       prova:   L("🎁 Mes de prova (logo propi i IA)", "🎁 Mes de prueba (logo propio e IA)"),
-      basic:   L("Bàsic · 20 €/mes (logo Anonta, sense IA)", "Básico · 20 €/mes (logo Anonta, sin IA)"),
-      premium: L("Prèmium · 25 €/mes (logo propi i IA)", "Prémium · 25 €/mes (logo propio e IA)")
+      basic:   L(`Bàsic · ${P.basic} €/mes${iva} (logo Anonta, sense IA)`, `Básico · ${P.basic} €/mes${iva} (logo Anonta, sin IA)`),
+      premium: L(`Prèmium · ${P.premium} €/mes${iva} (logo propi i IA)`, `Prémium · ${P.premium} €/mes${iva} (logo propio e IA)`)
     },
     formularis: { prova: L("🎁 Mes de prova", "🎁 Mes de prueba"), activa: L("✓ Activa (ha pagat)", "✓ Activa (ha pagado)") },
     itineraris: { prova: L("🎁 Mes de prova", "🎁 Mes de prueba"), activa: L("✓ Activa (ha pagat)", "✓ Activa (ha pagado)") }
-  });
+    };
+  };
   let SOLS = [], AGS = [];
 
   window.comptarSollicituds = async function(){
@@ -36,8 +41,8 @@
         <div id="benvinguda" class="amagat"></div>
       </div>
       <div id="agLlista"></div>
-      <p class="ajuda">${L("Cada agència només té les apps que hi surten activades. <b>Mes de prova</b>: pot crear coses fins a la data; després només pot mirar. <b>Activa</b> o un pla: sense data de final. <b>Donar de baixa</b>: ja no hi entra, però les dades es conserven. A Anonta, el pla decideix la marca: <b>Bàsic</b> amb la marca Anonta; <b>Prova</b> i <b>Prèmium</b> amb el logo de l'agència. Preus dels plans: d'agent, sense IVA. A cada agència tries si veu els preus d'agent o els de fora (els de la web, amb IVA inclòs).",
-        "Cada agencia solo tiene las apps que salen activadas. <b>Mes de prueba</b>: puede crear cosas hasta la fecha; después solo puede mirar. <b>Activa</b> o un plan: sin fecha de final. <b>Dar de baja</b>: ya no entra, pero los datos se conservan. En Anonta, el plan decide la marca: <b>Básico</b> con la marca Anonta; <b>Prueba</b> y <b>Prémium</b> con el logo de la agencia. Precios de los planes: de agente, sin IVA. En cada agencia eliges si ve los precios de agente o los de fuera (los de la web, con IVA incluido).")}</p>`;
+      <p class="ajuda">${L("Cada agència només té les apps que hi surten activades. <b>Mes de prova</b>: pot crear coses fins a la data; després només pot mirar. <b>Activa</b> o un pla: sense data de final. <b>Donar de baixa</b>: ja no hi entra, però les dades es conserven. A Anonta, el pla decideix la marca: <b>Bàsic</b> amb la marca Anonta; <b>Prova</b> i <b>Prèmium</b> amb el logo de l'agència. Al costat de cada pla hi surt el preu que li toca: d'agent sense IVA, o de fora amb IVA inclòs. A cada agència tries si veu els preus d'agent o els de fora (els de la web, amb IVA inclòs).",
+        "Cada agencia solo tiene las apps que salen activadas. <b>Mes de prueba</b>: puede crear cosas hasta la fecha; después solo puede mirar. <b>Activa</b> o un plan: sin fecha de final. <b>Dar de baja</b>: ya no entra, pero los datos se conservan. En Anonta, el plan decide la marca: <b>Básico</b> con la marca Anonta; <b>Prueba</b> y <b>Prémium</b> con el logo de la agencia. Junto a cada plan sale el precio que le corresponde: de agente sin IVA, o de fuera con IVA incluido. En cada agencia eliges si ve los precios de agente o los de fuera (los de la web, con IVA incluido).")}</p>`;
     pintaSols(); pintaAgs();
   };
 
@@ -66,7 +71,7 @@
   }
 
   function filaApp(a, k){
-    const x = a[k] || {}, est = ESTATS()[k];
+    const x = a[k] || {}, est = ESTATS(a.tarifa)[k];
     const actual = !x.actiu ? "cap" : k === "anonta" ? x.pla : (x.prova_fins ? "prova" : "activa");
     const enProva = x.actiu && x.prova_fins && (k !== "anonta" || x.pla === "prova");
     const dies = enProva ? diesFins(x.prova_fins) : null;
@@ -103,6 +108,7 @@
       const { error } = await sb.rpc("ag_canviar_tarifa", { p_agencia: a.id, p_tarifa: sel.value });
       if(error){ sel.value = a.tarifa; return avis(errMsg(error), true); }
       a.tarifa = sel.value;
+      pintaAgs();
       avis(sel.value === "agent" ? L(`«${a.nom}» veurà els preus d'agent ✓`, `«${a.nom}» verá los precios de agente ✓`) : L(`«${a.nom}» veurà els preus de fora ✓`, `«${a.nom}» verá los precios de fuera ✓`));
     });
     $("agLlista").querySelectorAll("select[data-ag]").forEach(sel => sel.onchange = async () => {
