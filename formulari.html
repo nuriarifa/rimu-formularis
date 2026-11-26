@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>…</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="estil.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="cap">
+  <img class="logo" alt="" style="visibility:hidden">
+</header>
+
+<main class="contingut">
+  <div id="carregant" class="targeta centre">…</div>
+  <div id="error" class="targeta centre amagat"></div>
+
+  <form id="form" class="amagat" novalidate>
+    <div class="targeta">
+      <div class="viatge-titol" id="titol"></div>
+      <div class="viatge-dates" id="dates"></div>
+      <div class="ratlla"></div>
+      <p id="intro" style="margin:0"></p>
+      <div id="jaEnviat" class="avis amagat"></div>
+    </div>
+
+    <div id="viatgers"></div>
+
+    <div class="targeta">
+      <label class="consentiment">
+        <input type="checkbox" id="consent">
+        <span id="txtConsent"></span>
+      </label>
+      <div id="errForm" class="error amagat"></div>
+      <div style="margin-top:16px"><button class="boto ample" id="btnEnviar" type="submit"></button></div>
+    </div>
+  </form>
+
+  <div id="gracies" class="targeta centre amagat">
+    <div style="font-size:44px">✈️</div>
+    <h2 style="justify-content:center" id="txtGracies"></h2>
+    <p id="txtGracies2"></p>
+  </div>
+
+  <div class="peu" id="peu"></div>
+</main>
+
+<script>
+const T = {
+  ca: {
+    carregant: "Carregant…",
+    noTrobat: "No hem trobat aquest formulari. Revisa l'enllaç o contacta amb la teva agència.",
+    errConn: "No s'ha pogut carregar el formulari. Torna-ho a provar d'aquí a una estona.",
+    intro1: "Per preparar el teu viatge necessitem algunes dades. Algunes ja les tenim i les veuràs omplertes: revisa que siguin correctes i completa la resta.",
+    introN: "Per preparar el viatge necessitem les dades de tots els viatgers. Les que ja tenim les veureu omplertes: reviseu que siguin correctes i completeu la resta.",
+    jaEnviat: "Ja hem rebut aquestes dades. Si cal corregir alguna cosa, modifica-la i torna a enviar.",
+    viatger: "Viatger/a",
+    personals: "Dades personals", document: "Documentació", adreca: "Adreça", contacte: "Contacte",
+    nom: "Nom", cognoms: "Cognoms", nomAjuda: "Exactament com apareix al passaport",
+    naixement: "Data de naixement", dni: "Número de DNI",
+    passaport: "Número de passaport", caducitat: "Data de caducitat del passaport",
+    carrer: "Carrer, número i pis", poblacio: "Població", cp: "Codi postal", provincia: "Província",
+    telefon: "Telèfon", email: "Correu electrònic",
+    avisPass: "Atenció: el passaport ha de tenir com a mínim 6 mesos de validesa a partir de la data del viatge. Si caduca abans, caldrà renovar-lo.",
+    consent: "Accepto que {ag} utilitzi aquestes dades únicament per gestionar la reserva i la documentació d'aquest viatge.",
+    enviar: "Enviar les dades", enviant: "Enviant…",
+    falten: "Falten alguns camps obligatoris (marcats en vermell).",
+    faltaConsent: "Cal acceptar el tractament de les dades per poder enviar.",
+    errEnviar: "No s'han pogut enviar les dades. Comprova la connexió i torna-ho a provar.",
+    gracies: "Moltes gràcies!", gracies2: "Hem rebut les dades correctament. Ens posarem en contacte amb tu si cal res més.",
+    jaRebut: "Ja hem rebut les teves dades", jaRebut2: "Per seguretat, ja no es mostren en aquest enllaç. Si cal corregir alguna cosa, posa't en contacte amb {ag}.",
+    lema: "El teu pròxim destí comença aquí",
+    fotoDni: "Foto del DNI (cara de davant)", fotoPass: "Foto del passaport (pàgina de la foto)",
+    opcional: "opcional", triaFoto: "📷 Fer foto o triar arxiu", pujant: "Pujant la foto…",
+    pujada: "✓ Foto pujada", jaEnviada: "✓ Foto ja enviada", canviar: "Canviar",
+    errFoto: "No s'ha pogut pujar la foto. Torna-ho a provar.", massaGran: "L'arxiu és massa gran (màxim 10 MB).",
+    faltaFoto: "Falta la foto del passaport.", esperaFoto: "Espera que acabi de pujar la foto.",
+    ajudaFoto: "Que es vegi sencer i es pugui llegir bé.",
+    del: "del", al: "al",
+    mesos: ["de gener","de febrer","de març","d'abril","de maig","de juny","de juliol","d'agost","de setembre","d'octubre","de novembre","de desembre"]
+  },
+  es: {
+    carregant: "Cargando…",
+    noTrobat: "No hemos encontrado este formulario. Revisa el enlace o contacta con tu agencia.",
+    errConn: "No se ha podido cargar el formulario. Vuelve a intentarlo en un rato.",
+    intro1: "Para preparar tu viaje necesitamos algunos datos. Algunos ya los tenemos y los verás rellenados: revisa que sean correctos y completa el resto.",
+    introN: "Para preparar el viaje necesitamos los datos de todos los viajeros. Los que ya tenemos los veréis rellenados: revisad que sean correctos y completad el resto.",
+    jaEnviat: "Ya hemos recibido estos datos. Si hay que corregir algo, modifícalo y vuelve a enviar.",
+    viatger: "Viajero/a",
+    personals: "Datos personales", document: "Documentación", adreca: "Dirección", contacte: "Contacto",
+    nom: "Nombre", cognoms: "Apellidos", nomAjuda: "Exactamente como aparece en el pasaporte",
+    naixement: "Fecha de nacimiento", dni: "Número de DNI",
+    passaport: "Número de pasaporte", caducitat: "Fecha de caducidad del pasaporte",
+    carrer: "Calle, número y piso", poblacio: "Población", cp: "Código postal", provincia: "Provincia",
+    telefon: "Teléfono", email: "Correo electrónico",
+    avisPass: "Atención: el pasaporte debe tener como mínimo 6 meses de validez a partir de la fecha del viaje. Si caduca antes, habrá que renovarlo.",
+    consent: "Acepto que {ag} utilice estos datos únicamente para gestionar la reserva y la documentación de este viaje.",
+    enviar: "Enviar los datos", enviant: "Enviando…",
+    falten: "Faltan algunos campos obligatorios (marcados en rojo).",
+    faltaConsent: "Hay que aceptar el tratamiento de los datos para poder enviar.",
+    errEnviar: "No se han podido enviar los datos. Comprueba la conexión y vuelve a intentarlo.",
+    gracies: "¡Muchas gracias!", gracies2: "Hemos recibido los datos correctamente. Nos pondremos en contacto contigo si hace falta algo más.",
+    jaRebut: "Ya hemos recibido tus datos", jaRebut2: "Por seguridad, ya no se muestran en este enlace. Si hay que corregir algo, ponte en contacto con {ag}.",
+    lema: "Tu próximo destino empieza aquí",
+    fotoDni: "Foto del DNI (cara delantera)", fotoPass: "Foto del pasaporte (página de la foto)",
+    opcional: "opcional", triaFoto: "📷 Hacer foto o elegir archivo", pujant: "Subiendo la foto…",
+    pujada: "✓ Foto subida", jaEnviada: "✓ Foto ya enviada", canviar: "Cambiar",
+    errFoto: "No se ha podido subir la foto. Vuelve a intentarlo.", massaGran: "El archivo es demasiado grande (máximo 10 MB).",
+    faltaFoto: "Falta la foto del pasaporte.", esperaFoto: "Espera a que termine de subir la foto.",
+    ajudaFoto: "Que se vea entero y se pueda leer bien.",
+    del: "del", al: "al",
+    mesos: ["de enero","de febrero","de marzo","de abril","de mayo","de junio","de julio","de agosto","de septiembre","de octubre","de noviembre","de diciembre"]
+  }
+};
+
+// Camps: [clau, tipus, obligatori, ample]
+const SECCIONS = [
+  ["personals", [["nom","text",1],["cognoms","text",1],["naixement","date",1],["dni","text",1]]],
+  ["document",  [["passaport","text",1],["caducitat","date",1]]],
+  ["adreca",    [["carrer","text",1,1],["poblacio","text",1],["cp","text",1],["provincia","text",1]]],
+  ["contacte",  [["telefon","tel",1],["email","email",1]]]
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let L = T.ca, F = null, FOTOS = [], PUJANT = 0;
+const sb = supabase.createClient(RIMU.SUPABASE_URL, RIMU.SUPABASE_KEY);
+
+// Redueix la foto (màx. 1800 px, JPEG) perquè ocupi poc i pugi ràpid
+function reduirFoto(file){
+  return new Promise(resolve => {
+    const esHeic = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+    if(!/^image\//.test(file.type) && !esHeic) return resolve(file);
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 1800, r = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      // Sempre JPEG si l'original no ho és (p. ex. HEIC de l'iPhone); si ja ho és, només si ocupa menys
+      c.toBlob(b => resolve(b && (b.size < file.size || !/jpeg|png|webp/.test(file.type)) ? b : file), "image/jpeg", 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function pujarFoto(inp){
+  const file = inp.files && inp.files[0];
+  if(!file) return;
+  const i = +inp.dataset.i, tipus = inp.dataset.tipus;
+  const caixa = $(`fc${i}_${tipus}`), boto = caixa.querySelector(".foto-boto"),
+        estat = caixa.querySelector(".foto-estat"), mini = caixa.querySelector(".foto-mini");
+  caixa.querySelector(".error")?.remove();
+  if(file.size > 10 * 1024 * 1024){ errorFoto(caixa, L.massaGran); return; }
+  PUJANT++; estat.textContent = L.pujant; boto.classList.remove("feta","malament");
+  try{
+    const blob = await reduirFoto(file);
+    const ext = blob.type === "image/jpeg" ? "jpg" : (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const ruta = `${F.id}/viatger${i+1}_${tipus}_${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from("documents").upload(ruta, blob, { contentType: blob.type || file.type, upsert: false });
+    if(error) throw error;
+    FOTOS[i][tipus] = ruta;
+    estat.textContent = L.pujada + " · " + L.canviar;
+    boto.classList.add("feta");
+    if(/^image\//.test(blob.type)){ mini.src = URL.createObjectURL(blob); mini.classList.remove("amagat"); }
+  }catch(e){
+    estat.textContent = L.triaFoto;
+    errorFoto(caixa, L.errFoto);
+  }finally{ PUJANT--; inp.value = ""; }
+}
+function errorFoto(caixa, t){
+  const d = document.createElement("div"); d.className = "error"; d.textContent = t; caixa.appendChild(d);
+  caixa.querySelector(".foto-boto").classList.add("malament");
+}
+
+function dataLlarga(iso){
+  if(!iso) return "";
+  const [a,m,d] = iso.split("-").map(Number);
+  return d + " " + L.mesos[m-1] + " " + a;
+}
+
+function pintar(){
+  document.documentElement.lang = F.idioma;
+  const AG = F.agencia || { nom: "Rimu Viatges" };
+  aplicarMarca(F.agencia);
+  document.title = AG.nom + " · " + F.titol;
+  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
+  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
+  $("titol").textContent = F.titol;
+  let d = "";
+  if(F.data_inici && F.data_fi) d = "Del " + dataLlarga(F.data_inici) + " " + L.al + " " + dataLlarga(F.data_fi);
+  else if(F.data_inici) d = dataLlarga(F.data_inici);
+  $("dates").textContent = d;
+  $("intro").textContent = F.viatgers.length > 1 ? L.introN : L.intro1;
+  if(F.estat === "rebut"){ $("jaEnviat").textContent = L.jaEnviat; $("jaEnviat").classList.remove("amagat"); }
+  $("txtConsent").textContent = L.consent.replace("{ag}", AG.nom);
+  $("btnEnviar").textContent = L.enviar;
+  $("txtGracies").textContent = L.gracies;
+  $("txtGracies2").textContent = L.gracies2;
+
+  const ambPass = F.passaport_obligatori !== false;
+  const seccions = SECCIONS.map(([sec, camps]) =>
+    [sec, camps.filter(([k]) => ambPass || (k !== "passaport" && k !== "caducitat"))]);
+  FOTOS = F.viatgers.map(v => ({ dni: v.foto_dni || "", passaport: v.foto_passaport || "" }));
+  PUJANT = 0;
+
+  let html = "";
+  F.viatgers.forEach((v, i) => {
+    html += `<div class="targeta"><h2><span class="num">${i+1}</span>${esc(L.viatger)}${F.viatgers.length>1?" "+(i+1):""}</h2>`;
+    // Els acompanyants (no el viatger principal) no han de posar adreça, correu ni telèfon
+    const secundari = i > 0 || v.secundari === true;
+    seccions.map(([sec, camps]) => [sec, secundari ? (sec === "adreca" ? [] : camps.filter(([k]) => k !== "email" && k !== "telefon")) : camps])
+      .forEach(([sec, camps]) => {
+      const fotos = sec === "document" ? [
+        !v.te_foto_dni ? ["dni", L.fotoDni, false] : null,
+        ambPass && !v.te_foto_passaport ? ["passaport", L.fotoPass, true] : null
+      ].filter(Boolean) : [];
+      if(!camps.length && !fotos.length) return;
+      html += `<h3>${esc(L[sec])}</h3><div class="graella">`;
+      camps.forEach(([k, tipus, obl, ample]) => {
+        const val = v[k] || "";
+        const id = `v${i}_${k}`;
+        const ajuda = (k==="nom"||k==="cognoms") ? `<div class="ajuda">${esc(L.nomAjuda)}</div>` : "";
+        html += `<div class="${ample?"ample":""}"><label for="${id}">${esc(L[k])}</label>
+          <input id="${id}" data-i="${i}" data-k="${k}" type="${tipus}" value="${esc(val)}"
+            ${obl?"required":""} class="${val?"prefill":""}"
+            ${k==="email"?'autocomplete="email" inputmode="email"':""}
+            ${k==="telefon"?'autocomplete="tel" inputmode="tel"':""}
+            ${k==="cp"?'inputmode="numeric" autocomplete="postal-code"':""}>${ajuda}</div>`;
+      });
+      fotos.forEach(([tipus, et, obl]) => {
+        const ja = FOTOS[i][tipus];
+        html += `<div class="ample foto-camp" id="fc${i}_${tipus}">
+          <label>${esc(et)}${obl ? "" : ` <span class="opc">(${esc(L.opcional)})</span>`}</label>
+          <label class="foto-boto${ja?" feta":""}" for="f${i}_${tipus}">
+            <span class="foto-estat">${ja ? esc(L.jaEnviada) + " · " + esc(L.canviar) : esc(L.triaFoto)}</span>
+            <img class="foto-mini amagat" alt="">
+          </label>
+          <input class="amagat" type="file" id="f${i}_${tipus}" accept="image/jpeg,image/png,image/webp,application/pdf"
+            data-i="${i}" data-tipus="${tipus}" data-obl="${obl?1:0}">
+          <div class="ajuda">${esc(L.ajudaFoto)}</div></div>`;
+      });
+      html += `</div>`;
+      if(sec==="document" && ambPass) html += `<div id="avisPass${i}" class="avis amagat">${esc(L.avisPass)}</div>`;
+    });
+    html += `</div>`;
+  });
+  $("viatgers").innerHTML = html;
+  if(ambPass) F.viatgers.forEach((_, i) => {
+    const c = $(`v${i}_caducitat`);
+    c.addEventListener("change", () => comprovaPassaport(i));
+    comprovaPassaport(i);
+  });
+  document.querySelectorAll("input[type=file]").forEach(inp =>
+    inp.addEventListener("change", () => pujarFoto(inp)));
+  document.querySelectorAll("#viatgers input").forEach(inp =>
+    inp.addEventListener("input", () => { inp.style.borderColor = ""; }));
+}
+
+function comprovaPassaport(i){
+  const cad = $(`v${i}_caducitat`).value;
+  const ref = F.data_fi || F.data_inici;
+  let malament = false;
+  if(cad && ref){
+    const r = new Date(ref + "T00:00:00"); r.setMonth(r.getMonth() + 6);
+    malament = new Date(cad + "T00:00:00") < r;
+  }
+  $(`avisPass${i}`).classList.toggle("amagat", !malament);
+}
+
+async function carregar(){
+  const id = new URLSearchParams(location.search).get("f");
+  if(!id){ mostrarError(T.ca.noTrobat); return; }
+  try{
+    const { data, error } = await sb.rpc("obtenir_formulari", { p_id: id });
+    if(error){ mostrarError(/uuid/i.test(error.message) ? T.ca.noTrobat : T.ca.errConn); return; }
+    if(!data){ mostrarError(T.ca.noTrobat); return; }
+    F = data; L = T[F.idioma] || T.ca;
+    if(F.estat !== "pendent"){ mostrarJaRebut(); return; }
+    pintar();
+    $("carregant").classList.add("amagat");
+    $("form").classList.remove("amagat");
+  }catch(e){ mostrarError(T.ca.errConn); }
+}
+// Formulari ja enviat: només un missatge, sense cap dada personal
+function mostrarJaRebut(){
+  const AG = F.agencia || { nom: "" };
+  document.documentElement.lang = F.idioma;
+  aplicarMarca(F.agencia);
+  document.title = AG.nom + " · " + F.titol;
+  const lema = F.idioma === "es" ? AG.lema_es : AG.lema_ca;
+  $("peu").textContent = AG.nom + (lema ? " · " + lema : "");
+  $("txtGracies").textContent = L.jaRebut;
+  $("txtGracies2").textContent = L.jaRebut2.replace("{ag}", AG.nom);
+  $("carregant").classList.add("amagat");
+  $("gracies").classList.remove("amagat");
+}
+function mostrarError(t){
+  $("carregant").classList.add("amagat");
+  $("error").textContent = t; $("error").classList.remove("amagat");
+}
+
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const err = $("errForm"); err.classList.add("amagat");
+  let primer = null;
+  document.querySelectorAll("#viatgers input").forEach(inp => {
+    const buit = inp.required && !inp.value.trim();
+    const malEmail = inp.type==="email" && inp.value && !inp.checkValidity();
+    inp.style.borderColor = (buit || malEmail) ? "#B3261E" : "";
+    if((buit || malEmail) && !primer) primer = inp;
+  });
+  if(primer){ err.textContent = L.falten; err.classList.remove("amagat"); primer.focus(); return; }
+  if(PUJANT > 0){ err.textContent = L.esperaFoto; err.classList.remove("amagat"); return; }
+  const faltaFoto = [...document.querySelectorAll("input[type=file][data-obl='1']")]
+    .find(inp => !FOTOS[+inp.dataset.i][inp.dataset.tipus]);
+  if(faltaFoto){
+    const caixa = faltaFoto.closest(".foto-camp");
+    caixa.querySelector(".foto-boto").classList.add("malament");
+    err.textContent = L.faltaFoto; err.classList.remove("amagat");
+    caixa.scrollIntoView({ behavior: "smooth", block: "center" }); return;
+  }
+  if(!$("consent").checked){ err.textContent = L.faltaConsent; err.classList.remove("amagat"); return; }
+
+  const viatgers = F.viatgers.map((v, i) => {
+    const o = { ...v };
+    SECCIONS.forEach(([, camps]) => camps.forEach(([k]) => { const el = $(`v${i}_${k}`); if(el) o[k] = el.value.trim(); }));
+    o.foto_dni = FOTOS[i].dni || "";
+    o.foto_passaport = FOTOS[i].passaport || "";
+    return o;
+  });
+
+  const b = $("btnEnviar"); b.disabled = true; b.textContent = L.enviant;
+  try{
+    const { data, error } = await sb.rpc("enviar_formulari", { p_id: F.id, p_viatgers: viatgers });
+    if(error || data !== true) throw error || new Error("no");
+    avisarPerCorreu(viatgers);
+    $("form").classList.add("amagat");
+    $("gracies").classList.remove("amagat");
+    window.scrollTo(0, 0);
+  }catch(e){
+    err.textContent = L.errEnviar; err.classList.remove("amagat");
+    b.disabled = false; b.textContent = L.enviar;
+  }
+});
+
+// Avís per correu a l'agència (sense dades personals sensibles)
+function avisarPerCorreu(viatgers){
+  const email = F.agencia && F.agencia.email_avis;
+  if(!email) return;
+  const es = F.agencia.idioma_fix === "es";
+  const noms = viatgers.map(v => (v.nom + " " + v.cognoms).trim()).join(", ");
+  const panell = new URL("admin.html", location.href).href;
+  const cos = es
+    ? { _subject: "Nuevo formulario recibido: " + F.titol + " – " + noms, "Viaje": F.titol, "Viajeros": noms, "Consúltalo en el panel": panell }
+    : { _subject: "Nou formulari rebut: " + F.titol + " – " + noms, "Viatge": F.titol, "Viatgers": noms, "Consulta-ho al panell": panell };
+  fetch("https://formsubmit.co/ajax/" + email, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({ ...cos, _template: "table", _captcha: "false" })
+  }).catch(() => {});
+}
+
+$("carregant").textContent = T.ca.carregant;
+carregar();
+</script>
+</body>
+</html>

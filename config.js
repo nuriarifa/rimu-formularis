@@ -44,3 +44,52 @@ window.aplicarMarca = function(ag){
     document.head.appendChild(s);
   });
 };
+
+// ---- Tarifes ----
+// "agent": preus per als agents de Rimu Viatges (enllaços de sempre)
+// "web":   preus per a les agències que arriben des de la pàgina pública d'Anonta (enllaços amb ?web), amb IVA inclòs
+window.TARIFES = {
+  agent: { formularis: 5, anonta: { basic: 20, premium: 25 }, itineraris: { basic: 10, premium: 15 } },
+  web:   { formularis: 9, anonta: { basic: 29, premium: 39 }, itineraris: { basic: 15, premium: 22 } },
+  descomptePack: 10   // % de descompte si contracten les 3 apps
+};
+(function(){
+  const CLAU = "anonta_tarifa";
+  const q = new URLSearchParams(location.search);
+  try{
+    if(q.has("web")) localStorage.setItem(CLAU, JSON.stringify({ m: "web", t: Date.now() }));
+    if(q.has("agent")) localStorage.removeItem(CLAU);
+  }catch(e){}
+  let web = false;
+  try{ const x = JSON.parse(localStorage.getItem(CLAU) || "null"); web = !!x && x.m === "web" && Date.now() - x.t < 7 * 864e5; }catch(e){}
+  window.TARIFA_WEB = web;
+  // Només a les demos: es canvien els preus d'agent pels de la web
+  const esDemo = /demo/.test(location.search) || /demo\.html$/.test(location.pathname);
+  if(!web || !esDemo) return;
+  const A = TARIFES.agent, W = TARIFES.web, p = location.pathname;
+  const mapa = /\/anonta\//.test(p) ? { [A.anonta.basic]: W.anonta.basic, [A.anonta.premium]: W.anonta.premium }
+    : /\/itineraris\//.test(p) ? { [A.itineraris.basic]: W.itineraris.basic, [A.itineraris.premium]: W.itineraris.premium }
+    : { [A.formularis]: W.formularis };
+  const fets = new WeakSet();
+  // (els preus "web" ja porten l'IVA inclòs)
+  const re = /(^|[^\d.,])(\d+) €(?=\s*$|\s*\/\s*mes)/g;
+  const canvia = arrel => {
+    const w = document.createTreeWalker(arrel, NodeFilter.SHOW_TEXT);
+    let n;
+    while((n = w.nextNode())){
+      if(fets.has(n) || !/€|IVA/.test(n.data)) continue;
+      const nou = n.data.replace(re, (m, a, num) => mapa[num] != null ? `${a}${mapa[num]} €` : m)
+        .replace(/\+\s?IVA/g, "IVA incl.").replace(/Preus sense IVA/g, "Preus amb IVA inclòs").replace(/Precios sin IVA/g, "Precios con IVA incluido")
+        .replace(/sense IVA/g, "IVA inclòs").replace(/sin IVA/g, "IVA incluido");
+      if(nou !== n.data){ n.data = nou; }
+      fets.add(n);
+    }
+  };
+  const inici = () => {
+    canvia(document.body);
+    new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(x => {
+      if(x.nodeType === 3){ if(x.parentNode) canvia(x.parentNode); } else if(x.nodeType === 1) canvia(x);
+    }))).observe(document.body, { childList: true, subtree: true });
+  };
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", inici); else inici();
+})();
