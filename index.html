@@ -103,19 +103,6 @@
   .app .prova30{font-size:13px;color:#2E8B57;font-weight:700;margin:-6px 0 12px}
   .boto.terc{background:none;color:var(--blau);padding:8px 4px;font-size:14px;text-decoration:underline;text-underline-offset:3px}
   .demo-tot{text-align:center;margin-top:26px}
-  dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 24px);box-shadow:0 24px 60px rgba(0,0,0,.3)}
-  dialog::backdrop{background:rgba(20,30,45,.55)}
-  .dlg{padding:22px}
-  .dlg h3{margin:0 0 6px;color:var(--blau);font-size:22px}
-  .dlg p.sub{margin:0 0 16px;color:var(--gris);font-size:14.5px}
-  .dlg label.c{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
-  .dlg input[type=text],.dlg input[type=email],.dlg input[type=tel],.dlg select,.dlg textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--linia);border-radius:10px;padding:10px 12px;background:#fff}
-  .dlg .checks{display:flex;flex-wrap:wrap;gap:8px}
-  .dlg .checks label{display:flex;gap:6px;align-items:center;border:1px solid var(--linia);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
-  .dlg .botons{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-  .dlg .err{color:#B3261E;font-size:14px;margin-top:10px}
-  .dlg .ok{background:#E9F6EE;color:#1E6B3E;border-radius:12px;padding:14px;font-size:15px}
-  .x-tanca{float:right;border:0;background:none;font-size:22px;cursor:pointer;color:var(--gris);line-height:1}
   .nota-preus{text-align:center;color:var(--gris);font-size:14px;margin-top:18px}
   /* Passos */
   .passos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:p}
@@ -234,8 +221,6 @@
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="boto prim" href="#apps" data-t="provaGratis"></a><button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo"></button></div>
   </div>
 </section>
-
-<dialog id="dlgDemo"><div class="dlg" id="dlgCos"></div></dialog>
 
 <footer>
   <div class="amp">
@@ -384,71 +369,11 @@
     document.title = LANG === "ca" ? "Anonta · Apps per a agències de viatges" : "Anonta · Apps para agencias de viajes";
   }
   // ---- Sol·licitud de demo (presentació) ----
-  // Quan tinguem el calendari (Calendly, Google Calendar…), posa'n l'enllaç aquí i sortirà el botó per reservar dia i hora.
+  // Enllaç del calendari (Calendly) on les agències reserven la demo
   const CALENDARI = "https://calendly.com/rimuviatges/demo-anonta";
-  const CORREU_DEMOS = "admin@rimuviatges.com";
-  const DL = {
-    es: { titol: "Solicita una demo", sub: "Te enseñamos la app por videollamada, con calma y resolviendo tus dudas. Rellena esto y te contactamos para cerrar el día.",
-      cal: "📅 Elegir día y hora en el calendario", oForm: "O déjanos tus datos y te llamamos:",
-      nom: "Tu nombre", ag: "Agencia", correu: "Correo", tel: "Teléfono (opcional)", apps: "¿Qué quieres ver?", totes: "Todas",
-      quan: "¿Cuándo te va mejor?", qI: "Me da igual", qM: "Por la mañana", qT: "Por la tarde", com: "Comentarios (opcional)",
-      envia: "Enviar solicitud", cancel: "Cancelar", falta: "Falta tu nombre, la agencia o un correo válido.", triaApp: "Elige al menos una app.",
-      ok: "✅ ¡Gracias! Hemos recibido tu solicitud. Te escribiremos en breve para acordar el día y la hora.", err: "No se ha podido enviar. Escríbenos a admin@rimuviatges.com.", enviant: "Enviando…", tanca: "Cerrar" },
-    ca: { titol: "Sol·licita una demo", sub: "T'ensenyem l'app per videotrucada, amb calma i resolent els teus dubtes. Omple això i et contactem per tancar el dia.",
-      cal: "📅 Triar dia i hora al calendari", oForm: "O deixa'ns les teves dades i et truquem:",
-      nom: "El teu nom", ag: "Agència", correu: "Correu", tel: "Telèfon (opcional)", apps: "Què vols veure?", totes: "Totes",
-      quan: "Quan et va millor?", qI: "M'és igual", qM: "Al matí", qT: "A la tarda", com: "Comentaris (opcional)",
-      envia: "Enviar la sol·licitud", cancel: "Cancel·la", falta: "Falta el teu nom, l'agència o un correu vàlid.", triaApp: "Tria com a mínim una app.",
-      ok: "✅ Gràcies! Hem rebut la teva sol·licitud. T'escriurem aviat per acordar el dia i l'hora.", err: "No s'ha pogut enviar. Escriu-nos a admin@rimuviatges.com.", enviant: "Enviant…", tanca: "Tanca" }
-  };
-  function obreDemo(quina){
-    const t = T[LANG], d = DL[LANG], dlg = document.getElementById("dlgDemo"), cos = document.getElementById("dlgCos");
-    const apps = [["anonta", "📱 Anonta"], ["itineraris", "🗺️ " + t.a2], ["formularis", "📝 " + t.a3]];
-    const marcada = id => quina === "totes" || quina === id;
-    cos.innerHTML = `<button class="x-tanca" type="button" data-tanca aria-label="${esc(d.tanca)}">×</button>
-      <h3>${esc(d.titol)}</h3><p class="sub">${esc(d.sub)}</p>
-      ${CALENDARI ? `<a class="boto prim" href="${esc(CALENDARI)}" target="_blank" rel="noopener" style="width:100%">${esc(d.cal)}</a><p class="sub" style="margin:16px 0 0">${esc(d.oForm)}</p>` : ""}
-      <form id="fDemo" novalidate>
-        <label class="c">${esc(d.apps)}</label>
-        <div class="checks">${apps.map(([id, n]) => `<label><input type="checkbox" name="app" value="${id}"${marcada(id) ? " checked" : ""}> ${esc(n)}</label>`).join("")}</div>
-        <label class="c" for="dNom">${esc(d.nom)}</label><input type="text" id="dNom" autocomplete="name">
-        <label class="c" for="dAg">${esc(d.ag)}</label><input type="text" id="dAg" autocomplete="organization">
-        <label class="c" for="dCorreu">${esc(d.correu)}</label><input type="email" id="dCorreu" autocomplete="email">
-        <label class="c" for="dTel">${esc(d.tel)}</label><input type="tel" id="dTel" autocomplete="tel">
-        <label class="c" for="dQuan">${esc(d.quan)}</label><select id="dQuan"><option>${esc(d.qI)}</option><option>${esc(d.qM)}</option><option>${esc(d.qT)}</option></select>
-        <label class="c" for="dCom">${esc(d.com)}</label><textarea id="dCom" rows="3"></textarea>
-        <div class="err" id="dErr" hidden></div>
-        <div class="botons"><button class="boto prim" type="submit" id="dEnvia">${esc(d.envia)}</button><button class="boto sec" type="button" data-tanca>${esc(d.cancel)}</button></div>
-      </form>`;
-    cos.querySelectorAll("[data-tanca]").forEach(b => b.onclick = () => dlg.close());
-    const f = cos.querySelector("#fDemo"), err = cos.querySelector("#dErr");
-    f.onsubmit = async ev => {
-      ev.preventDefault();
-      const triades = [...f.querySelectorAll("[name=app]:checked")].map(x => apps.find(a => a[0] === x.value)[1].replace(/^\S+\s/, ""));
-      const nom = cos.querySelector("#dNom").value.trim(), ag = cos.querySelector("#dAg").value.trim(), correu = cos.querySelector("#dCorreu").value.trim();
-      const mal = m => { err.textContent = m; err.hidden = false; };
-      if(!triades.length) return mal(d.triaApp);
-      if(!nom || !ag || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correu)) return mal(d.falta);
-      err.hidden = true;
-      const b = cos.querySelector("#dEnvia"); b.disabled = true; b.textContent = d.enviant;
-      try{
-        const r = await fetch("https://formsubmit.co/ajax/" + CORREU_DEMOS, {
-          method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify({ _subject: "Sol·licitud de demo d'Anonta: " + ag, _template: "table", _captcha: "false", _replyto: correu,
-            "Agència": ag, "Nom": nom, "Correu": correu, "Telèfon": cos.querySelector("#dTel").value.trim(), "Apps": triades.join(", "),
-            "Quan li va millor": cos.querySelector("#dQuan").value, "Comentaris": cos.querySelector("#dCom").value.trim(), "Idioma": LANG === "ca" ? "Català" : "Castellà" })
-        });
-        if(!r.ok) throw new Error(r.status);
-        cos.innerHTML = `<button class="x-tanca" type="button" aria-label="${esc(d.tanca)}">×</button><h3>${esc(d.titol)}</h3><div class="ok">${esc(d.ok)}</div>
-          <div class="botons"><button class="boto sec" type="button">${esc(d.tanca)}</button></div>`;
-        cos.querySelectorAll("button").forEach(x => x.onclick = () => dlg.close());
-      }catch(e){ b.disabled = false; b.textContent = d.envia; mal(d.err); }
-    };
-    if(!dlg.open) dlg.showModal();
-  }
-  document.addEventListener("click", e => { const b = e.target.closest("[data-demo]"); if(b){ e.preventDefault(); obreDemo(b.dataset.demo); } });
-  document.getElementById("dlgDemo").addEventListener("click", e => { if(e.target.id === "dlgDemo") e.target.close(); });
-  if(location.hash === "#demo") setTimeout(() => obreDemo("totes"), 300);
+  // Els botons «Sol·licita una demo» obren el calendari per reservar dia i hora
+  document.addEventListener("click", e => { const b = e.target.closest("[data-demo]"); if(b){ e.preventDefault(); window.open(CALENDARI, "_blank", "noopener"); } });
+  if(location.hash === "#demo") location.href = CALENDARI;
 
   document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { LANG = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", LANG); }catch(e){} pinta(); });
   pinta();
