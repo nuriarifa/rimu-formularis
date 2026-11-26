@@ -93,3 +93,23 @@ window.TARIFES = {
   };
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", inici); else inici();
 })();
+
+// ---- Enllaç a les condicions legals a les sol·licituds de prova (#pAccepto) ----
+(function(){
+  const posa = () => {
+    const c = document.getElementById("pAccepto");
+    if(!c || c.dataset.legal) return;
+    c.dataset.legal = "1";
+    const es = (document.documentElement.lang || "es") !== "ca";
+    const p = document.createElement("p");
+    p.className = "ajuda";
+    p.style.cssText = "margin:6px 0 0;font-size:13px";
+    const u = location.origin + "/legal.html";
+    p.innerHTML = es
+      ? `Al solicitar la prueba aceptas también las <a href="${u}#condiciones" target="_blank" rel="noopener">condiciones de contratación</a> (incluido el <a href="${u}#encargo" target="_blank" rel="noopener">encargo del tratamiento</a> de los datos de tus clientes) y la <a href="${u}#privacidad" target="_blank" rel="noopener">política de privacidad</a>.`
+      : `En sol·licitar la prova acceptes també les <a href="${u}#condiciones" target="_blank" rel="noopener">condicions de contractació</a> (inclòs l'<a href="${u}#encargo" target="_blank" rel="noopener">encàrrec del tractament</a> de les dades dels teus clients) i la <a href="${u}#privacidad" target="_blank" rel="noopener">política de privacitat</a>.`;
+    (c.closest("label") || c).after(p);
+  };
+  const inici = () => { posa(); new MutationObserver(posa).observe(document.body, { childList: true, subtree: true }); };
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", inici); else inici();
+})();
