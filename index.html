@@ -147,7 +147,7 @@
     <nav>
       <a class="enllac amaga" href="#apps" data-t="navApps"></a>
       <a class="enllac amaga" href="#preus" data-t="navPreus"></a>
-      <a class="enllac" href="anonta/admin.html" data-t="entrar"></a>
+      <a class="enllac" href="anonta/admin.html" data-t="entrar" data-gc="entrar"></a>
       <div class="idiomes"><button type="button" data-l="es">ES</button><button type="button" data-l="ca">CA</button></div>
     </nav>
   </div>
@@ -159,7 +159,7 @@
       <h1 data-t="heroTitol" data-html></h1>
       <p class="sub" data-t="heroSub"></p>
       <div class="crides">
-        <a class="boto prim" href="#apps" data-t="provaGratis"></a>
+        <a class="boto prim" href="#apps" data-t="provaGratis" data-gc="prova-portada"></a>
         <button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo"></button>
       </div>
       <div class="garanties"><span data-t="g1"></span><span data-t="g2"></span><span data-t="g3"></span></div>
@@ -352,7 +352,7 @@
       <div class="app"><div class="ico">${a.ico}</div><h3>${esc(a.n)}</h3><p class="lema">${esc(a.l)}</p>
         <ul>${a.f.map(x => `<li>${esc(x)}</li>`).join("")}${a.ia.map(x => `<li class="ia">${esc(x)} <small>(${esc(t.premium)})</small></li>`).join("")}</ul>
         <p class="prova30">${esc(t.prova30)}</p>
-        <div class="accions"><a class="boto prim petit" href="${a.prova}">🎁 ${esc(t.provar)}</a><a class="boto sec petit" href="${a.demo}">👀 ${esc(t.ver)}</a></div>
+        <div class="accions"><a class="boto prim petit" href="${a.prova}" data-gc="prova-${a.id}">🎁 ${esc(t.provar)}</a><a class="boto sec petit" href="${a.demo}" data-gc="demo-propia-${a.id}">👀 ${esc(t.ver)}</a></div>
         <button class="boto terc" type="button" data-demo="${a.id}">${esc(t.demoApp)}</button></div>`).join("");
 
     const pla = (nom, imp, det, prem) => `<div class="pla${prem ? " prem" : ""}"><div class="nom"><span>${esc(nom)}${prem ? `<span class="et">${esc(t.recomanat)}</span>` : ""}</span>
@@ -372,12 +372,17 @@
   // Enllaç del calendari (Calendly) on les agències reserven la demo
   const CALENDARI = "https://calendly.com/rimuviatges/demo-anonta";
   // Els botons «Sol·licita una demo» obren el calendari per reservar dia i hora
-  document.addEventListener("click", e => { const b = e.target.closest("[data-demo]"); if(b){ e.preventDefault(); window.open(CALENDARI, "_blank", "noopener"); } });
+  document.addEventListener("click", e => { const b = e.target.closest("[data-demo]"); if(b){ e.preventDefault(); compta("demo-calendly-" + b.dataset.demo); window.open(CALENDARI, "_blank", "noopener"); } });
+
+  // ---- Estadístiques (GoatCounter, sense galetes): també es compten els clics als botons importants ----
+  function compta(nom){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "clic-" + nom, title: nom, event: true }); }catch(e){} }
+  document.addEventListener("click", e => { const b = e.target.closest("[data-gc]"); if(b) compta(b.dataset.gc); });
   if(location.hash === "#demo") location.href = CALENDARI;
 
   document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { LANG = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", LANG); }catch(e){} pinta(); });
   pinta();
 })();
 </script>
+<script data-goatcounter="https://anonta.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
