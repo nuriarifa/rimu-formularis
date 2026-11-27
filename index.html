@@ -5,16 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script>
   // Els enllaços dels formularis (anonta.es/?f=…) van al formulari del client
-  if(new URLSearchParams(location.search).get("f")) location.replace("formulari.html" + location.search);
+  if(new URLSearchParams(location.search).get("f")) location.replace("/formulari.html" + location.search);
+  // A la portada en castellà, qui té el català triat (o el navegador en català) va a /ca/
+  else if(!document.documentElement.dataset.idioma){ try{ const p = localStorage.getItem("anonta_web_idioma"); if(p === "ca" || (!p && /^ca\b/i.test(navigator.language))) location.replace("/ca/" + location.hash); }catch(e){} }
 </script>
-<title>Anonta · Apps para agencias de viajes</title>
-<meta name="description" content="La app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. 30 días gratis.">
+<!--SEO-->
+<title>Anonta · App y software para agencias de viajes: itinerarios y datos de viajeros</title>
+<meta name="description" content="App de viaje con el logo de tu agencia, itinerarios y presupuestos con IA y formulario de datos de viajeros. Pensado por una agencia de viajes. 30 días gratis.">
+<link rel="canonical" href="https://anonta.es/">
+<link rel="alternate" hreflang="es" href="https://anonta.es/">
+<link rel="alternate" hreflang="ca" href="https://anonta.es/ca/">
+<link rel="alternate" hreflang="x-default" href="https://anonta.es/">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Anonta · Apps para agencias de viajes">
-<meta property="og:description" content="App de viaje para tus clientes, itinerarios con IA y formulario de datos de viajeros. Pruébalo 30 días gratis.">
+<meta property="og:site_name" content="Anonta">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://anonta.es/">
+<meta property="og:title" content="Anonta · App y software para agencias de viajes: itinerarios y datos de viajeros">
+<meta property="og:description" content="App de viaje con el logo de tu agencia, itinerarios y presupuestos con IA y formulario de datos de viajeros. Pensado por una agencia de viajes. 30 días gratis.">
+<meta property="og:image" content="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta">
+<link rel="apple-touch-icon" href="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta?icona">
+<script type="application/ld+json">[{"@context":"https://schema.org","@type":"Organization","@id":"https://anonta.es/#org","name":"Anonta","url":"https://anonta.es/","logo":"https://anonta.es/anonta/icona-anonta.svg","email":"admin@rimuviatges.com"},{"@context":"https://schema.org","@type":"WebSite","name":"Anonta","url":"https://anonta.es/","inLanguage":"es","publisher":{"@id":"https://anonta.es/#org"}},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Anonta","description":"La app de viaje para tus clientes","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/#apps","inLanguage":"es","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Básico","price":29,"priceCurrency":"EUR","valueAddedTaxIncluded":true},{"@type":"Offer","name":"Prémium","price":39,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Itinerarios","description":"Presupuestos que se venden solos","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/#apps","inLanguage":"es","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Básico","price":15,"priceCurrency":"EUR","valueAddedTaxIncluded":true},{"@type":"Offer","name":"Prémium","price":22,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Formulario de viajeros","description":"Los datos de los viajeros, sin perseguir a nadie","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/#apps","inLanguage":"es","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Tarifa única","price":9,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"es","mainEntity":[{"@type":"Question","name":"¿Mis clientes tienen que descargar algo de una tienda de apps?","acceptedAnswer":{"@type":"Answer","text":"No. Les envías un enlace, entran con su correo y, si quieren, la añaden a la pantalla de inicio del móvil como una app más. Funciona en iPhone y Android."}},{"@type":"Question","name":"¿Puedo poner el logo de mi agencia?","acceptedAnswer":{"@type":"Answer","text":"Sí, con el plan Prémium la app del cliente lleva tu logo y tus colores. Con el Básico, lleva el logo de Anonta."}},{"@type":"Question","name":"¿Qué pasa cuando termina la prueba?","acceptedAnswer":{"@type":"Answer","text":"Nada automático: no te pedimos tarjeta. Si quieres continuar, eliges plan y seguimos. Si no, no pagas nada."}},{"@type":"Question","name":"¿Tengo que contratar las tres apps?","acceptedAnswer":{"@type":"Answer","text":"No, ninguna es obligatoria. Cada app tiene su propia prueba de 30 días y se contrata por separado. Puedes empezar con una y añadir las demás desde tu panel, en «Mis apps». Como están conectadas, cuantas más uses, menos trabajo repetido."}},{"@type":"Question","name":"¿Alguien me puede enseñar cómo funciona?","acceptedAnswer":{"@type":"Answer","text":"Sí. Pulsa «Solicita una demo» y te hacemos una presentación de la app que elijas o de todas."}},{"@type":"Question","name":"¿Mis datos y los de mis clientes están seguros?","acceptedAnswer":{"@type":"Answer","text":"Cada agencia solo ve sus viajes y cada cliente solo ve los suyos. Los documentos se abren con enlaces temporales y privados."}}]}]</script>
+<!--/SEO-->
 <meta name="theme-color" content="#1F3A5F">
-<link rel="icon" href="anonta/icona-anonta.svg" type="image/svg+xml">
-<script src="config.js"></script>
+<link rel="icon" href="/anonta/icona-anonta.svg" type="image/svg+xml">
+<script src="/config.js"></script>
 <style>
   :root{--blau:#1F3A5F;--blau-mig:#3D698E;--blau-clar:#E8EEF6;--coral:#F2A65A;--coral-clar:#FDF1E4;--rosa:#E79893;--text:#22313F;--gris:#5F6F80;--linia:#DDE5EC;--fons:#F7F9FC}
   *{box-sizing:border-box}
@@ -43,6 +61,7 @@
   .hero .amp{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
   .hero h1{font-size:44px;line-height:1.1;margin:0 0 16px;color:var(--blau);letter-spacing:-.02em}
   .hero h1 em{font-style:normal;color:var(--blau-mig);background:linear-gradient(transparent 62%,rgba(242,166,90,.45) 62%)}
+  .hero h1 .kicker{display:block;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blau-mig);margin-bottom:12px}
   .hero p.sub{font-size:19px;color:var(--gris);margin:0 0 26px;max-width:560px}
   .hero .crides{display:flex;gap:12px;flex-wrap:wrap}
   .hero .garanties{margin-top:16px;font-size:14px;color:var(--gris);display:flex;gap:16px;flex-wrap:wrap}
@@ -155,13 +174,13 @@
 <body>
 <header>
   <div class="amp">
-    <a class="marca" href="#"><img src="anonta/logo-anonta.svg" alt="Anonta"></a>
+    <a class="marca" href="./"><img src="/anonta/logo-anonta.svg" alt="Anonta"></a>
     <nav>
-      <a class="enllac amaga" href="#apps" data-t="navApps"></a>
-      <a class="enllac amaga" href="#preus" data-t="navPreus"></a>
-      <a class="enllac amaga" href="#contacte" data-t="navContacte"></a>
-      <a class="enllac" href="anonta/admin.html" data-t="entrar" data-gc="entrar"></a>
-      <div class="idiomes"><button type="button" data-l="es">ES</button><button type="button" data-l="ca">CA</button></div>
+      <a class="enllac amaga" href="#apps" data-t="navApps">Apps</a>
+      <a class="enllac amaga" href="#preus" data-t="navPreus">Precios</a>
+      <a class="enllac amaga" href="#contacte" data-t="navContacte">Contacto</a>
+      <a class="enllac" href="/anonta/admin.html" data-t="entrar" data-gc="entrar">Entrar</a>
+      <div class="idiomes"><button type="button" data-l="es" class="actiu">ES</button><button type="button" data-l="ca">CA</button></div>
     </nav>
   </div>
 </header>
@@ -169,23 +188,23 @@
 <section class="hero">
   <div class="amp">
     <div>
-      <h1 data-t="heroTitol" data-html></h1>
-      <p class="sub" data-t="heroSub"></p>
+      <h1 data-t="heroTitol" data-html=""><span class="kicker">App y software para agencias de viajes</span>Tu agencia, en el <em>móvil de tus clientes</em></h1>
+      <p class="sub" data-t="heroSub">Una app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. Pensado por una agencia de viajes, para agencias de viajes.</p>
       <div class="crides">
-        <a class="boto prim" href="#apps" data-t="provaGratis" data-gc="prova-portada"></a>
-        <button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo"></button>
+        <a class="boto prim" href="#apps" data-t="provaGratis" data-gc="prova-portada">🎁 30 días gratis en cada app</a>
+        <button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo">📅 Solicita una demo</button>
       </div>
-      <div class="garanties"><span data-t="g1"></span><span data-t="g2"></span><span data-t="g3"></span></div>
-      <p class="nota-hero" data-t="notaHero" data-html></p>
+      <div class="garanties"><span data-t="g1">Sin tarjeta</span><span data-t="g2">Sin permanencia</span><span data-t="g3">Prueba con el plan Prémium</span></div>
+      <p class="nota-hero" data-t="notaHero" data-html=""><b>Cada app se prueba y se contrata por separado</b> y ninguna es obligatoria: empieza por la que necesites. Eso sí, como están conectadas, tenerlas todas te ahorra mucho trabajo.</p>
     </div>
     <div class="mobil" aria-hidden="true">
-      <div class="bar"><small data-t="mAg"></small><b data-t="mViatge"></b><span data-t="mDates"></span></div>
+      <div class="bar"><small data-t="mAg">Tu agencia</small><b data-t="mViatge">Japón en familia</b><span data-t="mDates">10 – 19 de enero</span></div>
       <div class="cos">
-        <div class="noti" data-t="mNoti"></div>
-        <div class="it"><span class="ic">✈️</span><div><b data-t="mRuta"></b><span data-t="mVol"></span><br><span class="xip" data-t="mBitllet"></span></div></div>
-        <div class="it"><span class="ic">🏨</span><div><b>Shinjuku Garden Hotel</b><span data-t="mHotel"></span><br><span class="xip" data-t="mBo"></span></div></div>
-        <div class="it"><span class="ic">🗓️</span><div><b data-t="mDia"></b><span data-t="mDiaTxt"></span></div></div>
-        <div class="it"><span class="ic">💶</span><div><b data-t="mPag"></b><span data-t="mPagTxt"></span></div></div>
+        <div class="noti" data-t="mNoti">🔔 Nuevo documento: billetes de avión</div>
+        <div class="it"><span class="ic">✈️</span><div><b data-t="mRuta">Barcelona (BCN) → Tokio (HND)</b><span data-t="mVol"> · 08:25 → 07:10 (+1)</span><br><span class="xip" data-t="mBitllet">🎫 Billetes</span></div></div>
+        <div class="it"><span class="ic">🏨</span><div><b>Shinjuku Garden Hotel</b><span data-t="mHotel"> · 3 noches · Desayuno</span><br><span class="xip" data-t="mBo">🧾 Bono del hotel</span></div></div>
+        <div class="it"><span class="ic">🗓️</span><div><b data-t="mDia">Día 2 · Tokio tradicional</b><span data-t="mDiaTxt"> · 10:00 Asakusa y Senso-ji</span></div></div>
+        <div class="it"><span class="ic">💶</span><div><b data-t="mPag">Pago pendiente</b><span data-t="mPagTxt"> · 1.200 € antes del 15/12</span></div></div>
       </div>
     </div>
   </div>
@@ -193,70 +212,96 @@
 
 <section class="blo" id="apps">
   <div class="amp">
-    <div class="titol-sec"><h2 data-t="appsTitol"></h2><p data-t="appsSub"></p></div>
-    <div class="apps" id="llistaApps"></div>
-    <div class="connexio"><div class="flux"><span class="n">📝 <span data-t="a3"></span></span> → <span class="n">📱 Anonta</span> ← <span class="n">🗺️ <span data-t="a2"></span></span></div><p data-t="connexio"></p></div>
-    <div class="demo-tot"><button class="boto sec" type="button" data-demo="totes" data-t="demoTotes"></button></div>
+    <div class="titol-sec"><h2 data-t="appsTitol">Tres apps que trabajan juntas</h2><p data-t="appsSub">Puedes usar solo una o las tres: los datos pasan de una a otra sin volver a escribirlos.</p></div>
+    <div class="apps" id="llistaApps">
+      <div class="app"><div class="ico">📱</div><h3>Anonta</h3><p class="lema">La app de viaje para tus clientes</p>
+        <ul><li>Todo el viaje en el móvil: vuelos, hoteles, traslados y excursiones</li><li>Documentos dentro de cada servicio (billetes, bonos, seguro…)</li><li>Itinerario día a día con horarios</li><li>Pagos pendientes y avisos automáticos</li><li>Mensajes con la agencia y notificaciones en el móvil</li><li>En catalán y en castellano</li><li class="ia">Recomendaciones del destino e itinerario propuestos con IA <small>(Prémium)</small></li></ul>
+        <p class="prova30">🎁 30 días de prueba gratis de esta app</p>
+        <div class="accions"><a class="boto prim petit" href="/anonta/demo.html?web#prova" data-gc="prova-anonta">🎁 30 días gratis</a><a class="boto sec petit" href="/anonta/demo.html?web" data-gc="demo-propia-anonta">👀 Pruébala ahora</a></div>
+        <button class="boto terc" type="button" data-demo="anonta">📅 Solicita una demo</button></div>
+      <div class="app"><div class="ico">🗺️</div><h3>Itinerarios</h3><p class="lema">Presupuestos que se venden solos</p>
+        <ul><li>Itinerarios día a día con fotos</li><li>Servicios opcionales que el cliente elige</li><li>Total y precio por persona al momento</li><li>PDF para enviar o imprimir</li><li>Cuando el cliente acepta, se convierte en un viaje de Anonta</li><li class="ia">IA para redactar los días y los servicios <small>(Prémium)</small></li></ul>
+        <p class="prova30">🎁 30 días de prueba gratis de esta app</p>
+        <div class="accions"><a class="boto prim petit" href="/itineraris/admin.html?demo&amp;prova&amp;web" data-gc="prova-itineraris">🎁 30 días gratis</a><a class="boto sec petit" href="/itineraris/admin.html?demo&amp;web" data-gc="demo-propia-itineraris">👀 Pruébala ahora</a></div>
+        <button class="boto terc" type="button" data-demo="itineraris">📅 Solicita una demo</button></div>
+      <div class="app"><div class="ico">📝</div><h3>Formulario de viajeros</h3><p class="lema">Los datos de los viajeros, sin perseguir a nadie</p>
+        <ul><li>Un enlace por WhatsApp y el cliente lo rellena desde el móvil</li><li>Datos de todos los viajeros, con foto del DNI y del pasaporte</li><li>Aviso si el pasaporte caduca antes de tiempo</li><li>Te llega un correo cuando lo envían</li><li>Con un clic, los datos pasan a Anonta</li></ul>
+        <p class="prova30">🎁 30 días de prueba gratis de esta app</p>
+        <div class="accions"><a class="boto prim petit" href="/demo.html?web" data-gc="prova-formularis">🎁 30 días gratis</a><a class="boto sec petit" href="/demo.html?web" data-gc="demo-propia-formularis">👀 Pruébala ahora</a></div>
+        <button class="boto terc" type="button" data-demo="formularis">📅 Solicita una demo</button></div></div>
+    <div class="connexio"><div class="flux"><span class="n">📝 <span data-t="a3">Formulario de viajeros</span></span> → <span class="n">📱 Anonta</span> ← <span class="n">🗺️ <span data-t="a2">Itinerarios</span></span></div><p data-t="connexio">Los datos del formulario pasan a Anonta con un clic, y un itinerario aceptado se convierte en un viaje de Anonta. Sin volver a escribir nada.</p></div>
+    <div class="demo-tot"><button class="boto sec" type="button" data-demo="totes" data-t="demoTotes">📅 Solicita una demo de todas las apps</button></div>
   </div>
 </section>
 
 <section class="blo gris" id="preus">
   <div class="amp">
-    <div class="titol-sec"><h2 data-t="preusTitol"></h2><p data-t="preusSub"></p></div>
-    <div class="taula-preus" id="taulaPreus"></div>
-    <div class="pack" id="pack"></div>
-    <p class="nota-preus" data-t="notaPreus"></p>
+    <div class="titol-sec"><h2 data-t="preusTitol">Precios claros, sin sorpresas</h2><p data-t="preusSub">Precios mensuales por agencia, con IVA incluido. Los 30 primeros días son gratis y con todo el plan Prémium.</p></div>
+    <div class="taula-preus" id="taulaPreus">
+      <div class="preu"><h3>📱 Anonta</h3><div class="pla"><div class="nom"><span>Básico</span>
+      <span class="imp">29 €<small>/mes</small></span></div><div class="det">App con el logo de Anonta. Sin IA.</div></div><div class="pla prem"><div class="nom"><span>Prémium<span class="et">Recomendado</span></span>
+      <span class="imp">39 €<small>/mes</small></span></div><div class="det">Tu logo y tus colores en la app del cliente, e IA.</div></div></div>
+      <div class="preu"><h3>🗺️ Itinerarios</h3><div class="pla"><div class="nom"><span>Básico</span>
+      <span class="imp">15 €<small>/mes</small></span></div><div class="det">Itinerarios ilimitados, opcionales y PDF.</div></div><div class="pla prem"><div class="nom"><span>Prémium<span class="et">Recomendado</span></span>
+      <span class="imp">22 €<small>/mes</small></span></div><div class="det">Todo lo del Básico e IA para redactar.</div></div></div>
+      <div class="preu"><h3>📝 Formulario de viajeros</h3><div class="pla"><div class="nom"><span>Tarifa única</span>
+      <span class="imp">9 €<small>/mes</small></span></div><div class="det">Formularios ilimitados para todos tus viajes.</div></div></div></div>
+    <div class="pack" id="pack">
+      <div><span class="badge">−10 %</span><h3>Las 3 apps juntas</h3><p>Si contratas Anonta, Itinerarios y el Formulario de viajeros, tienes un 10 % de descuento sobre el total, cada mes.</p></div>
+      <div class="opc"><div class="nom">Pack Básico</div><div class="imp">47,70 €<small>/mes</small></div><div class="abans">en lugar de <s>53 €</s></div></div>
+      <div class="opc"><div class="nom">Pack Prémium</div><div class="imp">63 €<small>/mes</small></div><div class="abans">en lugar de <s>70 €</s></div></div></div>
+    <p class="nota-preus" data-t="notaPreus">Todos los precios llevan el IVA incluido. Sin permanencia: puedes darte de baja cuando quieras. ¿Dudas? Escríbenos a admin@rimuviatges.com.</p>
   </div>
 </section>
 
 <section class="blo">
   <div class="amp">
-    <div class="titol-sec"><h2 data-t="passosTitol"></h2></div>
+    <div class="titol-sec"><h2 data-t="passosTitol">Empezar es muy fácil</h2></div>
     <div class="passos">
-      <div class="pas"><h3 data-t="p1"></h3><p data-t="p1t"></p></div>
-      <div class="pas"><h3 data-t="p2"></h3><p data-t="p2t"></p></div>
-      <div class="pas"><h3 data-t="p3"></h3><p data-t="p3t"></p></div>
+      <div class="pas"><h3 data-t="p1">Elige la app</h3><p data-t="p1t">Empieza por la que más necesites y pide la prueba: el nombre de tu agencia, tu correo y, si quieres, tu logo.</p></div>
+      <div class="pas"><h3 data-t="p2">Pruébala 30 días</h3><p data-t="p2t">Con tus viajes y tus clientes de verdad, y con todo el plan Prémium. Puedes probar las otras apps cuando quieras, cada una con sus 30 días.</p></div>
+      <div class="pas"><h3 data-t="p3">Elige tu plan</h3><p data-t="p3t">Si te convence, eliges Básico o Prémium. Y si acabas con las tres, tienes el descuento del pack.</p></div>
     </div>
   </div>
 </section>
 
 <section class="blo gris">
   <div class="amp">
-    <div class="titol-sec"><h2 data-t="faqTitol"></h2></div>
-    <div class="faq" id="faq"></div>
+    <div class="titol-sec"><h2 data-t="faqTitol">Preguntas frecuentes</h2></div>
+    <div class="faq" id="faq"><details><summary>¿Mis clientes tienen que descargar algo de una tienda de apps?</summary><p>No. Les envías un enlace, entran con su correo y, si quieren, la añaden a la pantalla de inicio del móvil como una app más. Funciona en iPhone y Android.</p></details><details><summary>¿Puedo poner el logo de mi agencia?</summary><p>Sí, con el plan Prémium la app del cliente lleva tu logo y tus colores. Con el Básico, lleva el logo de Anonta.</p></details><details><summary>¿Qué pasa cuando termina la prueba?</summary><p>Nada automático: no te pedimos tarjeta. Si quieres continuar, eliges plan y seguimos. Si no, no pagas nada.</p></details><details><summary>¿Tengo que contratar las tres apps?</summary><p>No, ninguna es obligatoria. Cada app tiene su propia prueba de 30 días y se contrata por separado. Puedes empezar con una y añadir las demás desde tu panel, en «Mis apps». Como están conectadas, cuantas más uses, menos trabajo repetido.</p></details><details><summary>¿Alguien me puede enseñar cómo funciona?</summary><p>Sí. Pulsa «Solicita una demo» y te hacemos una presentación de la app que elijas o de todas.</p></details><details><summary>¿Mis datos y los de mis clientes están seguros?</summary><p>Cada agencia solo ve sus viajes y cada cliente solo ve los suyos. Los documentos se abren con enlaces temporales y privados.</p></details></div>
   </div>
 </section>
 
 <section class="final">
   <div class="amp">
-    <h2 data-t="finalTitol"></h2>
-    <p data-t="finalSub"></p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="boto prim" href="#apps" data-t="provaGratis"></a><button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo"></button></div>
+    <h2 data-t="finalTitol">¿Lo probamos con tu próximo viaje?</h2>
+    <p data-t="finalSub">30 días gratis, sin tarjeta y sin compromiso.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="boto prim" href="#apps" data-t="provaGratis">🎁 30 días gratis en cada app</a><button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo">📅 Solicita una demo</button></div>
   </div>
 </section>
 
 <section class="blo gris" id="contacte">
   <div class="amp">
-    <div class="titol-sec"><h2 data-t="contTitol"></h2><p data-t="contSub"></p></div>
-    <form class="contacte" id="fContacte" novalidate>
+    <div class="titol-sec"><h2 data-t="contTitol">¿Hablamos?</h2><p data-t="contSub">¿Tienes alguna duda o quieres contarnos algo? Escríbenos y te respondemos lo antes posible.</p></div>
+    <form class="contacte" id="fContacte" novalidate="">
       <div class="dos">
-        <div><label class="c" for="cNom" data-t="cNom"></label><input type="text" id="cNom" autocomplete="name" maxlength="120"></div>
-        <div><label class="c" for="cAg" data-t="cAg"></label><input type="text" id="cAg" autocomplete="organization" maxlength="160"></div>
-        <div><label class="c" for="cCorreu" data-t="cCorreu"></label><input type="email" id="cCorreu" autocomplete="email" maxlength="200"></div>
-        <div><label class="c" for="cTel" data-t="cTel"></label><input type="tel" id="cTel" autocomplete="tel" maxlength="40"></div>
+        <div><label class="c" for="cNom" data-t="cNom">Nombre</label><input type="text" id="cNom" autocomplete="name" maxlength="120"></div>
+        <div><label class="c" for="cAg" data-t="cAg">Agencia (opcional)</label><input type="text" id="cAg" autocomplete="organization" maxlength="160"></div>
+        <div><label class="c" for="cCorreu" data-t="cCorreu">Correo</label><input type="email" id="cCorreu" autocomplete="email" maxlength="200"></div>
+        <div><label class="c" for="cTel" data-t="cTel">Teléfono (opcional)</label><input type="tel" id="cTel" autocomplete="tel" maxlength="40"></div>
       </div>
-      <label class="c" for="cMiss" data-t="cMiss"></label><textarea id="cMiss" rows="5" maxlength="4000"></textarea>
-      <label class="acc"><input type="checkbox" id="cAcc"> <span data-t="cAcc" data-html></span></label>
-      <div class="err" id="cErr" hidden></div>
-      <div style="margin-top:16px"><button class="boto prim" type="submit" id="cEnvia" data-t="cEnvia"></button></div>
+      <label class="c" for="cMiss" data-t="cMiss">Mensaje</label><textarea id="cMiss" rows="5" maxlength="4000"></textarea>
+      <label class="acc"><input type="checkbox" id="cAcc"> <span data-t="cAcc" data-html="">He leído y acepto la <a href="/legal.html#privacidad" target="_blank">política de privacidad</a>.</span></label>
+      <div class="err" id="cErr" hidden=""></div>
+      <div style="margin-top:16px"><button class="boto prim" type="submit" id="cEnvia" data-t="cEnvia">Enviar mensaje</button></div>
     </form>
   </div>
 </section>
 
 <footer>
   <div class="amp">
-    <div data-t="peu" data-html></div>
-    <div class="legal"><a href="legal.html#aviso-legal" data-t="lAvis"></a><a href="legal.html#privacidad" data-t="lPriv"></a><a href="legal.html#cookies" data-t="lCookies"></a><a href="legal.html#condiciones" data-t="lCond"></a></div>
+    <div data-t="peu" data-html="">© Anonta</div>
+    <div class="legal"><a href="/legal.html#aviso-legal" data-t="lAvis">Aviso legal</a><a href="/legal.html#privacidad" data-t="lPriv">Privacidad</a><a href="/legal.html#cookies" data-t="lCookies">Cookies</a><a href="/legal.html#condiciones" data-t="lCond">Condiciones de contratación</a></div>
   </div>
 </footer>
 
@@ -267,13 +312,13 @@
   const sumaB = W.anonta.basic + W.itineraris.basic + W.formularis;
   const sumaP = W.anonta.premium + W.itineraris.premium + W.formularis;
   const packB = sumaB * (1 - D / 100), packP = sumaP * (1 - D / 100);
-  let LANG = "es";
-  try{ LANG = localStorage.getItem("anonta_web_idioma") || (/^ca\b/i.test(navigator.language) ? "ca" : "es"); }catch(e){}
+  // Cada idioma té la seva adreça: anonta.es (castellà) i anonta.es/ca/ (català)
+  const LANG = document.documentElement.dataset.idioma === "ca" ? "ca" : "es";
 
   const T = {
     es: {
       navApps: "Apps", navPreus: "Precios", entrar: "Entrar",
-      heroTitol: "Tu agencia, en el <em>móvil de tus clientes</em>",
+      heroTitol: "<span class=\"kicker\">App y software para agencias de viajes</span>Tu agencia, en el <em>móvil de tus clientes</em>",
       heroSub: "Una app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. Pensado por una agencia de viajes, para agencias de viajes.",
       provaGratis: "🎁 30 días gratis en cada app", demanaDemo: "📅 Solicita una demo",
       g1: "Sin tarjeta", g2: "Sin permanencia", g3: "Prueba con el plan Prémium",
@@ -319,14 +364,14 @@
       peu: "© Anonta",
       navContacte: "Contacto", contTitol: "¿Hablamos?", contSub: "¿Tienes alguna duda o quieres contarnos algo? Escríbenos y te respondemos lo antes posible.",
       cNom: "Nombre", cAg: "Agencia (opcional)", cCorreu: "Correo", cTel: "Teléfono (opcional)", cMiss: "Mensaje",
-      cAcc: "He leído y acepto la <a href=\"legal.html#privacidad\" target=\"_blank\">política de privacidad</a>.", cEnvia: "Enviar mensaje",
+      cAcc: "He leído y acepto la <a href=\"/legal.html#privacidad\" target=\"_blank\">política de privacidad</a>.", cEnvia: "Enviar mensaje",
       cFalta: "Falta tu nombre, un correo válido o el mensaje.", cFaltaAcc: "Para enviar el mensaje, acepta la política de privacidad.",
       cOk: "✅ ¡Gracias! Hemos recibido tu mensaje y te responderemos pronto.", cErr: "No se ha podido enviar. Escríbenos a admin@rimuviatges.com.", cEnviant: "Enviando…",
       lAvis: "Aviso legal", lPriv: "Privacidad", lCookies: "Cookies", lCond: "Condiciones de contratación"
     },
     ca: {
       navApps: "Apps", navPreus: "Preus", entrar: "Entrar",
-      heroTitol: "La teva agència, al <em>mòbil dels teus clients</em>",
+      heroTitol: "<span class=\"kicker\">App i programari per a agències de viatges</span>La teva agència, al <em>mòbil dels teus clients</em>",
       heroSub: "Una app de viatge amb el logo de la teva agència, itineraris i pressupostos que enamoren i les dades dels viatgers sense haver d'empaitar ningú. Pensat per una agència de viatges, per a agències de viatges.",
       provaGratis: "🎁 30 dies gratis a cada app", demanaDemo: "📅 Sol·licita una demo",
       g1: "Sense targeta", g2: "Sense permanència", g3: "Prova amb el pla Prèmium",
@@ -372,7 +417,7 @@
       peu: "© Anonta",
       navContacte: "Contacte", contTitol: "En parlem?", contSub: "Tens algun dubte o ens vols explicar alguna cosa? Escriu-nos i et respondrem el més aviat possible.",
       cNom: "Nom", cAg: "Agència (opcional)", cCorreu: "Correu", cTel: "Telèfon (opcional)", cMiss: "Missatge",
-      cAcc: "He llegit i accepto la <a href=\"legal.html#privacidad\" target=\"_blank\">política de privacitat</a>.", cEnvia: "Enviar el missatge",
+      cAcc: "He llegit i accepto la <a href=\"/legal.html#privacidad\" target=\"_blank\">política de privacitat</a>.", cEnvia: "Enviar el missatge",
       cFalta: "Falta el teu nom, un correu vàlid o el missatge.", cFaltaAcc: "Per enviar el missatge, accepta la política de privacitat.",
       cOk: "✅ Gràcies! Hem rebut el teu missatge i et respondrem aviat.", cErr: "No s'ha pogut enviar. Escriu-nos a admin@rimuviatges.com.", cEnviant: "Enviant…",
       lAvis: "Avís legal", lPriv: "Privacitat", lCookies: "Galetes", lCond: "Condicions de contractació"
@@ -387,9 +432,9 @@
     document.querySelectorAll("[data-t]").forEach(el => { const v = t[el.dataset.t]; if(typeof v === "string"){ if(el.hasAttribute("data-html")) el.innerHTML = v; else el.textContent = v; } });
 
     const apps = [
-      { id: "anonta", ico: "📱", n: t.a1, l: t.a1l, f: t.a1f, ia: t.a1ia, demo: "anonta/demo.html?web", prova: "anonta/demo.html?web#prova" },
-      { id: "itineraris", ico: "🗺️", n: t.a2, l: t.a2l, f: t.a2f, ia: t.a2ia, demo: "itineraris/admin.html?demo&web", prova: "itineraris/admin.html?demo&prova&web" },
-      { id: "formularis", ico: "📝", n: t.a3, l: t.a3l, f: t.a3f, ia: t.a3ia, demo: "demo.html?web", prova: "demo.html?web" }
+      { id: "anonta", ico: "📱", n: t.a1, l: t.a1l, f: t.a1f, ia: t.a1ia, demo: "/anonta/demo.html?web", prova: "/anonta/demo.html?web#prova" },
+      { id: "itineraris", ico: "🗺️", n: t.a2, l: t.a2l, f: t.a2f, ia: t.a2ia, demo: "/itineraris/admin.html?demo&web", prova: "/itineraris/admin.html?demo&prova&web" },
+      { id: "formularis", ico: "📝", n: t.a3, l: t.a3l, f: t.a3f, ia: t.a3ia, demo: "/demo.html?web", prova: "/demo.html?web" }
     ];
     document.getElementById("llistaApps").innerHTML = apps.map(a => `
       <div class="app"><div class="ico">${a.ico}</div><h3>${esc(a.n)}</h3><p class="lema">${esc(a.l)}</p>
@@ -409,7 +454,6 @@
       <div class="opc"><div class="nom">${esc(t.packB)}</div><div class="imp">${eur(packB)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaB)}</s></div></div>
       <div class="opc"><div class="nom">${esc(t.packP)}</div><div class="imp">${eur(packP)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaP)}</s></div></div>`;
     document.getElementById("faq").innerHTML = t.faq.map(([q, r]) => `<details><summary>${esc(q)}</summary><p>${esc(r)}</p></details>`).join("");
-    document.title = LANG === "ca" ? "Anonta · Apps per a agències de viatges" : "Anonta · Apps para agencias de viajes";
   }
   // ---- Sol·licitud de demo (presentació) ----
   // Enllaç del calendari (Calendly) on les agències reserven la demo
@@ -450,10 +494,10 @@
     document.getElementById("fContacte").innerHTML = `<div class="ok">${esc(t.cOk)}</div>`;
   });
 
-  document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { LANG = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", LANG); }catch(e){} pinta(); });
+  document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { const l = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", l); }catch(e){} if(l !== LANG) location.href = (l === "ca" ? "/ca/" : "/") + location.hash; });
   pinta();
 })();
 </script>
-<script data-goatcounter="https://anonta.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://anonta.goatcounter.com/count" async="" src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
