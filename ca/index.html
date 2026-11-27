@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ca" data-idioma="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+  // Els enllaços dels formularis (anonta.es/?f=…) van al formulari del client
+  if(new URLSearchParams(location.search).get("f")) location.replace("/formulari.html" + location.search);
+  // A la portada en castellà, qui té el català triat (o el navegador en català) va a /ca/
+  else if(!document.documentElement.dataset.idioma){ try{ const p = localStorage.getItem("anonta_web_idioma"); if(p === "ca" || (!p && /^ca\b/i.test(navigator.language))) location.replace("/ca/" + location.hash); }catch(e){} }
+</script>
+<!--SEO-->
+<title>Anonta · App i programari per a agències de viatges: itineraris i dades de viatgers</title>
+<meta name="description" content="App de viatge amb el logo de la teva agència, itineraris i pressupostos amb IA i formulari de dades de viatgers. Pensat per una agència de viatges. 30 dies gratis.">
+<link rel="canonical" href="https://anonta.es/ca/">
+<link rel="alternate" hreflang="es" href="https://anonta.es/">
+<link rel="alternate" hreflang="ca" href="https://anonta.es/ca/">
+<link rel="alternate" hreflang="x-default" href="https://anonta.es/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Anonta">
+<meta property="og:locale" content="ca_ES">
+<meta property="og:url" content="https://anonta.es/ca/">
+<meta property="og:title" content="Anonta · App i programari per a agències de viatges: itineraris i dades de viatgers">
+<meta property="og:description" content="App de viatge amb el logo de la teva agència, itineraris i pressupostos amb IA i formulari de dades de viatgers. Pensat per una agència de viatges. 30 dies gratis.">
+<meta property="og:image" content="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta?l=ca">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta?l=ca">
+<link rel="apple-touch-icon" href="https://ewcrlyoiyfcbzjsqaqzr.supabase.co/functions/v1/og-anonta?icona">
+<script type="application/ld+json">[{"@context":"https://schema.org","@type":"Organization","@id":"https://anonta.es/#org","name":"Anonta","url":"https://anonta.es/","logo":"https://anonta.es/anonta/icona-anonta.svg","email":"admin@rimuviatges.com"},{"@context":"https://schema.org","@type":"WebSite","name":"Anonta","url":"https://anonta.es/ca/","inLanguage":"ca","publisher":{"@id":"https://anonta.es/#org"}},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Anonta","description":"L'app de viatge per als teus clients","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/ca/#apps","inLanguage":"ca","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Bàsic","price":29,"priceCurrency":"EUR","valueAddedTaxIncluded":true},{"@type":"Offer","name":"Prèmium","price":39,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Itineraris","description":"Pressupostos que es venen sols","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/ca/#apps","inLanguage":"ca","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Bàsic","price":15,"priceCurrency":"EUR","valueAddedTaxIncluded":true},{"@type":"Offer","name":"Prèmium","price":22,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Formulari de viatgers","description":"Les dades dels viatgers, sense empaitar ningú","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, Android","url":"https://anonta.es/ca/#apps","inLanguage":"ca","publisher":{"@id":"https://anonta.es/#org"},"offers":[{"@type":"Offer","name":"Tarifa única","price":9,"priceCurrency":"EUR","valueAddedTaxIncluded":true}]},{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ca","mainEntity":[{"@type":"Question","name":"Els meus clients han de descarregar alguna cosa d'una botiga d'apps?","acceptedAnswer":{"@type":"Answer","text":"No. Els envies un enllaç, entren amb el seu correu i, si volen, l'afegeixen a la pantalla d'inici del mòbil com una app més. Funciona a iPhone i Android."}},{"@type":"Question","name":"Hi puc posar el logo de la meva agència?","acceptedAnswer":{"@type":"Answer","text":"Sí, amb el pla Prèmium l'app del client porta el teu logo i els teus colors. Amb el Bàsic, porta el logo d'Anonta."}},{"@type":"Question","name":"Què passa quan s'acaba la prova?","acceptedAnswer":{"@type":"Answer","text":"Res automàtic: no et demanem targeta. Si vols continuar, tries pla i seguim. Si no, no pagues res."}},{"@type":"Question","name":"He de contractar les tres apps?","acceptedAnswer":{"@type":"Answer","text":"No, cap és obligatòria. Cada app té la seva prova de 30 dies i es contracta per separat. Pots començar amb una i afegir-hi les altres des del teu panell, a «Les meves apps». Com que estan connectades, com més en facis servir, menys feina repetida."}},{"@type":"Question","name":"Algú em pot ensenyar com funciona?","acceptedAnswer":{"@type":"Answer","text":"Sí. Prem «Sol·licita una demo» i et fem una presentació de l'app que triïs o de totes."}},{"@type":"Question","name":"Les meves dades i les dels meus clients estan segures?","acceptedAnswer":{"@type":"Answer","text":"Cada agència només veu els seus viatges i cada client només veu els seus. Els documents s'obren amb enllaços temporals i privats."}}]}]</script>
+<!--/SEO-->
+<meta name="theme-color" content="#1F3A5F">
+<link rel="icon" href="/anonta/icona-anonta.svg" type="image/svg+xml">
+<script src="/config.js"></script>
+<style>
+  :root{--blau:#1F3A5F;--blau-mig:#3D698E;--blau-clar:#E8EEF6;--coral:#F2A65A;--coral-clar:#FDF1E4;--rosa:#E79893;--text:#22313F;--gris:#5F6F80;--linia:#DDE5EC;--fons:#F7F9FC}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:#fff;line-height:1.5;font-size:16px}
+  a{color:inherit}
+  .amp{max-width:1120px;margin:0 auto;padding:0 20px}
+  /* Capçalera */
+  header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--linia)}
+  header .amp{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+  header .marca img{height:38px;display:block}
+  header nav{display:flex;align-items:center;gap:8px}
+  header nav a.enllac{font-size:15px;font-weight:600;text-decoration:none;color:var(--gris);padding:8px 10px}
+  header nav a.enllac:hover{color:var(--blau)}
+  .idiomes{display:flex;gap:4px}
+  .idiomes button{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--linia);background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--gris)}
+  .idiomes button.actiu{background:var(--blau);border-color:var(--blau);color:#fff}
+  .boto{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:11px 20px;text-decoration:none;border:2px solid transparent;cursor:pointer;white-space:nowrap}
+  .boto.prim{background:var(--coral);color:#3A2410;box-shadow:0 6px 18px rgba(242,166,90,.35)}
+  .boto.prim:hover{filter:brightness(.96)}
+  .boto.sec{background:#fff;color:var(--blau);border-color:var(--blau)}
+  .boto.sec:hover{background:var(--blau-clar)}
+  .boto.petit{font-size:14px;padding:8px 14px}
+  /* Portada */
+  .hero{background:linear-gradient(180deg,var(--blau-clar),#fff);padding:64px 0 56px}
+  .hero .amp{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+  .hero h1{font-size:44px;line-height:1.1;margin:0 0 16px;color:var(--blau);letter-spacing:-.02em}
+  .hero h1 em{font-style:normal;color:var(--blau-mig);background:linear-gradient(transparent 62%,rgba(242,166,90,.45) 62%)}
+  .hero h1 .kicker{display:block;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blau-mig);margin-bottom:12px}
+  .hero p.sub{font-size:19px;color:var(--gris);margin:0 0 26px;max-width:560px}
+  .hero .crides{display:flex;gap:12px;flex-wrap:wrap}
+  .hero .garanties{margin-top:16px;font-size:14px;color:var(--gris);display:flex;gap:16px;flex-wrap:wrap}
+  .hero .garanties span::before{content:"✓ ";color:#2E8B57;font-weight:800}
+  .mobil{width:280px;margin:0 auto;border:10px solid #22313F;border-radius:38px;background:#fff;box-shadow:0 24px 60px rgba(31,58,95,.25);overflow:hidden}
+  .mobil .bar{background:var(--blau);color:#fff;padding:18px 16px 14px}
+  .mobil .bar small{opacity:.75;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .mobil .bar b{display:block;font-size:19px;margin-top:2px}
+  .mobil .bar span{font-size:12.5px;opacity:.85}
+  .mobil .cos{padding:12px;background:var(--fons);display:flex;flex-direction:column;gap:9px}
+  .mobil .it{background:#fff;border:1px solid var(--linia);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+  .mobil .it .ic{font-size:18px;line-height:1}
+  .mobil .it b{display:block;font-size:13.5px}
+  .mobil .it .xip{display:inline-block;margin-top:6px;font-size:11.5px;border:1px solid var(--linia);border-radius:999px;padding:2px 8px;background:var(--fons)}
+  .mobil .noti{background:#22313F;color:#fff;border-radius:12px;padding:9px 12px;font-size:12.5px}
+  /* Seccions */
+  section.blo{padding:72px 0}
+  section.blo.gris{background:var(--fons)}
+  .titol-sec{text-align:center;max-width:720px;margin:0 auto 40px}
+  .titol-sec h2{font-size:32px;line-height:1.2;color:var(--blau);margin:0 0 10px;letter-spacing:-.01em}
+  .titol-sec p{color:var(--gris);font-size:17px;margin:0}
+  .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .app{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:26px;display:flex;flex-direction:column}
+  .app .ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--blau-clar);margin-bottom:14px}
+  .app h3{margin:0 0 4px;font-size:22px;color:var(--blau)}
+  .app .lema{color:var(--gris);margin:0 0 14px;font-size:15px}
+  .app ul{list-style:none;padding:0;margin:0 0 18px;font-size:14.5px;flex:1}
+  .app li{padding-left:24px;position:relative;margin-bottom:7px}
+  .app li::before{content:"✓";position:absolute;left:0;color:#2E8B57;font-weight:800}
+  .app li.ia::before{content:"✨"}
+  .app .accions{display:flex;gap:8px;flex-wrap:wrap}
+  /* Preus */
+  .taula-preus{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .preu{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:24px}
+  .preu h3{margin:0 0 14px;font-size:20px;color:var(--blau);display:flex;align-items:center;gap:8px}
+  .pla{border-top:1px solid var(--linia);padding:12px 0}
+  .pla:first-of-type{border-top:0;padding-top:0}
+  .pla .nom{font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .pla .imp{font-size:26px;font-weight:800;color:var(--blau);white-space:nowrap}
+  .pla .imp small{font-size:13px;font-weight:600;color:var(--gris)}
+  .pla .det{font-size:13.5px;color:var(--gris);margin-top:2px}
+  .pla.prem .nom span.et{background:var(--coral-clar);color:#8A4B12;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px}
+  .pack{margin-top:26px;background:var(--blau);color:#fff;border-radius:24px;padding:30px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:20px;align-items:center}
+  .pack h3{margin:0 0 6px;font-size:24px}
+  .pack p{margin:0;opacity:.85;font-size:15px}
+  .pack .opc{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:16px}
+  .pack .opc .nom{font-weight:700;font-size:15px}
+  .pack .opc .imp{font-size:30px;font-weight:800;line-height:1.1;margin-top:4px}
+  .pack .opc .imp small{font-size:13px;font-weight:600;opacity:.8}
+  .pack .opc .abans{font-size:13px;opacity:.75}
+  .pack .opc .abans s{opacity:.9}
+  .pack .badge{display:inline-block;background:var(--coral);color:#3A2410;font-weight:800;font-size:13px;border-radius:999px;padding:4px 10px;margin-bottom:10px}
+  .nota-hero{margin:18px 0 0;max-width:560px;background:#fff;border:1px solid var(--linia);border-left:4px solid var(--coral);border-radius:12px;padding:12px 14px;font-size:14.5px;color:var(--text)}
+  .connexio{margin:34px auto 0;max-width:900px;background:#fff;border:1px dashed var(--blau-mig);border-radius:20px;padding:20px 22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center;text-align:center}
+  .connexio .flux{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-weight:700;color:var(--blau)}
+  .connexio .flux span.n{background:var(--blau-clar);border-radius:999px;padding:6px 12px}
+  .connexio p{margin:0;color:var(--gris);font-size:15px;flex-basis:100%}
+  .app .prova30{font-size:13px;color:#2E8B57;font-weight:700;margin:-6px 0 12px}
+  .boto.terc{background:none;color:var(--blau);padding:8px 4px;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+  .demo-tot{text-align:center;margin-top:26px}
+  .nota-preus{text-align:center;color:var(--gris);font-size:14px;margin-top:18px}
+  /* Passos */
+  .passos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:p}
+  .pas{background:#fff;border:1px solid var(--linia);border-radius:20px;padding:24px;position:relative}
+  .pas::before{counter-increment:p;content:counter(p);display:flex;width:36px;height:36px;border-radius:50%;background:var(--coral);color:#3A2410;font-weight:800;align-items:center;justify-content:center;margin-bottom:12px}
+  .pas h3{margin:0 0 6px;color:var(--blau);font-size:18px}
+  .pas p{margin:0;color:var(--gris);font-size:15px}
+  /* Preguntes */
+  .faq{max-width:760px;margin:0 auto}
+  .faq details{background:#fff;border:1px solid var(--linia);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+  .faq summary{font-weight:700;cursor:pointer;color:var(--blau);list-style:none;display:flex;justify-content:space-between;gap:10px}
+  .faq summary::after{content:"+";font-size:20px;line-height:1;color:var(--gris)}
+  .faq details[open] summary::after{content:"–"}
+  .faq details p{margin:10px 0 0;color:var(--gris);font-size:15px}
+  /* Final */
+  .final{text-align:center;padding:72px 0;background:linear-gradient(180deg,#fff,var(--blau-clar))}
+  .final h2{font-size:32px;color:var(--blau);margin:0 0 10px}
+  .final p{color:var(--gris);margin:0 0 24px;font-size:17px}
+  .contacte{max-width:640px;margin:0 auto;background:#fff;border:1px solid var(--linia);border-radius:20px;padding:26px}
+  .contacte label.c{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+  .contacte input[type=text],.contacte input[type=email],.contacte input[type=tel],.contacte textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--linia);border-radius:10px;padding:10px 12px;background:#fff}
+  .contacte .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .contacte .acc{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin-top:14px;color:var(--gris)}
+  .contacte .acc input{margin-top:4px}
+  .contacte .err{color:#B3261E;font-size:14px;margin-top:10px}
+  .contacte .ok{background:#E9F6EE;color:#1E6B3E;border-radius:12px;padding:14px;font-size:15px}
+  footer .legal{display:flex;gap:14px;flex-wrap:wrap}
+  footer .legal a{color:rgba(255,255,255,.85);text-decoration:none}
+  footer .legal a:hover{text-decoration:underline}
+  @media (max-width:560px){ .contacte .dos{grid-template-columns:1fr} }
+  footer{background:#22313F;color:rgba(255,255,255,.8);font-size:14px;padding:28px 0}
+  footer .amp{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:#fff}
+  @media (max-width:900px){
+    .hero .amp{grid-template-columns:1fr}
+    .hero h1{font-size:34px}
+    .apps,.taula-preus,.passos{grid-template-columns:1fr}
+    .pack{grid-template-columns:1fr}
+    header nav a.enllac.amaga{display:none}
+  }
+  @media (max-width:420px){
+    header nav a.enllac.amaga{display:none}
+    .hero{padding:40px 0}
+    .hero h1{font-size:30px}
+    section.blo{padding:52px 0}
+    .titol-sec h2{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="amp">
+    <a class="marca" href="./"><img src="/anonta/logo-anonta.svg" alt="Anonta"></a>
+    <nav>
+      <a class="enllac amaga" href="#apps" data-t="navApps">Apps</a>
+      <a class="enllac amaga" href="#preus" data-t="navPreus">Preus</a>
+      <a class="enllac amaga" href="#contacte" data-t="navContacte">Contacte</a>
+      <a class="enllac" href="/anonta/admin.html" data-t="entrar" data-gc="entrar">Entrar</a>
+      <div class="idiomes"><button type="button" data-l="es" class="">ES</button><button type="button" data-l="ca" class="actiu">CA</button></div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="amp">
+    <div>
+      <h1 data-t="heroTitol" data-html=""><span class="kicker">App i programari per a agències de viatges</span>La teva agència, al <em>mòbil dels teus clients</em></h1>
+      <p class="sub" data-t="heroSub">Una app de viatge amb el logo de la teva agència, itineraris i pressupostos que enamoren i les dades dels viatgers sense haver d'empaitar ningú. Pensat per una agència de viatges, per a agències de viatges.</p>
+      <div class="crides">
+        <a class="boto prim" href="#apps" data-t="provaGratis" data-gc="prova-portada">🎁 30 dies gratis a cada app</a>
+        <button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo">📅 Sol·licita una demo</button>
+      </div>
+      <div class="garanties"><span data-t="g1">Sense targeta</span><span data-t="g2">Sense permanència</span><span data-t="g3">Prova amb el pla Prèmium</span></div>
+      <p class="nota-hero" data-t="notaHero" data-html=""><b>Cada app es prova i es contracta per separat</b> i cap és obligatòria: comença per la que necessitis. Això sí, com que estan connectades, tenir-les totes t'estalvia molta feina.</p>
+    </div>
+    <div class="mobil" aria-hidden="true">
+      <div class="bar"><small data-t="mAg">La teva agència</small><b data-t="mViatge">Japó en família</b><span data-t="mDates">10 – 19 de gener</span></div>
+      <div class="cos">
+        <div class="noti" data-t="mNoti">🔔 Nou document: bitllets d'avió</div>
+        <div class="it"><span class="ic">✈️</span><div><b data-t="mRuta">Barcelona (BCN) → Tòquio (HND)</b><span data-t="mVol"> · 08:25 → 07:10 (+1)</span><br><span class="xip" data-t="mBitllet">🎫 Bitllets</span></div></div>
+        <div class="it"><span class="ic">🏨</span><div><b>Shinjuku Garden Hotel</b><span data-t="mHotel"> · 3 nits · Esmorzar</span><br><span class="xip" data-t="mBo">🧾 Bo de l'hotel</span></div></div>
+        <div class="it"><span class="ic">🗓️</span><div><b data-t="mDia">Dia 2 · Tòquio tradicional</b><span data-t="mDiaTxt"> · 10:00 Asakusa i Senso-ji</span></div></div>
+        <div class="it"><span class="ic">💶</span><div><b data-t="mPag">Pagament pendent</b><span data-t="mPagTxt"> · 1.200 € abans del 15/12</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blo" id="apps">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="appsTitol">Tres apps que treballen juntes</h2><p data-t="appsSub">Pots fer servir només una o les tres: les dades passen d'una a l'altra sense tornar-les a escriure.</p></div>
+    <div class="apps" id="llistaApps">
+      <div class="app"><div class="ico">📱</div><h3>Anonta</h3><p class="lema">L'app de viatge per als teus clients</p>
+        <ul><li>Tot el viatge al mòbil: vols, hotels, trasllats i excursions</li><li>Documents dins de cada servei (bitllets, bons, assegurança…)</li><li>Itinerari dia a dia amb horaris</li><li>Pagaments pendents i avisos automàtics</li><li>Missatges amb l'agència i notificacions al mòbil</li><li>En català i en castellà</li><li class="ia">Recomanacions del destí i itinerari proposats amb IA <small>(Prèmium)</small></li></ul>
+        <p class="prova30">🎁 30 dies de prova gratis d'aquesta app</p>
+        <div class="accions"><a class="boto prim petit" href="/anonta/demo.html?web#prova" data-gc="prova-anonta">🎁 30 dies gratis</a><a class="boto sec petit" href="/anonta/demo.html?web" data-gc="demo-propia-anonta">👀 Prova-la ara</a></div>
+        <button class="boto terc" type="button" data-demo="anonta">📅 Sol·licita una demo</button></div>
+      <div class="app"><div class="ico">🗺️</div><h3>Itineraris</h3><p class="lema">Pressupostos que es venen sols</p>
+        <ul><li>Itineraris dia a dia amb fotos</li><li>Serveis opcionals que el client tria</li><li>Total i preu per persona al moment</li><li>PDF per enviar o imprimir</li><li>Quan el client accepta, es converteix en un viatge d'Anonta</li><li class="ia">IA per redactar els dies i els serveis <small>(Prèmium)</small></li></ul>
+        <p class="prova30">🎁 30 dies de prova gratis d'aquesta app</p>
+        <div class="accions"><a class="boto prim petit" href="/itineraris/admin.html?demo&amp;prova&amp;web" data-gc="prova-itineraris">🎁 30 dies gratis</a><a class="boto sec petit" href="/itineraris/admin.html?demo&amp;web" data-gc="demo-propia-itineraris">👀 Prova-la ara</a></div>
+        <button class="boto terc" type="button" data-demo="itineraris">📅 Sol·licita una demo</button></div>
+      <div class="app"><div class="ico">📝</div><h3>Formulari de viatgers</h3><p class="lema">Les dades dels viatgers, sense empaitar ningú</p>
+        <ul><li>Un enllaç per WhatsApp i el client l'omple des del mòbil</li><li>Dades de tots els viatgers, amb foto del DNI i del passaport</li><li>Avís si el passaport caduca abans d'hora</li><li>Et arriba un correu quan l'envien</li><li>Amb un clic, les dades passen a Anonta</li></ul>
+        <p class="prova30">🎁 30 dies de prova gratis d'aquesta app</p>
+        <div class="accions"><a class="boto prim petit" href="/demo.html?web" data-gc="prova-formularis">🎁 30 dies gratis</a><a class="boto sec petit" href="/demo.html?web" data-gc="demo-propia-formularis">👀 Prova-la ara</a></div>
+        <button class="boto terc" type="button" data-demo="formularis">📅 Sol·licita una demo</button></div></div>
+    <div class="connexio"><div class="flux"><span class="n">📝 <span data-t="a3">Formulari de viatgers</span></span> → <span class="n">📱 Anonta</span> ← <span class="n">🗺️ <span data-t="a2">Itineraris</span></span></div><p data-t="connexio">Les dades del formulari passen a Anonta amb un clic, i un itinerari acceptat es converteix en un viatge d'Anonta. Sense tornar a escriure res.</p></div>
+    <div class="demo-tot"><button class="boto sec" type="button" data-demo="totes" data-t="demoTotes">📅 Sol·licita una demo de totes les apps</button></div>
+  </div>
+</section>
+
+<section class="blo gris" id="preus">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="preusTitol">Preus clars, sense sorpreses</h2><p data-t="preusSub">Preus mensuals per agència, amb IVA inclòs. Els 30 primers dies són gratis i amb tot el pla Prèmium.</p></div>
+    <div class="taula-preus" id="taulaPreus">
+      <div class="preu"><h3>📱 Anonta</h3><div class="pla"><div class="nom"><span>Bàsic</span>
+      <span class="imp">29 €<small>/mes</small></span></div><div class="det">App amb el logo d'Anonta. Sense IA.</div></div><div class="pla prem"><div class="nom"><span>Prèmium<span class="et">Recomanat</span></span>
+      <span class="imp">39 €<small>/mes</small></span></div><div class="det">El teu logo i els teus colors a l'app del client, i IA.</div></div></div>
+      <div class="preu"><h3>🗺️ Itineraris</h3><div class="pla"><div class="nom"><span>Bàsic</span>
+      <span class="imp">15 €<small>/mes</small></span></div><div class="det">Itineraris il·limitats, opcionals i PDF.</div></div><div class="pla prem"><div class="nom"><span>Prèmium<span class="et">Recomanat</span></span>
+      <span class="imp">22 €<small>/mes</small></span></div><div class="det">Tot el del Bàsic i IA per redactar.</div></div></div>
+      <div class="preu"><h3>📝 Formulari de viatgers</h3><div class="pla"><div class="nom"><span>Tarifa única</span>
+      <span class="imp">9 €<small>/mes</small></span></div><div class="det">Formularis il·limitats per a tots els teus viatges.</div></div></div></div>
+    <div class="pack" id="pack">
+      <div><span class="badge">−10 %</span><h3>Les 3 apps juntes</h3><p>Si contractes Anonta, Itineraris i el Formulari de viatgers, tens un 10 % de descompte sobre el total, cada mes.</p></div>
+      <div class="opc"><div class="nom">Pack Bàsic</div><div class="imp">47,70 €<small>/mes</small></div><div class="abans">en lloc de <s>53 €</s></div></div>
+      <div class="opc"><div class="nom">Pack Prèmium</div><div class="imp">63 €<small>/mes</small></div><div class="abans">en lloc de <s>70 €</s></div></div></div>
+    <p class="nota-preus" data-t="notaPreus">Tots els preus porten l'IVA inclòs. Sense permanència: et pots donar de baixa quan vulguis. Dubtes? Escriu-nos a admin@rimuviatges.com.</p>
+  </div>
+</section>
+
+<section class="blo">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="passosTitol">Començar és molt fàcil</h2></div>
+    <div class="passos">
+      <div class="pas"><h3 data-t="p1">Tria l'app</h3><p data-t="p1t">Comença per la que més necessitis i demana la prova: el nom de la teva agència, el teu correu i, si vols, el teu logo.</p></div>
+      <div class="pas"><h3 data-t="p2">Prova-la 30 dies</h3><p data-t="p2t">Amb els teus viatges i els teus clients de veritat, i amb tot el pla Prèmium. Pots provar les altres apps quan vulguis, cadascuna amb els seus 30 dies.</p></div>
+      <div class="pas"><h3 data-t="p3">Tria el teu pla</h3><p data-t="p3t">Si t'agrada, tries Bàsic o Prèmium. I si acabes amb les tres, tens el descompte del pack.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blo gris">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="faqTitol">Preguntes freqüents</h2></div>
+    <div class="faq" id="faq"><details><summary>Els meus clients han de descarregar alguna cosa d'una botiga d'apps?</summary><p>No. Els envies un enllaç, entren amb el seu correu i, si volen, l'afegeixen a la pantalla d'inici del mòbil com una app més. Funciona a iPhone i Android.</p></details><details><summary>Hi puc posar el logo de la meva agència?</summary><p>Sí, amb el pla Prèmium l'app del client porta el teu logo i els teus colors. Amb el Bàsic, porta el logo d'Anonta.</p></details><details><summary>Què passa quan s'acaba la prova?</summary><p>Res automàtic: no et demanem targeta. Si vols continuar, tries pla i seguim. Si no, no pagues res.</p></details><details><summary>He de contractar les tres apps?</summary><p>No, cap és obligatòria. Cada app té la seva prova de 30 dies i es contracta per separat. Pots començar amb una i afegir-hi les altres des del teu panell, a «Les meves apps». Com que estan connectades, com més en facis servir, menys feina repetida.</p></details><details><summary>Algú em pot ensenyar com funciona?</summary><p>Sí. Prem «Sol·licita una demo» i et fem una presentació de l'app que triïs o de totes.</p></details><details><summary>Les meves dades i les dels meus clients estan segures?</summary><p>Cada agència només veu els seus viatges i cada client només veu els seus. Els documents s'obren amb enllaços temporals i privats.</p></details></div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="amp">
+    <h2 data-t="finalTitol">Ho provem amb el teu pròxim viatge?</h2>
+    <p data-t="finalSub">30 dies gratis, sense targeta i sense compromís.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="boto prim" href="#apps" data-t="provaGratis">🎁 30 dies gratis a cada app</a><button class="boto sec" type="button" data-demo="totes" data-t="demanaDemo">📅 Sol·licita una demo</button></div>
+  </div>
+</section>
+
+<section class="blo gris" id="contacte">
+  <div class="amp">
+    <div class="titol-sec"><h2 data-t="contTitol">En parlem?</h2><p data-t="contSub">Tens algun dubte o ens vols explicar alguna cosa? Escriu-nos i et respondrem el més aviat possible.</p></div>
+    <form class="contacte" id="fContacte" novalidate="">
+      <div class="dos">
+        <div><label class="c" for="cNom" data-t="cNom">Nom</label><input type="text" id="cNom" autocomplete="name" maxlength="120"></div>
+        <div><label class="c" for="cAg" data-t="cAg">Agència (opcional)</label><input type="text" id="cAg" autocomplete="organization" maxlength="160"></div>
+        <div><label class="c" for="cCorreu" data-t="cCorreu">Correu</label><input type="email" id="cCorreu" autocomplete="email" maxlength="200"></div>
+        <div><label class="c" for="cTel" data-t="cTel">Telèfon (opcional)</label><input type="tel" id="cTel" autocomplete="tel" maxlength="40"></div>
+      </div>
+      <label class="c" for="cMiss" data-t="cMiss">Missatge</label><textarea id="cMiss" rows="5" maxlength="4000"></textarea>
+      <label class="acc"><input type="checkbox" id="cAcc"> <span data-t="cAcc" data-html="">He llegit i accepto la <a href="/legal.html#privacidad" target="_blank">política de privacitat</a>.</span></label>
+      <div class="err" id="cErr" hidden=""></div>
+      <div style="margin-top:16px"><button class="boto prim" type="submit" id="cEnvia" data-t="cEnvia">Enviar el missatge</button></div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="amp">
+    <div data-t="peu" data-html="">© Anonta</div>
+    <div class="legal"><a href="/legal.html#aviso-legal" data-t="lAvis">Avís legal</a><a href="/legal.html#privacidad" data-t="lPriv">Privacitat</a><a href="/legal.html#cookies" data-t="lCookies">Galetes</a><a href="/legal.html#condiciones" data-t="lCond">Condicions de contractació</a></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const W = TARIFES.web, D = TARIFES.descomptePack;
+  const eur = n => (Math.round(n * 100) / 100).toLocaleString(LANG === "ca" ? "ca-ES" : "es-ES", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }) + " €";
+  const sumaB = W.anonta.basic + W.itineraris.basic + W.formularis;
+  const sumaP = W.anonta.premium + W.itineraris.premium + W.formularis;
+  const packB = sumaB * (1 - D / 100), packP = sumaP * (1 - D / 100);
+  // Cada idioma té la seva adreça: anonta.es (castellà) i anonta.es/ca/ (català)
+  const LANG = document.documentElement.dataset.idioma === "ca" ? "ca" : "es";
+
+  const T = {
+    es: {
+      navApps: "Apps", navPreus: "Precios", entrar: "Entrar",
+      heroTitol: "<span class=\"kicker\">App y software para agencias de viajes</span>Tu agencia, en el <em>móvil de tus clientes</em>",
+      heroSub: "Una app de viaje con el logo de tu agencia, itinerarios y presupuestos que enamoran y los datos de los viajeros sin perseguir a nadie. Pensado por una agencia de viajes, para agencias de viajes.",
+      provaGratis: "🎁 30 días gratis en cada app", demanaDemo: "📅 Solicita una demo",
+      g1: "Sin tarjeta", g2: "Sin permanencia", g3: "Prueba con el plan Prémium",
+      notaHero: "<b>Cada app se prueba y se contrata por separado</b> y ninguna es obligatoria: empieza por la que necesites. Eso sí, como están conectadas, tenerlas todas te ahorra mucho trabajo.",
+      mAg: "Tu agencia", mViatge: "Japón en familia", mDates: "10 – 19 de enero",
+      mNoti: "🔔 Nuevo documento: billetes de avión", mRuta: "Barcelona (BCN) → Tokio (HND)", mVol: " · 08:25 → 07:10 (+1)", mBitllet: "🎫 Billetes", mHotel: " · 3 noches · Desayuno", mBo: "🧾 Bono del hotel",
+      mDia: "Día 2 · Tokio tradicional", mDiaTxt: " · 10:00 Asakusa y Senso-ji", mPag: "Pago pendiente", mPagTxt: " · 1.200 € antes del 15/12",
+      appsTitol: "Tres apps que trabajan juntas", appsSub: "Puedes usar solo una o las tres: los datos pasan de una a otra sin volver a escribirlos.",
+      ver: "Pruébala ahora", provar: "30 días gratis", demoApp: "📅 Solicita una demo", prova30: "🎁 30 días de prueba gratis de esta app",
+      connexio: "Los datos del formulario pasan a Anonta con un clic, y un itinerario aceptado se convierte en un viaje de Anonta. Sin volver a escribir nada.",
+      demoTotes: "📅 Solicita una demo de todas las apps",
+      a1: "Anonta", a1l: "La app de viaje para tus clientes",
+      a1f: ["Todo el viaje en el móvil: vuelos, hoteles, traslados y excursiones", "Documentos dentro de cada servicio (billetes, bonos, seguro…)", "Itinerario día a día con horarios", "Pagos pendientes y avisos automáticos", "Mensajes con la agencia y notificaciones en el móvil", "En catalán y en castellano"],
+      a1ia: ["Recomendaciones del destino e itinerario propuestos con IA"],
+      a2: "Itinerarios", a2l: "Presupuestos que se venden solos",
+      a2f: ["Itinerarios día a día con fotos", "Servicios opcionales que el cliente elige", "Total y precio por persona al momento", "PDF para enviar o imprimir", "Cuando el cliente acepta, se convierte en un viaje de Anonta"],
+      a2ia: ["IA para redactar los días y los servicios"],
+      a3: "Formulario de viajeros", a3l: "Los datos de los viajeros, sin perseguir a nadie",
+      a3f: ["Un enlace por WhatsApp y el cliente lo rellena desde el móvil", "Datos de todos los viajeros, con foto del DNI y del pasaporte", "Aviso si el pasaporte caduca antes de tiempo", "Te llega un correo cuando lo envían", "Con un clic, los datos pasan a Anonta"],
+      a3ia: [],
+      preusTitol: "Precios claros, sin sorpresas", preusSub: "Precios mensuales por agencia, con IVA incluido. Los 30 primeros días son gratis y con todo el plan Prémium.",
+      basic: "Básico", premium: "Prémium", unic: "Tarifa única", mes: "/mes",
+      dA_b: "App con el logo de Anonta. Sin IA.", dA_p: "Tu logo y tus colores en la app del cliente, e IA.",
+      dI_b: "Itinerarios ilimitados, opcionales y PDF.", dI_p: "Todo lo del Básico e IA para redactar.",
+      dF: "Formularios ilimitados para todos tus viajes.", recomanat: "Recomendado",
+      packTitol: "Las 3 apps juntas", packTxt: `Si contratas Anonta, Itinerarios y el Formulario de viajeros, tienes un ${D} % de descuento sobre el total, cada mes.`,
+      packB: "Pack Básico", packP: "Pack Prémium", enLloc: "en lugar de",
+      notaPreus: "Todos los precios llevan el IVA incluido. Sin permanencia: puedes darte de baja cuando quieras. ¿Dudas? Escríbenos a admin@rimuviatges.com.",
+      passosTitol: "Empezar es muy fácil",
+      p1: "Elige la app", p1t: "Empieza por la que más necesites y pide la prueba: el nombre de tu agencia, tu correo y, si quieres, tu logo.",
+      p2: "Pruébala 30 días", p2t: "Con tus viajes y tus clientes de verdad, y con todo el plan Prémium. Puedes probar las otras apps cuando quieras, cada una con sus 30 días.",
+      p3: "Elige tu plan", p3t: "Si te convence, eliges Básico o Prémium. Y si acabas con las tres, tienes el descuento del pack.",
+      faqTitol: "Preguntas frecuentes",
+      faq: [
+        ["¿Mis clientes tienen que descargar algo de una tienda de apps?", "No. Les envías un enlace, entran con su correo y, si quieren, la añaden a la pantalla de inicio del móvil como una app más. Funciona en iPhone y Android."],
+        ["¿Puedo poner el logo de mi agencia?", "Sí, con el plan Prémium la app del cliente lleva tu logo y tus colores. Con el Básico, lleva el logo de Anonta."],
+        ["¿Qué pasa cuando termina la prueba?", "Nada automático: no te pedimos tarjeta. Si quieres continuar, eliges plan y seguimos. Si no, no pagas nada."],
+        ["¿Tengo que contratar las tres apps?", "No, ninguna es obligatoria. Cada app tiene su propia prueba de 30 días y se contrata por separado. Puedes empezar con una y añadir las demás desde tu panel, en «Mis apps». Como están conectadas, cuantas más uses, menos trabajo repetido."],
+        ["¿Alguien me puede enseñar cómo funciona?", "Sí. Pulsa «Solicita una demo» y te hacemos una presentación de la app que elijas o de todas."],
+        ["¿Mis datos y los de mis clientes están seguros?", "Cada agencia solo ve sus viajes y cada cliente solo ve los suyos. Los documentos se abren con enlaces temporales y privados."]
+      ],
+      finalTitol: "¿Lo probamos con tu próximo viaje?", finalSub: "30 días gratis, sin tarjeta y sin compromiso.",
+      peu: "© Anonta",
+      navContacte: "Contacto", contTitol: "¿Hablamos?", contSub: "¿Tienes alguna duda o quieres contarnos algo? Escríbenos y te respondemos lo antes posible.",
+      cNom: "Nombre", cAg: "Agencia (opcional)", cCorreu: "Correo", cTel: "Teléfono (opcional)", cMiss: "Mensaje",
+      cAcc: "He leído y acepto la <a href=\"/legal.html#privacidad\" target=\"_blank\">política de privacidad</a>.", cEnvia: "Enviar mensaje",
+      cFalta: "Falta tu nombre, un correo válido o el mensaje.", cFaltaAcc: "Para enviar el mensaje, acepta la política de privacidad.",
+      cOk: "✅ ¡Gracias! Hemos recibido tu mensaje y te responderemos pronto.", cErr: "No se ha podido enviar. Escríbenos a admin@rimuviatges.com.", cEnviant: "Enviando…",
+      lAvis: "Aviso legal", lPriv: "Privacidad", lCookies: "Cookies", lCond: "Condiciones de contratación"
+    },
+    ca: {
+      navApps: "Apps", navPreus: "Preus", entrar: "Entrar",
+      heroTitol: "<span class=\"kicker\">App i programari per a agències de viatges</span>La teva agència, al <em>mòbil dels teus clients</em>",
+      heroSub: "Una app de viatge amb el logo de la teva agència, itineraris i pressupostos que enamoren i les dades dels viatgers sense haver d'empaitar ningú. Pensat per una agència de viatges, per a agències de viatges.",
+      provaGratis: "🎁 30 dies gratis a cada app", demanaDemo: "📅 Sol·licita una demo",
+      g1: "Sense targeta", g2: "Sense permanència", g3: "Prova amb el pla Prèmium",
+      notaHero: "<b>Cada app es prova i es contracta per separat</b> i cap és obligatòria: comença per la que necessitis. Això sí, com que estan connectades, tenir-les totes t'estalvia molta feina.",
+      mAg: "La teva agència", mViatge: "Japó en família", mDates: "10 – 19 de gener",
+      mNoti: "🔔 Nou document: bitllets d'avió", mRuta: "Barcelona (BCN) → Tòquio (HND)", mVol: " · 08:25 → 07:10 (+1)", mBitllet: "🎫 Bitllets", mHotel: " · 3 nits · Esmorzar", mBo: "🧾 Bo de l'hotel",
+      mDia: "Dia 2 · Tòquio tradicional", mDiaTxt: " · 10:00 Asakusa i Senso-ji", mPag: "Pagament pendent", mPagTxt: " · 1.200 € abans del 15/12",
+      appsTitol: "Tres apps que treballen juntes", appsSub: "Pots fer servir només una o les tres: les dades passen d'una a l'altra sense tornar-les a escriure.",
+      ver: "Prova-la ara", provar: "30 dies gratis", demoApp: "📅 Sol·licita una demo", prova30: "🎁 30 dies de prova gratis d'aquesta app",
+      connexio: "Les dades del formulari passen a Anonta amb un clic, i un itinerari acceptat es converteix en un viatge d'Anonta. Sense tornar a escriure res.",
+      demoTotes: "📅 Sol·licita una demo de totes les apps",
+      a1: "Anonta", a1l: "L'app de viatge per als teus clients",
+      a1f: ["Tot el viatge al mòbil: vols, hotels, trasllats i excursions", "Documents dins de cada servei (bitllets, bons, assegurança…)", "Itinerari dia a dia amb horaris", "Pagaments pendents i avisos automàtics", "Missatges amb l'agència i notificacions al mòbil", "En català i en castellà"],
+      a1ia: ["Recomanacions del destí i itinerari proposats amb IA"],
+      a2: "Itineraris", a2l: "Pressupostos que es venen sols",
+      a2f: ["Itineraris dia a dia amb fotos", "Serveis opcionals que el client tria", "Total i preu per persona al moment", "PDF per enviar o imprimir", "Quan el client accepta, es converteix en un viatge d'Anonta"],
+      a2ia: ["IA per redactar els dies i els serveis"],
+      a3: "Formulari de viatgers", a3l: "Les dades dels viatgers, sense empaitar ningú",
+      a3f: ["Un enllaç per WhatsApp i el client l'omple des del mòbil", "Dades de tots els viatgers, amb foto del DNI i del passaport", "Avís si el passaport caduca abans d'hora", "Et arriba un correu quan l'envien", "Amb un clic, les dades passen a Anonta"],
+      a3ia: [],
+      preusTitol: "Preus clars, sense sorpreses", preusSub: "Preus mensuals per agència, amb IVA inclòs. Els 30 primers dies són gratis i amb tot el pla Prèmium.",
+      basic: "Bàsic", premium: "Prèmium", unic: "Tarifa única", mes: "/mes",
+      dA_b: "App amb el logo d'Anonta. Sense IA.", dA_p: "El teu logo i els teus colors a l'app del client, i IA.",
+      dI_b: "Itineraris il·limitats, opcionals i PDF.", dI_p: "Tot el del Bàsic i IA per redactar.",
+      dF: "Formularis il·limitats per a tots els teus viatges.", recomanat: "Recomanat",
+      packTitol: "Les 3 apps juntes", packTxt: `Si contractes Anonta, Itineraris i el Formulari de viatgers, tens un ${D} % de descompte sobre el total, cada mes.`,
+      packB: "Pack Bàsic", packP: "Pack Prèmium", enLloc: "en lloc de",
+      notaPreus: "Tots els preus porten l'IVA inclòs. Sense permanència: et pots donar de baixa quan vulguis. Dubtes? Escriu-nos a admin@rimuviatges.com.",
+      passosTitol: "Començar és molt fàcil",
+      p1: "Tria l'app", p1t: "Comença per la que més necessitis i demana la prova: el nom de la teva agència, el teu correu i, si vols, el teu logo.",
+      p2: "Prova-la 30 dies", p2t: "Amb els teus viatges i els teus clients de veritat, i amb tot el pla Prèmium. Pots provar les altres apps quan vulguis, cadascuna amb els seus 30 dies.",
+      p3: "Tria el teu pla", p3t: "Si t'agrada, tries Bàsic o Prèmium. I si acabes amb les tres, tens el descompte del pack.",
+      faqTitol: "Preguntes freqüents",
+      faq: [
+        ["Els meus clients han de descarregar alguna cosa d'una botiga d'apps?", "No. Els envies un enllaç, entren amb el seu correu i, si volen, l'afegeixen a la pantalla d'inici del mòbil com una app més. Funciona a iPhone i Android."],
+        ["Hi puc posar el logo de la meva agència?", "Sí, amb el pla Prèmium l'app del client porta el teu logo i els teus colors. Amb el Bàsic, porta el logo d'Anonta."],
+        ["Què passa quan s'acaba la prova?", "Res automàtic: no et demanem targeta. Si vols continuar, tries pla i seguim. Si no, no pagues res."],
+        ["He de contractar les tres apps?", "No, cap és obligatòria. Cada app té la seva prova de 30 dies i es contracta per separat. Pots començar amb una i afegir-hi les altres des del teu panell, a «Les meves apps». Com que estan connectades, com més en facis servir, menys feina repetida."],
+        ["Algú em pot ensenyar com funciona?", "Sí. Prem «Sol·licita una demo» i et fem una presentació de l'app que triïs o de totes."],
+        ["Les meves dades i les dels meus clients estan segures?", "Cada agència només veu els seus viatges i cada client només veu els seus. Els documents s'obren amb enllaços temporals i privats."]
+      ],
+      finalTitol: "Ho provem amb el teu pròxim viatge?", finalSub: "30 dies gratis, sense targeta i sense compromís.",
+      peu: "© Anonta",
+      navContacte: "Contacte", contTitol: "En parlem?", contSub: "Tens algun dubte o ens vols explicar alguna cosa? Escriu-nos i et respondrem el més aviat possible.",
+      cNom: "Nom", cAg: "Agència (opcional)", cCorreu: "Correu", cTel: "Telèfon (opcional)", cMiss: "Missatge",
+      cAcc: "He llegit i accepto la <a href=\"/legal.html#privacidad\" target=\"_blank\">política de privacitat</a>.", cEnvia: "Enviar el missatge",
+      cFalta: "Falta el teu nom, un correu vàlid o el missatge.", cFaltaAcc: "Per enviar el missatge, accepta la política de privacitat.",
+      cOk: "✅ Gràcies! Hem rebut el teu missatge i et respondrem aviat.", cErr: "No s'ha pogut enviar. Escriu-nos a admin@rimuviatges.com.", cEnviant: "Enviant…",
+      lAvis: "Avís legal", lPriv: "Privacitat", lCookies: "Galetes", lCond: "Condicions de contractació"
+    }
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function pinta(){
+    const t = T[LANG];
+    document.documentElement.lang = LANG;
+    document.querySelectorAll(".idiomes button").forEach(b => b.classList.toggle("actiu", b.dataset.l === LANG));
+    document.querySelectorAll("[data-t]").forEach(el => { const v = t[el.dataset.t]; if(typeof v === "string"){ if(el.hasAttribute("data-html")) el.innerHTML = v; else el.textContent = v; } });
+
+    const apps = [
+      { id: "anonta", ico: "📱", n: t.a1, l: t.a1l, f: t.a1f, ia: t.a1ia, demo: "/anonta/demo.html?web", prova: "/anonta/demo.html?web#prova" },
+      { id: "itineraris", ico: "🗺️", n: t.a2, l: t.a2l, f: t.a2f, ia: t.a2ia, demo: "/itineraris/admin.html?demo&web", prova: "/itineraris/admin.html?demo&prova&web" },
+      { id: "formularis", ico: "📝", n: t.a3, l: t.a3l, f: t.a3f, ia: t.a3ia, demo: "/demo.html?web", prova: "/demo.html?web" }
+    ];
+    document.getElementById("llistaApps").innerHTML = apps.map(a => `
+      <div class="app"><div class="ico">${a.ico}</div><h3>${esc(a.n)}</h3><p class="lema">${esc(a.l)}</p>
+        <ul>${a.f.map(x => `<li>${esc(x)}</li>`).join("")}${a.ia.map(x => `<li class="ia">${esc(x)} <small>(${esc(t.premium)})</small></li>`).join("")}</ul>
+        <p class="prova30">${esc(t.prova30)}</p>
+        <div class="accions"><a class="boto prim petit" href="${a.prova}" data-gc="prova-${a.id}">🎁 ${esc(t.provar)}</a><a class="boto sec petit" href="${a.demo}" data-gc="demo-propia-${a.id}">👀 ${esc(t.ver)}</a></div>
+        <button class="boto terc" type="button" data-demo="${a.id}">${esc(t.demoApp)}</button></div>`).join("");
+
+    const pla = (nom, imp, det, prem) => `<div class="pla${prem ? " prem" : ""}"><div class="nom"><span>${esc(nom)}${prem ? `<span class="et">${esc(t.recomanat)}</span>` : ""}</span>
+      <span class="imp">${eur(imp)}<small>${t.mes}</small></span></div><div class="det">${esc(det)}</div></div>`;
+    document.getElementById("taulaPreus").innerHTML = `
+      <div class="preu"><h3>📱 ${esc(t.a1)}</h3>${pla(t.basic, W.anonta.basic, t.dA_b)}${pla(t.premium, W.anonta.premium, t.dA_p, true)}</div>
+      <div class="preu"><h3>🗺️ ${esc(t.a2)}</h3>${pla(t.basic, W.itineraris.basic, t.dI_b)}${pla(t.premium, W.itineraris.premium, t.dI_p, true)}</div>
+      <div class="preu"><h3>📝 ${esc(t.a3)}</h3>${pla(t.unic, W.formularis, t.dF)}</div>`;
+    document.getElementById("pack").innerHTML = `
+      <div><span class="badge">−${D} %</span><h3>${esc(t.packTitol)}</h3><p>${esc(t.packTxt)}</p></div>
+      <div class="opc"><div class="nom">${esc(t.packB)}</div><div class="imp">${eur(packB)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaB)}</s></div></div>
+      <div class="opc"><div class="nom">${esc(t.packP)}</div><div class="imp">${eur(packP)}<small>${t.mes}</small></div><div class="abans">${esc(t.enLloc)} <s>${eur(sumaP)}</s></div></div>`;
+    document.getElementById("faq").innerHTML = t.faq.map(([q, r]) => `<details><summary>${esc(q)}</summary><p>${esc(r)}</p></details>`).join("");
+  }
+  // ---- Sol·licitud de demo (presentació) ----
+  // Enllaç del calendari (Calendly) on les agències reserven la demo
+  const CALENDARI = "https://calendly.com/rimuviatges/demo-anonta";
+  // Els botons «Sol·licita una demo» obren el calendari per reservar dia i hora
+  document.addEventListener("click", e => { const b = e.target.closest("[data-demo]"); if(b){ e.preventDefault(); compta("demo-calendly-" + b.dataset.demo); window.open(CALENDARI, "_blank", "noopener"); } });
+
+  // ---- Estadístiques (GoatCounter, sense galetes): també es compten els clics als botons importants ----
+  function compta(nom){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: "clic-" + nom, title: nom, event: true }); }catch(e){} }
+  document.addEventListener("click", e => { const b = e.target.closest("[data-gc]"); if(b) compta(b.dataset.gc); });
+  if(location.hash === "#demo") location.href = CALENDARI;
+
+  // ---- Formulari de contacte: es desa a la base de dades (es veu al panell) i arriba per correu ----
+  document.getElementById("fContacte").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const t = T[LANG], v = id => document.getElementById(id).value.trim(), err = document.getElementById("cErr");
+    const d = { nom: v("cNom"), agencia: v("cAg") || null, email: v("cCorreu"), telefon: v("cTel") || null, missatge: v("cMiss"), idioma: LANG };
+    const mal = m => { err.textContent = m; err.hidden = false; };
+    if(!d.nom || !d.missatge || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return mal(t.cFalta);
+    if(!document.getElementById("cAcc").checked) return mal(t.cFaltaAcc);
+    err.hidden = true;
+    const b = document.getElementById("cEnvia"); b.disabled = true; b.textContent = t.cEnviant;
+    let ok = false;
+    try{
+      const r = await fetch(RIMU.SUPABASE_URL + "/rest/v1/web_contactes", { method: "POST",
+        headers: { apikey: RIMU.SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(d) });
+      ok = r.ok;
+    }catch(e){}
+    try{
+      const r = await fetch("https://formsubmit.co/ajax/admin@rimuviatges.com", { method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ _subject: "Missatge des d'anonta.es: " + (d.agencia || d.nom), _template: "table", _captcha: "false", _replyto: d.email,
+          "Nom": d.nom, "Agència": d.agencia || "", "Correu": d.email, "Telèfon": d.telefon || "", "Missatge": d.missatge }) });
+      ok = ok || r.ok;
+    }catch(e){}
+    if(!ok){ b.disabled = false; b.textContent = t.cEnvia; return mal(t.cErr); }
+    compta("contacte");
+    document.getElementById("fContacte").innerHTML = `<div class="ok">${esc(t.cOk)}</div>`;
+  });
+
+  document.querySelectorAll(".idiomes button").forEach(b => b.onclick = () => { const l = b.dataset.l; try{ localStorage.setItem("anonta_web_idioma", l); }catch(e){} if(l !== LANG) location.href = (l === "ca" ? "/ca/" : "/") + location.hash; });
+  pinta();
+})();
+</script>
+<script data-goatcounter="https://anonta.goatcounter.com/count" async="" src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
